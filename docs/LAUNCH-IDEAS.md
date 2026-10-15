@@ -4,7 +4,7 @@ Post-launch ideas, roughly ordered by value for effort. None of this blocks laun
 
 ## 1. Get indexed (week 1)
 
-- **Google Search Console**: add a **URL-prefix** property for the production URL (for example `https://ayanbhardwaj.vercel.app`). On a `vercel.app` URL you can't add DNS records, so verify with the HTML meta tag: put the code in `metadata.verification.google` in the root layout, deploy, then click Verify. Submit `/sitemap.xml`. After moving to a custom domain, add a **Domain** property (DNS TXT verification) and submit again.
+- **Google Search Console**: add a **URL-prefix** property for the production URL (for example `https://ayan-bhardwaj.vercel.app`). On a `vercel.app` URL you can't add DNS records, so verify with the HTML meta tag: put the code in `metadata.verification.google` in the root layout, deploy, then click Verify. Submit `/sitemap.xml`. After moving to a custom domain, add a **Domain** property (DNS TXT verification) and submit again.
 - **Bing Webmaster Tools**: import the property straight from Search Console. Bing also powers DuckDuckGo and several AI search tools.
 - Use **URL Inspection > Request indexing** in Search Console for the home page instead of waiting.
 - Check that `robots.ts` allows everything and that previews stay `noindex` (Vercel handles this automatically).
@@ -19,8 +19,8 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
   name: "Ayan Bhardwaj",
-  url: "https://ayanbhardwaj.vercel.app",
-  image: "https://ayanbhardwaj.vercel.app/<headshot>.jpg",
+  url: "https://ayan-bhardwaj.vercel.app",
+  image: "https://ayan-bhardwaj.vercel.app/<headshot>.jpg",
   jobTitle: "<e.g. Software Engineer>",
   sameAs: [
     "https://github.com/AyanBhardwaj1",
