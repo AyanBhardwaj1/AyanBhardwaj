@@ -10,8 +10,6 @@ main ─── 1b40889 Initial commit
            ├── chore/scaffold      (PR #1)  799cede Scaffold Next.js 16 app ...
            │      ├── chore/ci-deploy   CI, Dependabot, vercel.json, docs, README
            │      └── feat/site-v1      the actual site (src/)
-           │
-           └── docs/research       research notes (docs/research/), based on main
 ```
 
 `chore/ci-deploy` and `feat/site-v1` are both **stacked** on `chore/scaffold`: their PRs start out with `chore/scaffold` as the base branch. They are siblings and touch different files (`.github/`, `docs/`, `vercel.json`, `README.md` versus `src/`), so they should not conflict with each other.
@@ -19,11 +17,12 @@ main ─── 1b40889 Initial commit
 ## Order
 
 1. **PR #1 `chore/scaffold` -> `main`.** Merge first, with a **merge commit** (see below). Then delete the branch.
-2. **`docs/research` -> `main`.** Independent. It can go in any time, before or after the others. Squash merge.
-3. **`chore/ci-deploy` -> `main`** (this branch). Merge before the site, so the site PR gets CI checks and Lighthouse results. Squash merge.
-4. **`feat/site-v1` -> `main`.** Last. Wait for CI to pass and check its Vercel preview. Squash merge. The merge triggers the first real production deploy.
+2. **`chore/ci-deploy` -> `main`** (this branch). Merge before the site, so the site PR gets CI checks and Lighthouse results. Squash merge.
+3. **`feat/site-v1` -> `main`.** Last. Wait for CI to pass and check its Vercel preview. Squash merge. The merge triggers the first real production deploy.
 
-Optional: once PR #1 is merged, connect the repo to Vercel ([DEPLOYMENT.md](./DEPLOYMENT.md)) before merging 3 and 4, so both PRs get preview URLs.
+The agents' raw research notes stay out of the public repo on purpose (they include unconfirmed facts and open questions); the site PR carries only the final, curated content.
+
+Optional: once PR #1 is merged, connect the repo to Vercel ([DEPLOYMENT.md](./DEPLOYMENT.md)) before merging 2 and 3, so both PRs get preview URLs.
 
 ## Squash vs merge commits
 
