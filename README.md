@@ -4,7 +4,7 @@
 
 Source for my personal developer portfolio: who I am, what I've built, and how to reach me.
 
-**Live site:** _coming soon_ <!-- replace with the Vercel production URL, e.g. https://ayanbhardwaj.vercel.app -->
+**Live site:** [ayan-bhardwaj.vercel.app](https://ayan-bhardwaj.vercel.app)
 
 ## Stack
 

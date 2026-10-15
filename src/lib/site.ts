@@ -8,7 +8,7 @@ import { links } from "@/content/content";
  * OG URLs, sitemap and robots all read from it.
  */
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL || "https://ayanbhardwaj.vercel.app"
+  process.env.NEXT_PUBLIC_SITE_URL || "https://ayan-bhardwaj.vercel.app"
 ).replace(/\/$/, "");
 
 /**
