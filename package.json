@@ -9,17 +9,20 @@
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "data:refresh": "node scripts/fetch-github-data.mjs src/data",
+    "check:leaks": "node scripts/check-leaks.mjs",
+    "postbuild": "node scripts/check-leaks.mjs"
   },
   "dependencies": {
-    "motion": "^14.2.0",
+    "cmdk": "^1.1.1",
     "next": "16.4.1",
-    "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
-    "@types/node": "^20",
+    "@types/node": "^22.20.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
@@ -30,6 +33,6 @@
     "typescript": "^5"
   },
   "engines": {
-    "node": ">=22"
+    "node": "22.x"
   }
 }

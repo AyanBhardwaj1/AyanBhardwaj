@@ -42,3 +42,9 @@ next-env.d.ts
 
 .worktrees/
 .claude/worktrees/
+
+!.env.example
+*.log
+dist/
+.claude/settings.local.json
+.lighthouseci/

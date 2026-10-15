@@ -1,69 +1,81 @@
-import Image from "next/image";
+import { links, projects } from "@/content/content";
+import { projectRepo, sections } from "@/content/extras";
+import { contributionRanges, githubStats, totalStars } from "@/lib/github";
+import { hasResume } from "@/lib/site";
+import { NavPill, type NavItem } from "@/components/NavPill";
+import { StatusBar } from "@/components/StatusBar";
+import { About, Manifesto } from "@/components/sections/About";
+import { Activity } from "@/components/sections/Activity";
+import { Contact } from "@/components/sections/Contact";
+import { Experience } from "@/components/sections/Experience";
+import { Footer } from "@/components/sections/Footer";
+import { Hero } from "@/components/sections/Hero";
+import { Projects } from "@/components/sections/Projects";
+import { Trophies } from "@/components/sections/Trophies";
+import { Spotlight } from "@/components/ui/Spotlight";
+import { RevealObserver } from "@/components/motion/RevealObserver";
+import type { TickerItem } from "@/components/ui/Ticker";
 
 export default function Home() {
+  const mossIds = projects
+    .filter((p) => p.builtAt === "Moss")
+    .map((p) => projectRepo[p.id]);
+  const last12 = contributionRanges()[0];
+  const ticker: TickerItem[] = [
+    { symbol: "MOSS", value: "SWE intern (YC F25)", delta: "up" },
+    { symbol: "KOYAL AI", value: "AI eng intern (YC F25)", delta: "up" },
+    { symbol: "YOUBANK", value: "Live in beta", delta: "up" },
+    {
+      symbol: "MOSS APPS",
+      value: `10 shipped · ★ ${totalStars(mossIds)}`,
+      delta: "up",
+    },
+    { symbol: "LATENCY", value: "<10ms on-device", delta: "flat" },
+    { symbol: "RECALL@5", value: "0.85 → 0.97", delta: "up" },
+    { symbol: "SEC TOOLS", value: "328", delta: "up" },
+    { symbol: "GH 12M", value: `${last12.total} contributions`, delta: "up" },
+    { symbol: "GH STARS", value: String(githubStats.ownStars), delta: "up" },
+    { symbol: "AEO", value: "Founded · 200+ members", delta: "up" },
+    { symbol: "CSB HONORS", value: "UT Austin", delta: "flat" },
+    { symbol: "TESTS", value: "1,000+ on YouBank", delta: "up" },
+  ];
+
+  const navItems: NavItem[] = [
+    ...sections.map((s) => ({
+      id: s.id,
+      label: s.label,
+      href: `#${s.id}`,
+      external: false,
+    })),
+    ...(hasResume
+      ? [
+          {
+            id: "resume",
+            label: "Résumé",
+            href: links.resume.href,
+            external: true,
+          },
+        ]
+      : []),
+  ];
+
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex w-full max-w-3xl flex-1 flex-col items-center justify-between bg-white px-16 py-32 sm:items-start dark:bg-black">
-        <Image
-          className="h-5 w-[100px] dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl leading-10 font-semibold tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="bg-foreground text-background flex h-12 w-full items-center justify-center gap-2 rounded-full px-5 transition-colors hover:bg-[#383838] md:w-[158px] dark:hover:bg-[#ccc]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="h-[14px] w-4 dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] md:w-[158px] dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <>
+      <StatusBar />
+      <NavPill items={navItems} />
+      <Spotlight />
+      <main id="main" className="rails">
+        <Hero ticker={ticker} hasResume={hasResume} />
+        <About />
+        <Manifesto />
+        <Experience />
+        <Projects />
+        <Trophies />
+        <Activity />
+        <Contact hasResume={hasResume} />
       </main>
-    </div>
+      <Footer hasResume={hasResume} />
+      <RevealObserver />
+    </>
   );
 }

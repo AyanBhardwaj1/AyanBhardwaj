@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Advanced Equities">
+  <circle cx="50" cy="50" r="43.5" fill="#f8fbff"/>
+  <path d="M50 4.5 A45.5 45.5 0 0 1 50 95.5" fill="none" stroke="#23295f" stroke-width="5"/>
+  <path d="M50 95.5 A45.5 45.5 0 0 1 50 4.5" fill="none" stroke="#c9ab2b" stroke-width="5"/>
+  <text x="50" y="45" text-anchor="middle" fill="#23295f"
+        font-family="Syne, Helvetica, Arial, sans-serif" font-weight="700"
+        font-size="16" letter-spacing="-0.4">Advanced</text>
+  <text x="50" y="63" text-anchor="middle" fill="#23295f"
+        font-family="Syne, Helvetica, Arial, sans-serif" font-weight="700"
+        font-size="16" letter-spacing="-0.4">Equities</text>
+</svg>
