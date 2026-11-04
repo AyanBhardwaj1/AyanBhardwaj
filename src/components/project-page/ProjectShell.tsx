@@ -22,6 +22,11 @@
  *   The shell also mounts RevealObserver, so <Reveal> works in your body, and
  *   PointerFx, so [data-glow], [data-tilt] and [data-magnetic] work too.
  *     footer     false to drop the shared footer (keep prev/next somewhere).
+ *     themeToggle show the site theme toggle in the bar. Defaults to on only
+ *                when barTheme is "inherit", since a page with a fixed look
+ *                would not visibly respond to it.
+ *   The footer leads with a large "next project" teaser whose name shares a
+ *   view-transition name with the next page's <ProjectName>, so it morphs.
  * - Building blocks you may reuse or ignore: ProjectHero, ProjectOverview,
  *   ProjectFeatures, ProjectGallery, ProjectLinks (./DefaultProjectPage).
  * - Floor: one h1, real links, visible focus, prefers-reduced-motion respected,
@@ -30,9 +35,16 @@
 import Link from "next/link";
 import { ViewTransition } from "react";
 import { projectMnemonic } from "@/content/extras";
-import { getProject, prevNext, type ProjectSlug } from "@/lib/projects";
+import {
+  getProject,
+  PROJECT_PAGES,
+  prevNext,
+  type ProjectSlug,
+} from "@/lib/projects";
 import { PointerFx } from "../motion/PointerFx";
 import { RevealObserver } from "../motion/RevealObserver";
+import { ThemeToggle } from "../ui/ThemeToggle";
+import "./shell.css";
 
 export function ProjectShell({
   slug,
@@ -40,12 +52,14 @@ export function ProjectShell({
   barTheme = "inherit",
   className = "",
   footer = true,
+  themeToggle = barTheme === "inherit",
 }: {
   slug: ProjectSlug;
   children: React.ReactNode;
   barTheme?: "inherit" | "dark" | "light";
   className?: string;
   footer?: boolean;
+  themeToggle?: boolean;
 }) {
   const p = getProject(slug);
   const themeAttr = barTheme === "inherit" ? {} : { "data-theme": barTheme };
@@ -76,7 +90,12 @@ export function ProjectShell({
             </span>{" "}
             &lt;GO&gt; · {p.name}
           </p>
-          <CloseButton slug={slug} name={p.name} />
+          <div className="flex shrink-0 items-center gap-2">
+            {themeToggle && (
+              <ThemeToggle className="t-label h-10 min-w-10 justify-center px-3" />
+            )}
+            <CloseButton slug={slug} name={p.name} />
+          </div>
         </div>
       </header>
       <ViewTransition enter="vt-page-in" exit="vt-page-out" default="none">
@@ -146,52 +165,76 @@ export function ProjectFooter({
 }) {
   const { prev, next } = prevNext(slug);
   const themeAttr = barTheme === "inherit" ? {} : { "data-theme": barTheme };
+  const n = PROJECT_PAGES.length;
+  const at = PROJECT_PAGES.indexOf(next.id as ProjectSlug) + 1;
+  const code = projectMnemonic[next.id] ?? next.id.toUpperCase();
   return (
     <footer {...themeAttr} className="bg-bg border-line border-t">
       <nav aria-label="More projects" className="container-page py-12 md:py-16">
-        <div className="grid gap-px overflow-hidden rounded-lg sm:grid-cols-2">
-          {[
-            { dir: "Previous", p: prev, arrow: "←" },
-            { dir: "Next", p: next, arrow: "→" },
-          ].map(({ dir, p, arrow }) => (
-            <Link
-              key={dir}
-              href={`/projects/${p.id}`}
-              rel={dir === "Next" ? "next" : "prev"}
-              className={`group bg-card hover:bg-card-hover flex min-h-32 flex-col justify-between gap-6 p-6 transition-colors md:p-8 ${dir === "Next" ? "sm:items-end sm:text-right" : ""}`}
+        {/* Next project: a large teaser. Its name shares a view-transition
+            name with the next page's h1, so it morphs into the title. */}
+        <Link
+          href={`/projects/${next.id}`}
+          rel="next"
+          className="ps-next group"
+        >
+          <span className="ps-nextTop t-label">
+            <span>
+              Next project{" "}
+              <span className="text-muted">
+                · {String(at).padStart(2, "0")}/{String(n).padStart(2, "0")}
+              </span>
+            </span>
+            <span className="text-muted hidden sm:inline">
+              <span className="text-accent">{code}</span> &lt;GO&gt;
+            </span>
+          </span>
+          <span className="ps-nextRow">
+            <ViewTransition
+              name={`project-name-${next.id}`}
+              share="vt-morph"
+              default="none"
             >
-              <span className="t-label text-muted">
-                {dir === "Previous" && (
-                  <span
-                    aria-hidden="true"
-                    className="mr-2 inline-block transition-transform group-hover:-translate-x-1"
-                  >
-                    {arrow}
-                  </span>
-                )}
-                {dir} project
-                {dir === "Next" && (
-                  <span
-                    aria-hidden="true"
-                    className="ml-2 inline-block transition-transform group-hover:translate-x-1"
-                  >
-                    {arrow}
-                  </span>
-                )}
-              </span>
-              <span>
-                <span className="t-h3 block">{p.name}</span>
-                <span className="text-muted mt-1 block text-[16px]">
-                  {p.tagline}
+              <span className="ps-nextName t-display-sm">{next.name}</span>
+            </ViewTransition>
+            <span className="ps-nextArrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M4 12h15m-6-6 6 6-6 6"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
+          </span>
+          <span className="ps-nextTag">{next.tagline}</span>
+          {next.metrics && next.metrics.length > 0 && (
+            <span className="ps-nextMetrics" aria-hidden="true">
+              {next.metrics.slice(0, 3).map((m) => (
+                <span key={m} className="chip">
+                  {m}
                 </span>
-              </span>
-            </Link>
-          ))}
-        </div>
+              ))}
+            </span>
+          )}
+          <span className="ps-nextRule" aria-hidden="true" />
+        </Link>
         <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
-          <Link href="/#projects" className="pill">
-            <span aria-hidden="true">←</span> All projects
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            <Link href="/#projects" className="pill">
+              <span aria-hidden="true">←</span> All projects
+            </Link>
+            <Link
+              href={`/projects/${prev.id}`}
+              rel="prev"
+              className="ps-prev t-label"
+            >
+              <span className="text-muted">Previous:</span> {prev.name}
+            </Link>
+          </div>
           <p className="t-label text-muted">
             ayan<span className="text-accent">://</span>bhardwaj ·{" "}
             <Link href="/functions" className="link">
