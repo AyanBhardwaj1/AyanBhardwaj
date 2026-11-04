@@ -19,7 +19,10 @@ export function SectionHeader({
   const n = String(index).padStart(2, "0");
   return (
     <header className="mb-12 md:mb-20">
-      <div className="t-label border-line text-muted mb-6 flex items-center justify-between border-b pb-4">
+      <div
+        data-inview=""
+        className="section-rule t-label border-line text-muted mb-6 flex items-center justify-between border-b pb-4"
+      >
         <span>
           /{n} · {label}
         </span>

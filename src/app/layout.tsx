@@ -3,6 +3,7 @@ import { Archivo, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
 import { links, profile, seo } from "@/content/content";
 import { SITE_URL, hasResume } from "@/lib/site";
 import { Providers } from "@/components/Providers";
+import { AyanBot } from "@/components/ayan-bot/AyanBot";
 import "./globals.css";
 
 // Require the whole app to be produced at build time: no request-time work can sneak in.
@@ -84,7 +85,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
-        <Providers hasResume={hasResume}>{children}</Providers>
+        <Providers hasResume={hasResume}>
+          {children}
+          <AyanBot />
+        </Providers>
       </body>
     </html>
   );

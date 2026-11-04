@@ -7,6 +7,7 @@ import {
   type ClusterId,
 } from "@/content/extras";
 import { starsFor } from "./github";
+import { hasProjectPage } from "./projects";
 
 /**
  * Project constellation, laid out at build time (the page is prerendered, so
@@ -23,6 +24,8 @@ export type StarNode = {
   stack: string[];
   stars?: number;
   href: string;
+  /** On-site project page, when the project has one. */
+  page?: string;
   mnemonic: string;
   significance: number;
   x: number;
@@ -109,6 +112,7 @@ export function buildConstellation(): ConstellationData {
         stack: p.stack,
         stars: starsFor(projectRepo[p.id]),
         href: p.links.live ?? p.links.code ?? "#projects",
+        page: hasProjectPage(p.id) ? `/projects/${p.id}` : undefined,
         mnemonic: projectMnemonic[p.id] ?? p.id.slice(0, 4).toUpperCase(),
         significance: meta.significance,
         x: c.anchor[0] + radius * Math.cos(theta),

@@ -8,6 +8,8 @@ import {
   commands as allCommands,
   easterEggMap,
   parseMnemonic,
+  openAyanBot,
+  parseAsk,
   searchLocal,
   type Command as Cmd,
   type CommandGroup,
@@ -24,8 +26,14 @@ type Props = {
 
 type LogLine = { id: number; kind: "in" | "out" | "err"; text: string };
 
-const GROUP_ORDER: CommandGroup[] = ["Go", "Projects", "Links", "Settings"];
-const QUICK = ["PROJ", "EXP", "GP", "AWRD", "CV", "MAIL", "THEME", "HELP"];
+const GROUP_ORDER: CommandGroup[] = [
+  "Go",
+  "Ask",
+  "Projects",
+  "Links",
+  "Settings",
+];
+const QUICK = ["PROJ", "EXP", "ASK", "AWRD", "CV", "MAIL", "THEME", "HELP"];
 const RECENTS_KEY = "palette:recents";
 
 const readRecents = (): string[] => {
@@ -61,6 +69,7 @@ function score(cmd: Cmd, q: string): number {
 const HELP_LINES = [
   "type a function code and press Enter (<GO>). e.g. PROJ, GP, CV, YOUB",
   "or type words to search projects and experience, on-device",
+  "or ASK <question> to ask ayan-bot",
   "↑ ↓ to move · Enter to run · Tab to complete · Esc to close",
   "shortcuts: ⌘K / Ctrl+K anywhere · / to open · KEYS <GO> for type-to-open",
   "easter eggs exist. try: whoami, latency, mavs, sudo hire ayan",
@@ -241,6 +250,9 @@ export default function CommandPalette({
         }[mode];
         return print([{ kind: "out", text }]);
       }
+      case "bot":
+        close();
+        return openAyanBot();
       case "help":
         return print(
           HELP_LINES.map((text) => ({ kind: "out" as const, text })),
@@ -333,7 +345,16 @@ export default function CommandPalette({
                   e.preventDefault();
                   setQuery(query + ghost);
                 }
-                if (e.key === "Enter" && egg) {
+                const ask = e.key === "Enter" ? parseAsk(query) : null;
+                if (ask) {
+                  // "ASK <question>": hand the question to ayan-bot.
+                  e.preventDefault();
+                  print([{ kind: "in", text: query.trim() }]);
+                  pushRecent("ask.bot");
+                  setQuery("");
+                  close();
+                  openAyanBot(ask);
+                } else if (e.key === "Enter" && egg) {
                   e.preventDefault();
                   runEgg();
                 } else if (

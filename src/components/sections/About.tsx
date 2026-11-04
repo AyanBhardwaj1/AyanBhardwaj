@@ -91,8 +91,8 @@ export function About() {
             <div className="md:col-span-5">
               <p className="t-label text-accent">What is CSB?</p>
               <h3 className="t-h3 mt-4 max-w-[20ch]">
-                Two honors degrees, one <span className="t-serif">small</span>{" "}
-                cohort.
+                Two degrees, honors in both, one{" "}
+                <span className="t-serif">small</span> cohort.
               </h3>
               <ul className="mt-8 space-y-3">
                 {profile.education.degrees.map((d) => (
@@ -109,9 +109,9 @@ export function About() {
               <p className="text-muted max-w-[62ch]">{csb.paragraph}</p>
               <dl className="border-line mt-8 grid grid-cols-3 gap-4 border-t pt-6">
                 {[
-                  ["2", "honors degrees"],
-                  ["4", "years, not five"],
-                  ["≤40", "students per cohort"],
+                  ["2", "degrees, one program"],
+                  ["Honors", "coursework in both"],
+                  ["20–30", "students per cohort"],
                 ].map(([v, l]) => (
                   <div key={l}>
                     <dt className="sr-only">{l}</dt>
@@ -194,9 +194,9 @@ export function Manifesto() {
       <div className="container-page flex justify-center">
         <ScrubText
           className="t-manifesto max-w-[22ch] text-center text-balance"
-          text="From thesis to ship. I build tools that turn noisy markets and messy data into decisions: fast, typed, and actually used."
-          accent="decisions:"
-          serif={["noisy", "markets"]}
+          text="From thesis to ship: tools that turn messy data into decisions."
+          accent="decisions."
+          serif={["messy", "data"]}
         />
       </div>
     </section>

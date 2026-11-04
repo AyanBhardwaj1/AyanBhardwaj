@@ -33,7 +33,7 @@ export const projectMedia: Record<string, Media> = {
   },
   mycelium: {
     src: "/media/mycelium/graph.jpg",
-    alt: "Mycelium's graph view connecting related pages the user has read",
+    alt: "Mycelium's search palette (from its demo video): a concept query returning ranked pages the user has read",
     width: 1600,
     height: 900,
   },
@@ -72,6 +72,30 @@ export const projectMedia: Record<string, Media> = {
     alt: "DejaVu semantic journal cover",
     width: 1200,
     height: 630,
+  },
+  "walk-free": {
+    src: "/media/projects/walk-free/demo-utaustin.jpg",
+    alt: "Walk-Free at UT Austin: a 3D campus with a shaded walking route and route cards comparing sun exposure",
+    width: 1280,
+    height: 800,
+  },
+  runway: {
+    src: "/media/projects/runway/landing-hero.jpg",
+    alt: "Runway's landing page: a runway check card with cash, burn, months left and the date cash runs out",
+    width: 1440,
+    height: 900,
+  },
+  oncosense: {
+    src: "/media/projects/oncosense/photo-band-worn-electronics.jpg",
+    alt: "The OncoSense band worn on a forearm, with the microcontroller and wiring on the outer face",
+    width: 1164,
+    height: 910,
+  },
+  stack: {
+    src: "/media/projects/stack/hero-terminal-style.jpg",
+    alt: "Stack's landing page previewing a computer science workspace in its terminal style, with lecture notes and due dates",
+    width: 1440,
+    height: 900,
   },
   "golden-era-soccer": {
     src: "/media/golden-era/og.jpg",
@@ -120,6 +144,10 @@ export const projectRepo: Record<string, string> = {
   clef: "Clef",
   "emotion-classifier": "EmotionClassifier",
   "low-resource-research": "LowResourceResearch",
+  "walk-free": "Walk-Free",
+  runway: "AITX-MLOps-Hack",
+  oncosense: "OncoSense-MIT-LL",
+  stack: "stack",
 };
 
 /** Palette mnemonics for projects (Bloomberg-style, 2 to 5 letters). */
@@ -146,18 +174,24 @@ export const projectMnemonic: Record<string, string> = {
   clef: "CLEF",
   "emotion-classifier": "EMOT",
   "low-resource-research": "LRES",
+  "walk-free": "WALK",
+  runway: "RNWY",
+  oncosense: "ONCO",
+  stack: "STCK",
 };
 
 // ---------- Constellation ----------
 
-export type ClusterId = "moss" | "quant" | "sports" | "agents" | "research";
+export type ClusterId =
+  "moss" | "quant" | "sports" | "agents" | "research" | "hack";
 
 export const clusters: {
   id: ClusterId;
   label: string;
   anchor: [number, number];
 }[] = [
-  { id: "moss", label: "Moss Apps", anchor: [420, 330] },
+  { id: "moss", label: "Moss Apps", anchor: [430, 370] },
+  { id: "hack", label: "Hackathons & Research", anchor: [470, 90] },
   { id: "quant", label: "Quant Desk", anchor: [820, 170] },
   { id: "agents", label: "Agent Infra", anchor: [820, 500] },
   { id: "sports", label: "Sports Sims", anchor: [120, 510] },
@@ -191,6 +225,10 @@ export const constellation: Record<
   clef: { clusters: ["research"], significance: 2 },
   "emotion-classifier": { clusters: ["research"], significance: 2 },
   "low-resource-research": { clusters: ["research"], significance: 2 },
+  "walk-free": { clusters: ["hack"], significance: 4 },
+  runway: { clusters: ["hack", "quant", "agents"], significance: 4 },
+  oncosense: { clusters: ["hack", "research"], significance: 4 },
+  stack: { clusters: ["hack", "agents"], significance: 3 },
 };
 
 // ---------- Career chart (GP <GO>) ----------
@@ -323,9 +361,9 @@ export const trophies: Trophy[] = [
     title: "CSB Honors",
     issuer: "UT Austin",
     tier: "special",
-    stat: "≤40",
+    stat: "20–30",
     statLabel: "students per cohort",
     story:
-      "Admitted to Texas CSB, the joint honors degree in computer science and business. Two honors degrees in four years.",
+      "Admitted to Texas CSB, UT Austin's Computer Science and Business Honors dual degree, with honors coursework in both.",
   },
 ];

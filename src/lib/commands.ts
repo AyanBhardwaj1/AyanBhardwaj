@@ -7,13 +7,14 @@ import {
   ui,
 } from "@/content/content";
 import { projectMnemonic } from "@/content/extras";
+import { hasProjectPage, projectHref } from "./projects";
 
 /**
  * One command registry feeds the ⌘K palette and the static /functions page.
  * Pure data (no React), so it is safe on both sides of the boundary.
  */
 
-export type CommandGroup = "Go" | "Projects" | "Links" | "Settings";
+export type CommandGroup = "Go" | "Ask" | "Projects" | "Links" | "Settings";
 
 export type CommandAction =
   | { type: "scroll"; id: string }
@@ -22,7 +23,8 @@ export type CommandAction =
   | { type: "copy"; value: string; toast: string }
   | { type: "theme" }
   | { type: "shortcuts" }
-  | { type: "help" };
+  | { type: "help" }
+  | { type: "bot" };
 
 export type Command = {
   id: string;
@@ -82,7 +84,7 @@ export const commands: Command[] = [
     "timeline",
     "graph",
   ]),
-  go("PROJ", "projects", "Projects", "Featured work and the ten Moss apps", [
+  go("PROJ", "projects", "Projects", "YouBank, Moss builds, hackathons", [
     "projects",
     "work",
     "portfolio",
@@ -114,6 +116,16 @@ export const commands: Command[] = [
     "hire",
     "reach",
   ]),
+  {
+    id: "ask.bot",
+    mnemonic: "ASK",
+    title: "Ask ayan-bot",
+    hint: "Ask anything about Ayan. Type ASK or BOT, then your question",
+    group: "Ask",
+    keywords: ["bot", "ask", "chat", "question", "ayan-bot", "assistant"],
+    action: { type: "bot" },
+    href: "/functions#bot",
+  },
   {
     id: "link.mail",
     mnemonic: "MAIL",
@@ -232,8 +244,10 @@ export const commands: Command[] = [
       ...p.stack.map((s) => s.toLowerCase()),
       ...(p.builtAt ? ["moss"] : []),
     ],
-    action: { type: "scroll", id: `project-${p.id}` },
-    href: `/#project-${p.id}`,
+    action: hasProjectPage(p.id)
+      ? { type: "route", href: projectHref(p.id) }
+      : { type: "scroll", id: `project-${p.id}` },
+    href: projectHref(p.id),
   })),
 ];
 
@@ -333,3 +347,18 @@ export const parseMnemonic = (input: string) =>
     .replace(/\s+go$/i, "")
     .trim()
     .toUpperCase();
+
+/** "ASK what is YouBank <GO>" / "bot ..." → the question, or null if not an ask. */
+export function parseAsk(input: string): string | null {
+  const m = /^(?:ask|bot)(?:\s+([\s\S]*))?$/i.exec(
+    input.trim().replace(/\s*<go>$/i, ""),
+  );
+  return m ? (m[1] ?? "").trim() : null;
+}
+
+/** Opens the ayan-bot widget (mounted in the root layout), optionally with a question. */
+export function openAyanBot(prompt = "") {
+  window.dispatchEvent(
+    new CustomEvent("ayan-bot:open", { detail: { prompt } }),
+  );
+}

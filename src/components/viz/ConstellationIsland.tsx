@@ -1,13 +1,27 @@
 "use client";
 
-import { useMemo, useRef, useState, useSyncExternalStore } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { ConstellationData, StarNode } from "@/lib/constellation";
+import type { Body, Sim } from "./graph-physics";
 
 /**
  * EQS <GO>: project constellation. Layout arrives precomputed from the server.
  * Map view (SVG, decorative for AT) and List view (semantic). The list is the
  * default below 768px. Roving focus with arrow keys on the map; Enter opens the
  * detail panel.
+ *
+ * Physics: once the map is in view (and motion is allowed), a small force
+ * simulation is loaded on demand. Stars can be dragged and spring back, drift
+ * slowly, and shy away from the cursor. A click (not a drag) opens the
+ * project's page. Under reduced motion the map stays static.
  */
 
 const mq = "(min-width: 768px)";
@@ -31,6 +45,15 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [focusId, setFocusId] = useState<string>(data.nodes[0]?.id ?? "");
   const nodeRefs = useRef(new Map<string, SVGGElement>());
+  const edgeRefs = useRef(new Map<string, SVGLineElement>());
+  const predRefs = useRef(new Map<string, SVGGElement>());
+  const svgRef = useRef<SVGSVGElement>(null);
+  const simRef = useRef<Sim | null>(null);
+  const drag = useRef<{ id: string; x: number; y: number; moved: boolean }>(
+    null,
+  );
+  const suppressClick = useRef(false);
+  const router = useRouter();
 
   const byId = useMemo(
     () => new Map(data.nodes.map((n) => [n.id, n])),
@@ -47,6 +70,94 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
     return m;
   }, [data]);
 
+  // Load the simulation when the map first scrolls into view.
+  useEffect(() => {
+    if (view !== "map") return;
+    const svg = svgRef.current;
+    if (!svg) return;
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      !("IntersectionObserver" in window)
+    )
+      return;
+    let cancelled = false;
+    let visible = false;
+    const draw = (b: Map<string, Body>) => {
+      for (const [id, body] of b) {
+        nodeRefs.current
+          .get(id)
+          ?.setAttribute(
+            "transform",
+            `translate(${body.x.toFixed(1)} ${body.y.toFixed(1)})`,
+          );
+      }
+      for (const [k, el] of edgeRefs.current) {
+        const [s0, t0] = k.split("|");
+        const a = b.get(s0);
+        const c = b.get(t0);
+        if (!a || !c) continue;
+        el.setAttribute("x1", a.x.toFixed(1));
+        el.setAttribute("y1", a.y.toFixed(1));
+        el.setAttribute("x2", c.x.toFixed(1));
+        el.setAttribute("y2", c.y.toFixed(1));
+      }
+      for (const [k, el] of predRefs.current) {
+        const [s0, t0] = k.split("|");
+        const a = b.get(s0);
+        const c = b.get(t0);
+        if (!a || !c) continue;
+        const line = el.firstElementChild;
+        line?.setAttribute("x1", a.x.toFixed(1));
+        line?.setAttribute("y1", a.y.toFixed(1));
+        line?.setAttribute("x2", c.x.toFixed(1));
+        line?.setAttribute("y2", c.y.toFixed(1));
+        const label = el.lastElementChild;
+        label?.setAttribute("x", ((a.x + c.x) / 2).toFixed(1));
+        label?.setAttribute("y", ((a.y + c.y) / 2 - 4).toFixed(1));
+      }
+    };
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        visible = entry.isIntersecting;
+        if (simRef.current) {
+          simRef.current.setActive(visible);
+          return;
+        }
+        if (!visible) return;
+        import("./graph-physics").then(({ createSim }) => {
+          if (cancelled) return;
+          simRef.current = createSim({
+            nodes: data.nodes,
+            edges: data.edges,
+            onFrame: draw,
+          });
+          simRef.current.setActive(visible);
+        });
+      },
+      { rootMargin: "120px" },
+    );
+    io.observe(svg);
+    return () => {
+      cancelled = true;
+      io.disconnect();
+      simRef.current?.stop();
+      simRef.current = null;
+    };
+  }, [view, data]);
+
+  const toSvg = (e: React.PointerEvent) => {
+    const svg = svgRef.current;
+    const m = svg?.getScreenCTM();
+    if (!svg || !m) return null;
+    const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse());
+    return { x: p.x, y: p.y };
+  };
+
+  function activate(n: StarNode) {
+    if (n.page) router.push(n.page);
+    else setSelected(selected === n.id ? null : n.id);
+  }
+
   const lit = hover ?? selected;
   const isDim = (n: StarNode) => {
     if (filter && !n.clusters.includes(filter as StarNode["cluster"]))
@@ -54,7 +165,10 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
     if (lit && lit !== n.id && !neighbors.get(lit)?.has(n.id)) return true;
     return false;
   };
-  const sel = selected ? byId.get(selected) : undefined;
+  // The panel keeps the last star you looked at, so its links stay reachable.
+  const [lastSeen, setLastSeen] = useState<string | null>(null);
+  const shownId = selected ?? lit ?? lastSeen;
+  const shown = shownId ? byId.get(shownId) : undefined;
 
   function moveFocus(dir: "left" | "right" | "up" | "down") {
     const cur = byId.get(focusId);
@@ -170,11 +284,43 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
         >
           <div className="relative overflow-x-auto">
             <svg
+              ref={svgRef}
               viewBox={`0 0 ${data.width} ${data.height}`}
-              className="h-auto w-full min-w-[640px]"
+              className="h-auto w-full min-w-[640px] select-none"
               role="group"
-              aria-label="Project constellation map. Use arrow keys to move between projects and Enter to open one."
-              onPointerLeave={() => setHover(null)}
+              aria-label="Project constellation map. Use arrow keys to move between projects, Enter to open one, Space to pin its details."
+              onPointerMove={(e) => {
+                const p = toSvg(e);
+                if (!p) return;
+                simRef.current?.pointer(p.x, p.y);
+                const d = drag.current;
+                if (d) {
+                  if (Math.hypot(p.x - d.x, p.y - d.y) > 4) d.moved = true;
+                  simRef.current?.drag(p.x, p.y);
+                }
+              }}
+              onPointerUp={() => {
+                const d = drag.current;
+                drag.current = null;
+                simRef.current?.release();
+                if (!d) return;
+                if (d.moved) {
+                  suppressClick.current = true;
+                  return;
+                }
+                // The svg holds pointer capture during a press, so the click
+                // event lands on the svg, not the node: activate a tap here.
+                const node = byId.get(d.id);
+                if (node) activate(node);
+              }}
+              onPointerCancel={() => {
+                drag.current = null;
+                simRef.current?.release();
+              }}
+              onPointerLeave={() => {
+                setHover(null);
+                simRef.current?.pointerOut();
+              }}
             >
               {data.clusters.map((c) => (
                 <text
@@ -196,6 +342,11 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
                   return (
                     <line
                       key={`${e.source}-${e.target}`}
+                      ref={(el) => {
+                        const k = `${e.source}|${e.target}`;
+                        if (el) edgeRefs.current.set(k, el);
+                        else edgeRefs.current.delete(k);
+                      }}
                       x1={a.x}
                       y1={a.y}
                       x2={b.x}
@@ -211,7 +362,14 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
                     const a = byId.get(e.source)!;
                     const b = byId.get(e.target)!;
                     return (
-                      <g key={`p-${e.source}-${e.target}`}>
+                      <g
+                        key={`p-${e.source}-${e.target}`}
+                        ref={(el) => {
+                          const k = `${e.source}|${e.target}`;
+                          if (el) predRefs.current.set(k, el);
+                          else predRefs.current.delete(k);
+                        }}
+                      >
                         <line
                           x1={a.x}
                           y1={a.y}
@@ -241,18 +399,41 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
                     key={n.id}
                     ref={(el) => {
                       if (el) nodeRefs.current.set(n.id, el);
+                      else nodeRefs.current.delete(n.id);
                     }}
+                    transform={`translate(${n.x} ${n.y})`}
                     tabIndex={focusId === n.id ? 0 : -1}
-                    role="button"
-                    aria-label={`${n.name}: ${n.tagline}`}
-                    aria-pressed={selected === n.id}
-                    onPointerEnter={() => setHover(n.id)}
+                    role={n.page ? "link" : "button"}
+                    aria-label={`${n.name}: ${n.tagline.replace(/\.$/, "")}${n.page ? ". Opens project page" : ""}`}
+                    aria-pressed={n.page ? undefined : selected === n.id}
+                    onPointerDown={(e) => {
+                      const p = toSvg(e);
+                      if (!p || e.button !== 0) return;
+                      drag.current = { id: n.id, ...p, moved: false };
+                      simRef.current?.grab(n.id, p.x, p.y);
+                      svgRef.current?.setPointerCapture(e.pointerId);
+                    }}
+                    onPointerLeave={() => simRef.current?.hover(null)}
+                    onPointerEnter={() => {
+                      simRef.current?.hover(n.id);
+                      setHover(n.id);
+                      setLastSeen(n.id);
+                    }}
                     onFocus={() => {
                       setFocusId(n.id);
                       setHover(n.id);
+                      setLastSeen(n.id);
                     }}
                     onBlur={() => setHover(null)}
-                    onClick={() => setSelected(selected === n.id ? null : n.id)}
+                    onClick={(e) => {
+                      // Pointer taps are handled in the svg's onPointerUp;
+                      // only keyboard/assistive clicks (detail 0) land here.
+                      if (suppressClick.current) {
+                        suppressClick.current = false;
+                        return;
+                      }
+                      if (e.detail === 0) activate(n);
+                    }}
                     onKeyDown={(e) => {
                       const k = {
                         ArrowLeft: "left",
@@ -263,23 +444,27 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
                       if (k) {
                         e.preventDefault();
                         moveFocus(k);
-                      } else if (e.key === "Enter" || e.key === " ") {
+                      } else if (e.key === "Enter") {
+                        e.preventDefault();
+                        activate(n);
+                      } else if (e.key === " ") {
                         e.preventDefault();
                         setSelected(selected === n.id ? null : n.id);
                       } else if (e.key === "Escape") {
                         setSelected(null);
                       }
                     }}
-                    className="cursor-pointer outline-none [&:focus-visible_.star-ring]:opacity-100"
+                    className="cursor-grab outline-none active:cursor-grabbing [&:focus-visible_.star-ring]:opacity-100"
                     style={{
                       opacity: dim ? 0.18 : 1,
                       transition: "opacity 200ms",
+                      touchAction: "none",
                     }}
                   >
                     <circle
                       className="star-ring opacity-0"
-                      cx={n.x}
-                      cy={n.y}
+                      cx={0}
+                      cy={0}
                       r={n.r + 6}
                       fill="none"
                       stroke="var(--accent)"
@@ -287,16 +472,16 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
                     />
                     {n.significance >= 4 && (
                       <circle
-                        cx={n.x}
-                        cy={n.y}
+                        cx={0}
+                        cy={0}
                         r={n.r + 4}
                         fill="var(--accent)"
                         opacity="0.12"
                       />
                     )}
                     <circle
-                      cx={n.x}
-                      cy={n.y}
+                      cx={0}
+                      cy={0}
                       r={n.r}
                       fill={
                         active || selected === n.id
@@ -308,8 +493,8 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
                     />
                     {(n.significance >= 3 || active) && (
                       <text
-                        x={n.x}
-                        y={n.y + n.r + 14}
+                        x={0}
+                        y={n.r + 14}
                         textAnchor="middle"
                         className="pointer-events-none fill-[var(--fg)] font-sans text-[12px] font-medium"
                       >
@@ -331,14 +516,14 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
             aria-live="polite"
             className="border-line border-t p-5 md:border-t-0 md:border-l"
           >
-            {sel ? (
+            {shown ? (
               <StarDetail
-                node={sel}
+                node={shown}
                 reasons={data.edges
-                  .filter((e) => e.source === sel.id || e.target === sel.id)
+                  .filter((e) => e.source === shown.id || e.target === shown.id)
                   .map((e) => {
                     const other = byId.get(
-                      e.source === sel.id ? e.target : e.source,
+                      e.source === shown.id ? e.target : e.source,
                     )!;
                     return `${other.name}: ${e.reason}`;
                   })}
@@ -346,19 +531,12 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
             ) : (
               <div className="t-data text-muted space-y-3">
                 <p>
-                  Hover or focus a star to light its links. Click to open it.
+                  Hover or focus a star to light its links. Click to open its
+                  page. Drag one and it springs back.
                 </p>
                 <p>
                   Size = significance. Lines = shared stack or shared cluster.
                 </p>
-                {lit && byId.get(lit) && (
-                  <p className="text-fg">
-                    <span className="text-accent">
-                      {byId.get(lit)!.mnemonic}
-                    </span>{" "}
-                    {byId.get(lit)!.name}
-                  </p>
-                )}
               </div>
             )}
           </aside>
@@ -393,14 +571,20 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
                         {n.mnemonic}
                       </span>
                       <span>
-                        <a
-                          href={n.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="link font-medium"
-                        >
-                          {n.name}
-                        </a>
+                        {n.page ? (
+                          <Link href={n.page} className="link font-medium">
+                            {n.name}
+                          </Link>
+                        ) : (
+                          <a
+                            href={n.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="link font-medium"
+                          >
+                            {n.name}
+                          </a>
+                        )}
                         <span className="text-muted block text-[15px]">
                           {n.tagline}
                         </span>
@@ -437,17 +621,28 @@ function StarDetail({ node, reasons }: { node: StarNode; reasons: string[] }) {
           ))}
         </ul>
       )}
-      <a
-        href={node.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="pill mt-5"
-      >
-        {node.href.includes("github.com") ? "Code" : "Live"}{" "}
-        <span className="arrow" aria-hidden="true">
-          ↗
-        </span>
-      </a>
+      <div className="mt-5 flex flex-wrap gap-2">
+        {node.page && (
+          <Link href={node.page} className="pill pill-solid">
+            Project page{" "}
+            <span className="arrow" aria-hidden="true">
+              →
+            </span>
+          </Link>
+        )}
+        <a
+          href={node.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="pill"
+        >
+          {node.href.includes("github.com") ? "Code" : "Live"}{" "}
+          <span className="arrow" aria-hidden="true">
+            ↗
+          </span>
+          <span className="sr-only">(opens in a new tab)</span>
+        </a>
+      </div>
     </div>
   );
 }

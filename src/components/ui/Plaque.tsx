@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { CountUp } from "../motion/CountUp";
 
 /**
  * Trophy plaque: flips to its story on click/Enter (crossfade under reduced
@@ -83,7 +84,7 @@ export function Plaque({
             <span className="t-label text-muted">{category}</span>
             <span className={`${wide ? "mt-auto md:mt-0" : "mt-auto"} block`}>
               <span className="text-fg block text-[clamp(44px,5.2vw,80px)] leading-[0.9] font-extrabold tracking-[-0.04em] [font-stretch:112%] tabular-nums">
-                {numeral}
+                <CountUp value={numeral} />
               </span>
               <span className="t-label text-accent mt-2 block">
                 {numeralLabel}

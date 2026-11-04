@@ -48,7 +48,11 @@ export function Contact({ hasResume }: { hasResume: boolean }) {
                   {email}
                 </a>
                 <CopyEmail email={email} copiedText={ui.contact.copied} />
-                <a href={links.email.href} className="pill min-h-10">
+                <a
+                  href={links.email.href}
+                  className="pill min-h-10"
+                  data-magnetic=""
+                >
                   Open{" "}
                   <span className="arrow" aria-hidden="true">
                     ↗

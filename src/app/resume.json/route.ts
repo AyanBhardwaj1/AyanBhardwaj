@@ -6,6 +6,7 @@ import {
   projects,
   skills,
 } from "@/content/content";
+import { hasProjectPage } from "@/lib/projects";
 import { SITE_URL } from "@/lib/site";
 
 /** Machine-readable resume (JSON Resume-ish). Static, and built only from public site content. */
@@ -18,7 +19,7 @@ export function GET() {
       label: profile.role,
       email: links.email.display,
       url: SITE_URL,
-      summary: profile.bioOneLine,
+      summary: profile.aboutShort,
       location: { city: "Austin", region: "TX", countryCode: "US" },
       profiles: [
         { network: "GitHub", url: links.github.href },
@@ -48,7 +49,10 @@ export function GET() {
     projects: projects.map((p) => ({
       name: p.name,
       description: p.tagline,
-      url: p.links.live ?? p.links.code,
+      ...(p.context ? { entity: p.context } : {}),
+      url: hasProjectPage(p.id)
+        ? `${SITE_URL}/projects/${p.id}`
+        : (p.links.live ?? p.links.code),
       keywords: p.stack,
     })),
     awards: awards.map((a) => ({

@@ -38,7 +38,7 @@ export function Trophies() {
               numeral="CSB"
               numeralLabel="Honors · UT Austin"
               title="CS + Business Honors"
-              issuer="Two honors degrees, cohorts of 40 or fewer"
+              issuer="Dual degree, honors in both, cohorts of about 20 to 30"
               category={CATEGORY.csb}
               story={csb.story}
             />

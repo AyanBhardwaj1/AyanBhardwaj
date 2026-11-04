@@ -1,4 +1,5 @@
 import { experience, links, profile, projects } from "@/content/content";
+import { hasProjectPage } from "@/lib/projects";
 import { SITE_URL } from "@/lib/site";
 
 /** llms.txt: a plain-text brief for agents. Static. */
@@ -16,10 +17,20 @@ export function GET() {
         `- ${e.company}${e.companyNote ? ` (${e.companyNote})` : ""}: ${e.role}, ${e.start} to ${e.end}. ${e.summary}`,
     ),
     "",
+    `## Education`,
+    `- ${profile.education.school}: ${profile.education.program}. ${profile.education.csb.oneLiner}`,
+    "",
     "## Projects",
-    ...projects.map(
-      (p) => `- [${p.name}](${p.links.live ?? p.links.code}): ${p.tagline}`,
-    ),
+    ...projects.map((p) => {
+      const page = hasProjectPage(p.id)
+        ? `${SITE_URL}/projects/${p.id}`
+        : undefined;
+      const href = page ?? p.links.live ?? p.links.code;
+      const where = p.context ? ` (${p.context})` : "";
+      return href
+        ? `- [${p.name}](${href})${where}: ${p.tagline}`
+        : `- ${p.name}${where}: ${p.tagline}`;
+    }),
     "",
     "## Links",
     `- Site: ${SITE_URL}`,

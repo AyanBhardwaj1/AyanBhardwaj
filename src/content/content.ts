@@ -77,7 +77,15 @@ export interface Experience {
   relatedProjectIds?: string[];
 }
 
-export type ProjectTier = "featured" | "moss" | "more";
+/**
+ * featured: the lead card (YouBank).
+ * moss: the two Moss builds shown as cards on the home page.
+ * moss-sdk: the other Moss SDK apps, shown in "More work" with their own treatment.
+ * hackathon: hackathon builds and research projects.
+ * more: everything else in "More work".
+ */
+export type ProjectTier =
+  "featured" | "moss" | "moss-sdk" | "hackathon" | "more";
 
 export interface Project {
   id: string;
@@ -92,8 +100,19 @@ export interface Project {
   /** Snapshot 2026-10-15. Replace with live data if available. */
   stars?: number;
   builtAt?: string; // e.g. "Moss"
+  /** Where/why it was built, e.g. a hackathon name or research program. */
+  context?: string;
   category:
-    "AI" | "Search" | "Finance" | "Dev Tools" | "Sports" | "Research" | "Media";
+    | "AI"
+    | "Search"
+    | "Finance"
+    | "Dev Tools"
+    | "Sports"
+    | "Research"
+    | "Media"
+    | "Health"
+    | "Climate"
+    | "Productivity";
 }
 
 export interface Award {
@@ -213,9 +232,9 @@ export const profile: Profile = {
     "Code like an engineer. Think like a dealmaker.",
   ],
   subheadline:
-    "CS + Business Honors at UT Austin. Software engineer at Moss (YC F25), where I shipped 10 open-source apps on a sub-10ms semantic search SDK. Now building YouBank, an AI research desk for finance.",
+    "CS + Business Honors at UT Austin. At Moss (YC F25) I shipped 10 open-source apps on its semantic search SDK, including mossJARVIS and Mycelium. Now building YouBank, an AI deal desk for finance.",
   subheadlineShort:
-    "CS + Business Honors at UT Austin. Shipped 10 open-source apps at Moss (YC F25). Building YouBank.",
+    "CS + Business Honors at UT Austin. 10 open-source apps at Moss (YC F25). Building YouBank.",
   status: {
     label: "Building YouBank",
     show: true,
@@ -223,11 +242,12 @@ export const profile: Profile = {
   bioOneLine:
     "Software engineer. CS + Business Honors at UT Austin. Ex-Moss and Koyal AI (both YC F25). Building YouBank.",
   aboutShort:
-    "I'm Ayan. I build software at the point where AI meets money: semantic search that runs on your laptop, research tools that cite every number, agents that know when not to hit send. I study CS and business in UT Austin's CSB Honors program, so I write the code and read the 10-K.",
+    "I'm Ayan. I build software where AI meets money: search that runs on your own machine, research tools that cite every number, agents that know when not to hit send. I'm in UT Austin's CS + Business Honors program, so I write the code and read the 10-K.",
   aboutLong: [
-    "I'm Ayan Bhardwaj, a software engineer in UT Austin's CSB Honors program, a joint degree in honors computer science and honors business.",
-    "I like building things that are fast and things that are honest. At Moss (YC F25) I shipped 10 open-source apps on their WebAssembly semantic search SDK: a Chrome extension that remembers everything you read, a memory layer that stops coding agents from re-reading the same file, an Iron Man-style desktop assistant. At Koyal AI (YC F25) I worked on computer vision for an AI filmmaking platform. At UNT's NLP lab I built the scrapers and cleaning scripts behind a Belarusian question-answering benchmark.",
-    "On the finance side, I founded Advanced Equities Organization, a financial-literacy nonprofit that grew to 200+ members and ran a $15,000 live portfolio. That's where YouBank came from. It's the AI research desk I wanted: 328 tools on SEC data, quant models written from scratch, and an email agent that has to earn the right to send on its own.",
+    "I'm Ayan Bhardwaj, a software engineer in UT Austin's Computer Science and Business Honors program (CSB), a dual degree with honors coursework on both sides.",
+    "At Moss (YC F25) I shipped 10 open-source apps on its WebAssembly semantic search SDK. Two became products in their own right: mossJARVIS, an Iron Man-style desktop assistant with a long-term memory, and Mycelium, a Chrome extension that remembers the ideas you read instead of the URLs. The other eight range from memory for coding agents to a tutor that floats over your notes. At Koyal AI (YC F25) I worked on computer vision for an AI filmmaking platform.",
+    "Between jobs I build at hackathons and in research. Walk-Free shows how hot every street feels before you walk it, Runway tells a startup the day its cash runs out, and OncoSense was built at MIT Lincoln Laboratory with Eric Niu. At UNT's NLP lab I wrote the scrapers and cleaning scripts behind a Belarusian question-answering benchmark.",
+    "On the finance side, I founded Advanced Equities Organization, a financial-literacy nonprofit that grew to 200+ members and ran a $15,000 live portfolio. That's where YouBank came from. It's the AI deal desk I wanted: 328 tools on SEC data, quant models written from scratch, and an email agent that has to earn the right to send on its own.",
     "Off the keyboard: Mavericks basketball, soccer, pickleball, and a jersey collection that's getting out of hand. I've also built simulators for all three of the first sports, which tells you something.",
     "I speak English and Hindi.",
   ],
@@ -243,18 +263,16 @@ export const profile: Profile = {
     location: "Austin, TX",
     csb: {
       oneLiner:
-        "CSB is UT Austin's joint honors degree in computer science and business: a B.S. in Computer Science (Honors) plus a B.B.A. through Canfield Business Honors, done in four years, with a cohort of 40 or fewer.",
+        "CSB is UT Austin's Computer Science and Business Honors program: a dual degree (a B.S. in Computer Science and a B.B.A.) with honors coursework in both, in a cohort of about 20 to 30 students.",
       paragraph:
-        "Texas CSB (Computer Science and Business Honors) is an integrated honors degree run jointly by UT Austin's Department of Computer Science and the McCombs Canfield Business Honors Program. Students earn a B.S. in Computer Science (Honors) and a B.B.A. (Honors) in four years, less time than double-majoring in both. Students can only apply when entering UT, and admission is highly selective: cohorts are capped at about 40, and the first class enrolled 23 students out of 409 applicants. Both parent programs rank among the top ten in their fields.",
+        "Texas CSB (Computer Science and Business Honors) is a dual-degree program run jointly by UT Austin's Department of Computer Science and the McCombs Canfield Business Honors Program. Students earn a B.S. in Computer Science and a B.B.A., take honors coursework on both sides, and move through the program as a small cohort of about 20 to 30 students a year.",
       tooltip:
-        "UT Austin's joint CS + Business honors degree. Two honors degrees in four years. Cohorts of 40 or fewer.",
+        "UT Austin's CS + Business honors dual degree. Honors coursework in both. Cohorts of about 20 to 30.",
       tooltipShort:
-        "Joint CS + Business honors degree at UT Austin. ~40 students a year.",
+        "CS + Business honors dual degree at UT Austin. About 20 to 30 students a year.",
       sources: [
         "https://csb.utexas.edu/",
         "https://csb.utexas.edu/admissions-faq",
-        "https://www.cs.utexas.edu/news/2018/new-dual-degree-honors-program-university-texas-austin-combines-computer-science-business",
-        "https://cs.utexas.edu/news/2019/new-joint-honors-program-gets-strong-start",
       ],
     },
   },
@@ -364,9 +382,9 @@ export const projects: Project[] = [
     name: "YouBank",
     tier: "featured",
     category: "Finance",
-    tagline: "The AI deal desk that does the work.",
+    tagline: "The AI deal desk that learns how you work.",
     description:
-      "A research platform for people whose work is deals. A keyboard-driven terminal with 35+ functions and 328 tools on SEC EDGAR and XBRL data, where every number cites its filing. An email agent that drafts in your voice and keeps your pipeline current. A live modeling studio that builds models and pitch books cell by cell, with an Excel add-in.",
+      "Cited analysis from SEC filings, a live Studio that builds models and decks cell by cell, and an email agent that tracks every thread, asks what it can't answer, remembers, and earns the right to send on its own. The terminal has 35+ functions and 328 tools on EDGAR and XBRL data, and every number cites its filing. Built for boutique advisors, emerging managers, founders and students.",
     howItWorks: [
       "Quant models written from scratch in TypeScript: GARCH volatility, VaR with backtests, Monte Carlo valuation, a Treasury yield curve, and Altman, Ohlson, and Merton credit risk.",
       "PyTorch services on Modal, including a GraphSAGE model for M&A link prediction and hybrid retrieval with cross-encoder reranking (recall@5 from 0.85 to 0.97).",
@@ -377,13 +395,14 @@ export const projects: Project[] = [
       "Next.js",
       "React",
       "TypeScript",
+      "Neon Postgres",
+      "Drizzle",
       "Python",
       "PyTorch",
-      "PyTorch Geometric",
       "Modal",
-      "PostgreSQL",
       "Rust",
-      "Tauri",
+      "Tauri 2",
+      "Office.js",
       "Vercel",
     ],
     metrics: [
@@ -393,13 +412,13 @@ export const projects: Project[] = [
       "90%+ drafts unedited",
       "1,000+ tests",
     ],
-    links: { code: gh("YouBank"), live: "https://youbank-nu.vercel.app/" },
+    links: { code: gh("YouBank"), live: "https://youbank.dev/" },
     stars: 0,
   },
   {
     id: "mycelium",
     name: "Mycelium",
-    tier: "featured",
+    tier: "moss",
     category: "Search",
     builtAt: "Moss",
     tagline: "Your browser history, but it remembers ideas instead of URLs.",
@@ -407,7 +426,7 @@ export const projects: Project[] = [
       "A Chrome extension that quietly indexes long-form pages as you read. Search for a concept, not a title, and it finds the page. A graph view shows how everything you've read connects.",
     howItWorks: [
       "Manifest V3 extension. Extracts readable text with Mozilla Readability (500+ word pages only) and upserts it into a Moss index.",
-      "Moss embedding and vector search run in WebAssembly inside an offscreen document, so queries never leave the machine.",
+      "Moss embedding and vector search run in WebAssembly inside an offscreen document, so warm queries run locally with no network round trip. Captured pages sync to your Moss project.",
       "Command palette in a Shadow DOM, plus a d3-force graph of up to 300 related pages.",
     ],
     stack: [
@@ -420,7 +439,7 @@ export const projects: Project[] = [
     ],
     metrics: [
       "sub-10ms warm similarity search",
-      "no network round trip per query",
+      "warm queries run locally in WASM",
     ],
     links: { code: gh("Mycelium") },
     stars: 8,
@@ -446,14 +465,14 @@ export const projects: Project[] = [
       "Picovoice",
       "ElevenLabs",
     ],
-    metrics: ["sub-10ms local recall", "self-contained macOS app"],
+    metrics: ["Moss local recall", "self-contained macOS app"],
     links: { code: gh("mossJARVIS") },
     stars: 11,
   },
   {
     id: "thread",
     name: "Thread",
-    tier: "moss",
+    tier: "moss-sdk",
     category: "Dev Tools",
     builtAt: "Moss",
     tagline: "Memory for coding agents, so they stop re-reading the same file.",
@@ -472,7 +491,7 @@ export const projects: Project[] = [
   {
     id: "sentry",
     name: "Sentry",
-    tier: "moss",
+    tier: "moss-sdk",
     category: "Dev Tools",
     builtAt: "Moss",
     tagline: "A collision warning for parallel AI coding agents.",
@@ -491,7 +510,7 @@ export const projects: Project[] = [
   {
     id: "studyoverlay",
     name: "StudyOverlay",
-    tier: "moss",
+    tier: "moss-sdk",
     category: "AI",
     builtAt: "Moss",
     tagline: "A tutor that floats over whatever you're studying.",
@@ -512,7 +531,7 @@ export const projects: Project[] = [
   {
     id: "convos-ai",
     name: "Convos.AI",
-    tier: "moss",
+    tier: "moss-sdk",
     category: "AI",
     builtAt: "Moss",
     tagline: "Debate practice with an opponent that did the reading.",
@@ -532,7 +551,7 @@ export const projects: Project[] = [
   {
     id: "champions-wc-26",
     name: "Champions WC 26",
-    tier: "moss",
+    tier: "moss-sdk",
     category: "Sports",
     builtAt: "Moss",
     tagline: "Draft an XI. Find its historical twin. Win the World Cup.",
@@ -545,7 +564,7 @@ export const projects: Project[] = [
   {
     id: "syllabus",
     name: "Syllabus",
-    tier: "moss",
+    tier: "moss-sdk",
     category: "Search",
     builtAt: "Moss",
     tagline: "A study knowledge base built only from your own files.",
@@ -558,7 +577,7 @@ export const projects: Project[] = [
   {
     id: "duet",
     name: "Duet",
-    tier: "moss",
+    tier: "moss-sdk",
     category: "Dev Tools",
     builtAt: "Moss",
     tagline: "Shared context for pair programming.",
@@ -571,7 +590,7 @@ export const projects: Project[] = [
   {
     id: "dejavu",
     name: "DejaVu",
-    tier: "moss",
+    tier: "moss-sdk",
     category: "Search",
     builtAt: "Moss",
     tagline: "A journal that remembers what you wrote last time.",
@@ -586,6 +605,112 @@ export const projects: Project[] = [
     ],
     links: { code: gh("DejaVu") },
     stars: 6,
+  },
+
+  // Hackathons and research
+  {
+    id: "walk-free",
+    name: "Walk-Free",
+    tier: "hackathon",
+    category: "Climate",
+    context: "Meta Global AI Developer Hackathon · Indie track",
+    tagline: "See how hot every street feels before you walk it.",
+    description:
+      "Heat-aware walking for campuses and cities. Every path is colored by modeled feels-like temperature for the hour you walk it, with shade ray-traced against OpenStreetMap buildings and tree crowns. Six route types pick the way, and Meta's Muse Spark plans the walk in your own language.",
+    howItWorks: [
+      "Live weather and sunlight from Open-Meteo with an NWS fallback, plus US AQI, NWS heat alerts and the HeatRisk outlook.",
+      "Routes: quickest, more shade, scenic, cool stops through air-conditioned buildings, step-free, and lit at night.",
+      "A design tool lines a street with trees and shows shade and feels-like before and after.",
+      "Pre-built campus areas (UT Austin, UC Berkeley, Michigan, UCLA, Stanford, ASU); anywhere else builds from OpenStreetMap.",
+    ],
+    stack: [
+      "React",
+      "TypeScript",
+      "three.js",
+      "MapLibre",
+      "Express",
+      "Neon Postgres",
+      "Capacitor",
+      "Meta Muse Spark",
+    ],
+    links: {
+      code: gh("Walk-Free"),
+      live: "https://walk-free.vercel.app/",
+    },
+  },
+  {
+    id: "runway",
+    name: "Runway",
+    tier: "hackathon",
+    category: "Finance",
+    context: "AITX & MLOps World Hackathon · Austin Tech Week",
+    tagline: "Know the day your startup's cash runs out.",
+    description:
+      "Reads a company's bank feed read-only and works out burn, runway and the zero-cash date with plain, tested arithmetic: the LLM never does the math. It finds wasted spend (overlapping tools, quiet price increases, subscriptions on idle cards, double charges) and posts what changed to Slack every Monday. Agents draft the fixes; a person approves every one.",
+    howItWorks: [
+      "Deterministic TypeScript for cash, gross and net burn, runway and zero-cash date.",
+      "A 1,000-path Monte Carlo gives a P10 to P90 runway range instead of a single guess.",
+      "Copilot plans with tools over the same math; Autopilot runs the monthly review end to end. Nothing sends without approval.",
+    ],
+    stack: [
+      "Next.js",
+      "TypeScript",
+      "Tailwind",
+      "Vercel AI SDK",
+      "Supabase Postgres",
+      "Recharts",
+      "zod",
+      "vitest",
+      "Playwright",
+    ],
+    links: {
+      code: gh("AITX-MLOps-Hack"),
+      live: "https://runway-for-rho.vercel.app/",
+    },
+  },
+  {
+    id: "oncosense",
+    name: "OncoSense",
+    tier: "hackathon",
+    category: "Health",
+    context: "Built at MIT Lincoln Laboratory with Eric Niu",
+    tagline:
+      "A wearable that shines light into skin and reads what comes back.",
+    description:
+      "An optical arm band: 850 nm near-infrared and 660 nm red LEDs beside a 10-channel spectral sensor, reading how skin scatters and returns light. A tiny neural network runs on the band itself to read skin state, and a browser monitor shows it live over Web Serial or runs a virtual band. Research prototype, not a medical device.",
+    howItWorks: [
+      "Each sample is read with the LED off, then on, and subtracted to cancel room light, with auto-gain and saturation detection.",
+      "A 12→16→12→5 network (about 480 parameters, 2 KB of flash) runs in under a millisecond on the SAMD21, with confidence and out-of-distribution flags.",
+      "Trained in numpy on a physics-informed skin-optics simulator: 75.2% held out on simulated skin, not real skin.",
+      "Started from nonlinear optics (SHG from collagen). Expert review showed that needs femtosecond lasers, so the work pivoted to LED-driven diffuse reflectance.",
+    ],
+    stack: [
+      "Arduino C++",
+      "SAMD21",
+      "AS7341 spectral sensor",
+      "Python + numpy",
+      "Web Serial",
+      "JavaScript",
+      "GitHub Actions",
+    ],
+    links: {
+      code: gh("OncoSense-MIT-LL"),
+      live: "https://oncosense-monitor.vercel.app/",
+    },
+  },
+  {
+    id: "stack",
+    name: "Stack",
+    tier: "hackathon",
+    category: "Productivity",
+    context: "Independent build",
+    tagline: "A workspace shaped by your major.",
+    description:
+      'A Notion-style workspace whose notes, deadlines and databases set themselves up from what you study, in a style to match: a terminal for CS, a ledger for finance. Quick capture turns a line like "PS 5 for CS 61B due friday" into an assignment, and an AI tutor quizzes you on your own notes.',
+    stack: ["React", "Vite", "BlockNote", "KaTeX", "Shiki", "PWA"],
+    links: {
+      live: "https://stack-workspace.vercel.app/",
+    },
   },
 
   // More
@@ -896,7 +1021,7 @@ export const seo: Seo = {
   description:
     "Ayan Bhardwaj builds AI tools and fast search software. CS + Business Honors at UT Austin. Ex-Moss and Koyal AI (YC F25). Creator of YouBank.",
   ogDescription:
-    "Software engineer in UT Austin's CS + Business Honors program. 10 open-source apps at Moss (YC F25). Building YouBank, an AI research desk for finance.",
+    "Software engineer in UT Austin's CS + Business Honors program. Shipped 10 open-source apps at Moss (YC F25), including mossJARVIS and Mycelium. Building YouBank, an AI deal desk for finance.",
   twitterCard: "summary_large_image",
   keywords: [
     "Ayan Bhardwaj",
