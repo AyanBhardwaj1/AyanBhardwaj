@@ -90,7 +90,7 @@ export function ActivityIsland({ ranges }: { ranges: CompactRange[] }) {
             data-active={view === "grid"}
             inert={view !== "grid"}
           >
-            <div ref={gridRef} className="overflow-x-auto pb-2">
+            <div ref={gridRef} className="md-heat overflow-x-auto pb-2">
               <HeatGrid key={r.key} range={r} />
             </div>
             <div

@@ -757,6 +757,12 @@
 .md-view[data-active="true"] {
   transition-delay: 60ms, 60ms, 0s;
 }
+@media (min-width: 768px) {
+  .md-heat > svg {
+    width: 100%;
+    height: auto;
+  }
+}
 .md-seg {
   transition: color 200ms var(--ease-expo);
 }
