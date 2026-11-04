@@ -362,12 +362,12 @@ export function BrainGraph() {
       </div>
 
       <div className="jv-brainSide">
-        <h4 className="jv-hashHead">
+        <h3 className="jv-hashHead">
           SOURCES{" "}
           <small>
             {nodes.length} · {edges.length} links
           </small>
-        </h4>
+        </h3>
         <ul className="jv-sourceList">
           {nodes.map((n, i) => (
             <li key={n.id}>

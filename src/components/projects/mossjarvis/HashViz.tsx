@@ -52,9 +52,9 @@ export function HashViz() {
       </div>
 
       <div>
-        <h4 className="jv-hashHead">
+        <h3 className="jv-hashHead">
           1 · FEATURES <small>{features(a).length} (words + trigrams)</small>
-        </h4>
+        </h3>
         <ul className="jv-feats">
           {placed.map((p, i) => (
             <li key={p.feature + i}>
@@ -65,9 +65,11 @@ export function HashViz() {
                 onFocus={() => setHover(i)}
                 onBlur={() => setHover(null)}
                 data-sign={p.sign > 0 ? "+" : "-"}
-                aria-label={`${p.feature} goes to bucket ${p.bucket}, sign ${p.sign > 0 ? "plus" : "minus"}`}
               >
                 {p.feature}
+                <span className="sr-only">
+                  {` goes to bucket ${p.bucket}, sign ${p.sign > 0 ? "plus" : "minus"}`}
+                </span>
                 <small aria-hidden="true">
                   →{p.bucket}
                   {p.sign > 0 ? "+" : "−"}
@@ -79,9 +81,9 @@ export function HashViz() {
       </div>
 
       <div>
-        <h4 className="jv-hashHead">
+        <h3 className="jv-hashHead">
           2 · 384 BUCKETS <small>{used} non-zero · L2-normalised</small>
-        </h4>
+        </h3>
         <div
           className="jv-cells"
           style={{ gridTemplateColumns: `repeat(${COLS}, 1fr)` }}

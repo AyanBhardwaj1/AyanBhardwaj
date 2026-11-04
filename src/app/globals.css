@@ -438,6 +438,17 @@
     }
   }
 
+  /* Hero name scales with width, and with height on short laptop screens
+     so the headline and CTAs make the first view. */
+  .hero {
+    --hero-size: clamp(40px, 13vw, 196px);
+  }
+  @media (min-width: 768px) {
+    .hero {
+      --hero-size: clamp(40px, min(13vw, 19vh), 196px);
+    }
+  }
+
   /* Hero: CSS-only entrance, runs before hydration and never hides the LCP. */
   .hero-line {
     animation: hero-in 1100ms var(--ease-expo) both;
@@ -1089,4 +1100,25 @@ html:not(.js) .section-rule::after {
   .min-h-svh {
     min-height: 0 !important;
   }
+}
+
+/* After Hours: light screenshots dim a touch so they don't glare on dark
+   cards, and come up to full brightness on hover/focus. */
+img.tilt-layer {
+  transition:
+    transform 700ms var(--ease-expo),
+    scale 700ms var(--ease-expo),
+    filter 400ms var(--ease-expo);
+}
+:root[data-theme="dark"] img.tilt-layer {
+  filter: brightness(0.84) saturate(0.95);
+}
+@media not (prefers-color-scheme: light) {
+  :root:not([data-theme="light"]) img.tilt-layer {
+    filter: brightness(0.84) saturate(0.95);
+  }
+}
+.project-card:hover img.tilt-layer,
+.project-card:focus-within img.tilt-layer {
+  filter: none;
 }

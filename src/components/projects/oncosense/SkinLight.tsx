@@ -93,7 +93,10 @@ export function SkinLight() {
     if (!cv) return;
     const ctx = cv.getContext("2d");
     if (!ctx) return;
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const dpr = Math.min(
+      window.innerWidth < 768 ? 1.5 : 2,
+      window.devicePixelRatio || 1,
+    );
     cv.width = W * dpr;
     cv.height = H * dpr;
     ctx.scale(dpr, dpr);
@@ -190,16 +193,26 @@ export function SkinLight() {
       ctx.drawImage(trail, 0, 0, W, H);
     };
 
-    const tick = () => {
+    // ~30 fps is plenty for a diffusing photon cloud and halves the work.
+    let last = 0;
+    const tick = (t: number) => {
+      if (t - last < 30) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
+      last = t;
       frame++;
       // fade trails toward the panel colour
       tctx.globalCompositeOperation = "destination-out";
-      tctx.globalAlpha = 0.08;
+      tctx.globalAlpha = 0.15;
       tctx.fillStyle = "#000";
       tctx.fillRect(0, 0, W, H);
       tctx.globalCompositeOperation = "source-over";
-      for (let k = 0; k < 3; k++) spawn();
-      for (const p of photons) if (p.alive) step(p);
+      for (let k = 0; k < 5; k++) spawn();
+      for (const p of photons) {
+        if (p.alive) step(p);
+        if (p.alive) step(p);
+      }
       photons = photons.filter((p) => p.alive);
       draw();
       if (frame % 20 === 0 && emitted > 0)
@@ -247,14 +260,20 @@ export function SkinLight() {
       staticPaths();
       return;
     }
+    // Run only while on screen and the tab is visible; resume when both hold.
+    let onScreen = false;
+    const sync = () => (onScreen && !document.hidden ? start() : stop());
     const io = new IntersectionObserver(
-      ([e]) => (e.isIntersecting ? start() : stop()),
+      ([e]) => {
+        onScreen = e.isIntersecting;
+        sync();
+      },
       {
         rootMargin: "100px",
       },
     );
     io.observe(cv);
-    const onVis = () => (document.hidden ? stop() : null);
+    const onVis = sync;
     document.addEventListener("visibilitychange", onVis);
     return () => {
       stop();

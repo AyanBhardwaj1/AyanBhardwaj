@@ -72,6 +72,7 @@ export function JarvisBody() {
         <p className="jv-disclaimer">
           <span aria-hidden="true">◆</span> {data.noLive}
         </p>
+        <h2 className="sr-only">Interactive HUD demo</h2>
         <Hud />
         <ul className="jv-stack" aria-label="Stack">
           {p.stack.map((t) => (

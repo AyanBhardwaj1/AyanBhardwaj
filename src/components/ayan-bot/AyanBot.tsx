@@ -82,7 +82,7 @@ export function AyanBot() {
           className="bg-accent absolute top-2.5 right-2.5 size-2 rounded-full ring-2 ring-[var(--bg-elev)] md:hidden"
         />
         <span className="hidden md:inline">
-          <span className="text-muted group-hover:text-fg transition-colors">
+          <span className="text-fg/70 group-hover:text-fg transition-colors">
             ask{" "}
           </span>
           ayan-bot

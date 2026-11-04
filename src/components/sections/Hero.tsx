@@ -95,7 +95,7 @@ export function Hero({
     <section
       id="top"
       aria-label="Introduction"
-      className="relative flex min-h-svh flex-col pt-24 md:pt-36"
+      className="hero relative flex min-h-svh flex-col pt-24 md:pt-[clamp(7.5rem,15vh,9rem)]"
     >
       <div className="container-page relative flex flex-1 flex-col items-center text-center">
         <p className="t-label text-muted mb-8 md:mb-10">
@@ -103,7 +103,10 @@ export function Hero({
           Business (CSB Honors) @ UT Austin
         </p>
 
-        <h1 aria-label={profile.name} className="t-display relative z-0">
+        <h1
+          aria-label={profile.name}
+          className="t-display relative z-0 [font-size:var(--hero-size)]"
+        >
           <span aria-hidden="true" className="block whitespace-nowrap">
             <Letters word="Ayan" />
           </span>
@@ -114,11 +117,11 @@ export function Hero({
 
         <div
           className="relative z-10 -mt-[0.06em] flex justify-center md:-mt-[0.32em]"
-          style={{ fontSize: "clamp(40px, 13vw, 196px)" }}
+          style={{ fontSize: "var(--hero-size)" }}
         >
           <Spark className="bob absolute top-[-0.2em] left-[-1.4em] hidden size-[0.42em] md:block" />
           <Candles className="bob absolute right-[-1.5em] bottom-[0.6em] hidden size-[0.5em] [animation-delay:-3s] md:block" />
-          <figure className="hero-portrait group border-line-strong bg-card relative w-[clamp(168px,20vw,260px)] overflow-hidden rounded-xl border text-base">
+          <figure className="hero-portrait group border-line-strong bg-card relative w-[clamp(168px,min(20vw,27vh),260px)] overflow-hidden rounded-xl border text-base">
             <Image
               src={headshot.src}
               alt={headshot.alt}
@@ -147,7 +150,7 @@ export function Hero({
           </span>
         </div>
 
-        <p className="t-lead mt-10 max-w-[24ch] text-balance md:mt-14">
+        <p className="t-lead mt-10 max-w-[24ch] text-balance md:mt-[min(3.5rem,5vh)]">
           {profile.headline}
         </p>
         <p className="text-muted mt-4 max-w-[52ch]">
