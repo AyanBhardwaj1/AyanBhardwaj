@@ -446,7 +446,7 @@ html:not(.js) .lw-bar {
   position: absolute;
   left: -2%;
   right: -4%;
-  bottom: -0.12em;
+  bottom: -0.2em;
   width: 106%;
   height: 0.32em;
   overflow: visible;
@@ -534,4 +534,81 @@ html:not(.js) .lw-bar {
   .lw-row:is(:hover, :focus-within) .lw-name {
     transform: none;
   }
+}
+
+/* Copy email: labels roll vertically, the check draws, the address glows. */
+.lw-copy {
+  overflow: hidden;
+  transition:
+    background-color 240ms var(--ease-expo),
+    border-color 240ms var(--ease-expo),
+    color 240ms var(--ease-expo),
+    transform 120ms var(--ease-expo);
+}
+.lw-copy[data-state="copied"] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.lw-copy[data-state="failed"] {
+  border-color: var(--down);
+  color: var(--down);
+}
+.lw-copy-track {
+  display: grid;
+}
+.lw-copy-a,
+.lw-copy-b {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition:
+    transform 420ms cubic-bezier(0.23, 1, 0.32, 1),
+    opacity 200ms ease;
+}
+.lw-copy-b {
+  transform: translateY(110%);
+  opacity: 0;
+}
+.lw-copy:not([data-state="idle"]) .lw-copy-a {
+  transform: translateY(-110%);
+  opacity: 0;
+}
+.lw-copy:not([data-state="idle"]) .lw-copy-b {
+  transform: none;
+  opacity: 1;
+}
+.lw-check path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.lw-copy[data-state="copied"] .lw-check path {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 360ms cubic-bezier(0.65, 0, 0.35, 1) 140ms;
+}
+.lw-addr {
+  background-image:
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(var(--accent-glow), var(--accent-glow));
+  background-size:
+    0% 1px,
+    0% 100%;
+  background-position:
+    0 100%,
+    0 0;
+  transition:
+    background-size 520ms cubic-bezier(0.23, 1, 0.32, 1),
+    color 240ms ease;
+}
+.lw-addr:is(:hover, :focus-visible) {
+  background-size:
+    100% 1px,
+    0% 100%;
+}
+.lw-addr[data-state="copied"] {
+  color: var(--accent);
+  background-size:
+    100% 1px,
+    100% 100%;
 }
