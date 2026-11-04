@@ -753,10 +753,10 @@
 /* Contribution surface                                               */
 /* ---------------------------------------------------------------- */
 .md-views {
-  display: grid;
+  position: relative;
+  overflow: clip;
 }
 .md-view {
-  grid-area: 1 / 1;
   min-width: 0;
   transition:
     opacity 320ms var(--ease-expo),
@@ -764,6 +764,8 @@
     visibility 0s linear 320ms;
 }
 .md-view[data-active="false"] {
+  position: absolute;
+  inset: 0 0 auto;
   opacity: 0;
   transform: translateY(6px);
   visibility: hidden;

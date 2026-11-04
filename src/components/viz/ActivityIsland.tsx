@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SegToggle as Seg } from "../sections/mid/SegToggle";
 import "../sections/mid/mid.css";
 import {
@@ -21,6 +21,40 @@ export function ActivityIsland({ ranges }: { ranges: CompactRange[] }) {
   const [view, setView] = useState<"surface" | "grid">("surface");
   const gridRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const viewsRef = useRef<HTMLDivElement>(null);
+  const lastH = useRef(0);
+
+  // Keep the last laid-out height current (including mid-animation), so a
+  // view/range change can animate from exactly where the box is now.
+  useEffect(() => {
+    const el = viewsRef.current;
+    if (!el) return;
+    lastH.current = el.offsetHeight;
+    const ro = new ResizeObserver(() => {
+      lastH.current = el.offsetHeight;
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Only the active view is in flow; the box eases between the two heights.
+  useLayoutEffect(() => {
+    const el = viewsRef.current;
+    if (!el) return;
+    const prev = lastH.current;
+    const next = el.offsetHeight;
+    lastH.current = next;
+    if (
+      !prev ||
+      Math.abs(prev - next) < 2 ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    )
+      return;
+    el.animate([{ height: `${prev}px` }, { height: `${next}px` }], {
+      duration: 420,
+      easing: "cubic-bezier(0.16, 1, 0.3, 1)",
+    });
+  }, [view, key]);
   const r = ranges.find((x) => x.key === key) ?? ranges[0];
 
   useEffect(() => {
@@ -78,7 +112,7 @@ export function ActivityIsland({ ranges }: { ranges: CompactRange[] }) {
         </div>
       </div>
       <div className="px-4 py-6 md:px-6 md:py-8">
-        <div className="md-views">
+        <div ref={viewsRef} className="md-views">
           <div
             className="md-view mx-auto w-full max-w-4xl"
             data-active={view === "surface"}
@@ -87,7 +121,7 @@ export function ActivityIsland({ ranges }: { ranges: CompactRange[] }) {
             <IsoSkyline key={r.key} range={r} />
           </div>
           <div
-            className="md-view self-center"
+            className="md-view"
             data-active={view === "grid"}
             inert={view !== "grid"}
           >
@@ -125,7 +159,7 @@ export function ActivityIsland({ ranges }: { ranges: CompactRange[] }) {
       <div className="border-line grid gap-6 border-t px-4 py-5 md:grid-cols-[1fr_auto] md:items-end md:px-6">
         <dl className="t-data grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3 lg:grid-cols-6">
           {r.stats.map(([k, v]) => (
-            <div key={k}>
+            <div key={k} className="flex flex-col justify-between">
               <dt className="t-label text-muted">{k}</dt>
               <dd
                 key={`${r.key}-${v}`}
