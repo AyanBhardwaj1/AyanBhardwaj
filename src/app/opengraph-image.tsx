@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import { profile, seo } from "@/content/content";
-import { ogFonts } from "@/lib/og";
+import { OG_FONTS } from "@/lib/og";
 
 export const alt = seo.ogTitle;
 export const size = { width: 1200, height: 630 };
@@ -25,8 +25,7 @@ function Up({
 }
 
 /** After Hours OG card: expanded name, amber ://, mono meta. Generated at build. No year anywhere. */
-export default async function OpengraphImage() {
-  const fonts = await ogFonts();
+export default function OpengraphImage() {
   return new ImageResponse(
     <div
       style={{
@@ -105,6 +104,6 @@ export default async function OpengraphImage() {
         <span>CSB HONORS · UT AUSTIN</span>
       </div>
     </div>,
-    { ...size, fonts },
+    { ...size, fonts: OG_FONTS },
   );
 }

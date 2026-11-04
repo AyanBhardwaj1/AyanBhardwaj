@@ -33,8 +33,12 @@ jobs:
         with:
           node-version-file: .nvmrc
 
+      # The script writes each section that succeeds and exits non-zero if
+      # any failed; keep the good sections and still open the PR.
       - name: Fetch public GitHub data
-        run: node scripts/fetch-github-data.mjs src/data
+        run: |
+          node scripts/fetch-github-data.mjs src/data \
+            || echo "::warning::Some GitHub data sections failed; keeping the ones that refreshed."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -43,8 +47,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: chore/refresh-github-data
         run: |
-          if git diff --quiet -- src/data; then
-            echo "No changes."
+          # Every run rewrites generated_at; only real data changes count.
+          if ! git diff -U0 -- src/data | grep -E '^[+-][^+-]' | grep -qv '"generated_at"'; then
+            echo "No data changes."
+            git checkout -- src/data
             exit 0
           fi
           git config user.name "github-actions[bot]"

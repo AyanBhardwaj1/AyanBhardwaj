@@ -279,20 +279,34 @@ export function Hud() {
         ...prev.slice(-39),
         { id: `t-${Date.now()}`, type: "conversation-turn", text: q },
       ]);
+      // Re-running a directive (or the first-view demo, then the same
+      // preset by hand) never duplicates what is already remembered.
       if (facts.length)
-        setExtraLong((prev) => [
-          ...prev,
-          ...facts.map((f, i) => ({
-            id: `f-${Date.now()}-${i}`,
-            type: "fact" as const,
-            text: f,
-          })),
-        ]);
+        setExtraLong((prev) => {
+          const seen = new Set(prev.map((f) => f.text));
+          const add = facts.filter((f) => !seen.has(f));
+          return add.length
+            ? [
+                ...prev,
+                ...add.map((f, i) => ({
+                  id: `f-${Date.now()}-${i}`,
+                  type: "fact" as const,
+                  text: f,
+                })),
+              ]
+            : prev;
+        });
       if (newTasks.length)
-        setTasks((prev) => [
-          ...newTasks.map((t) => ({ ...t, isNew: true })),
-          ...prev.map((t) => ({ ...t, isNew: false })),
-        ]);
+        setTasks((prev) => {
+          const seen = new Set(prev.map((t) => t.title));
+          const add = newTasks.filter((t) => !seen.has(t.title));
+          return add.length
+            ? [
+                ...add.map((t) => ({ ...t, isNew: true })),
+                ...prev.map((t) => ({ ...t, isNew: false })),
+              ]
+            : prev;
+        });
       setState("idle");
       setStatus(
         quota

@@ -1065,7 +1065,8 @@ html:not(.js) .section-rule::after {
 
 /* Print: a clean, light, ink-friendly fallback résumé. */
 @media print {
-  :root,
+  /* Doubled :root outranks the light-scheme :root:not(...) token block. */
+  :root:root,
   [data-theme] {
     --bg: #fff;
     --bg-elev: #fff;
@@ -1174,13 +1175,10 @@ img.tilt-layer {
 }
 
 /* Typographic project cards: the HUD rings turn slowly (the whole SVG, so
-   it stays on the compositor), faster on hover. */
+   it stays on the compositor). */
 @media (prefers-reduced-motion: no-preference) {
   .type-rings {
     animation: ring-spin 60s linear infinite;
-  }
-  .project-card:hover .type-rings {
-    animation-duration: 12s;
   }
 }
 @keyframes ring-spin {

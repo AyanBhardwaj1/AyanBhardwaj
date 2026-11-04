@@ -34,36 +34,32 @@ const C = {
 
 const FONT_DIR = join(process.cwd(), "src", "assets", "og-fonts");
 
+// Assets don't depend on the request, so they're read once at module scope
+// (Next keeps these image routes static that way).
+const [a600, a800, mono] = await Promise.all(
+  [
+    "archivo-latin-600-normal.woff",
+    "archivo-latin-800-normal.woff",
+    "ibm-plex-mono-latin-500-normal.woff",
+  ].map((f) => readFile(join(FONT_DIR, f))),
+);
+
 /** Archivo 600/800 + Plex Mono 500, the site's own faces (OFL, see README). */
-export async function ogFonts() {
-  const [a600, a800, mono] = await Promise.all(
-    [
-      "archivo-latin-600-normal.woff",
-      "archivo-latin-800-normal.woff",
-      "ibm-plex-mono-latin-500-normal.woff",
-    ].map((f) => readFile(join(FONT_DIR, f))),
-  );
-  return [
-    {
-      name: "Archivo",
-      data: a600,
-      weight: 600 as const,
-      style: "normal" as const,
-    },
-    {
-      name: "Archivo",
-      data: a800,
-      weight: 800 as const,
-      style: "normal" as const,
-    },
-    {
-      name: "Plex",
-      data: mono,
-      weight: 500 as const,
-      style: "normal" as const,
-    },
-  ];
-}
+export const OG_FONTS = [
+  {
+    name: "Archivo",
+    data: a600,
+    weight: 600 as const,
+    style: "normal" as const,
+  },
+  {
+    name: "Archivo",
+    data: a800,
+    weight: 800 as const,
+    style: "normal" as const,
+  },
+  { name: "Plex", data: mono, weight: 500 as const, style: "normal" as const },
+];
 
 const MONO = { fontFamily: "Plex" } as const;
 
@@ -103,21 +99,24 @@ export const projectOgAlt = (slug: ProjectSlug) => {
   return `${p.name}: ${p.tagline} A project by ${profile.name}.`;
 };
 
-async function dataUri(publicPath: string) {
-  const buf = await readFile(join(process.cwd(), "public", publicPath));
-  return `data:image/jpeg;base64,${buf.toString("base64")}`;
-}
+const SHOT_DATA: Partial<Record<ProjectSlug, string>> = Object.fromEntries(
+  await Promise.all(
+    Object.entries(SHOT).map(async ([slug, path]) => {
+      const buf = await readFile(join(process.cwd(), "public", path));
+      return [slug, `data:image/jpeg;base64,${buf.toString("base64")}`];
+    }),
+  ),
+);
 
-export async function projectOgImage(slug: ProjectSlug) {
+export function projectOgImage(slug: ProjectSlug) {
   const p = getProject(slug);
-  const shot = SHOT[slug] ? await dataUri(SHOT[slug]) : null;
+  const shot = SHOT_DATA[slug] ?? null;
   const where = p.builtAt
     ? `Built at ${p.builtAt}${p.builtAt === "Moss" ? " (YC F25)" : ""}`
     : (p.context ?? p.category);
   const status = p.links.live ? "LIVE" : "SHIPPED";
   const host = SITE_URL.replace(/^https?:\/\//, "");
   const nameSize = p.name.length > 9 ? 96 : 120;
-  const fonts = await ogFonts();
 
   return new ImageResponse(
     <div
@@ -299,6 +298,6 @@ export async function projectOgImage(slug: ProjectSlug) {
         </div>
       </div>
     </div>,
-    { ...OG_SIZE, fonts },
+    { ...OG_SIZE, fonts: OG_FONTS },
   );
 }

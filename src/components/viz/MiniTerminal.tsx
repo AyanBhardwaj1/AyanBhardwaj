@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * A static-first mock of the YouBank terminal (design wow #3). Demo data only,
@@ -228,10 +228,8 @@ export function MiniTerminal() {
     return () => window.clearTimeout(id);
   }, [live, tab, typed]);
 
-  const breadth = useMemo(() => {
-    const ups = rows.filter((r) => r.chg >= 0).length;
-    return { ups, downs: rows.length - ups };
-  }, [rows]);
+  const ups = rows.filter((r) => r.chg >= 0).length;
+  const breadth = { ups, downs: rows.length - ups };
 
   const row = rows[sel];
 
@@ -309,12 +307,12 @@ export function MiniTerminal() {
                   <tr
                     key={r.sym}
                     onClick={() => setSel(i)}
-                    className={`cursor-pointer transition-colors duration-300 ${r.flash === 1 ? "bg-up/15" : r.flash === -1 ? "bg-down/15" : i === sel ? "bg-card" : "hover:bg-card"}`}
+                    className={`cursor-pointer transition-colors duration-300 ${i === sel ? "bg-card" : r.flash === 1 ? "bg-up/15" : r.flash === -1 ? "bg-down/15" : "hover:bg-card"}`}
                   >
                     <td className="py-1 pl-1">
+                      {/* Its click bubbles to the row's handler. */}
                       <button
                         type="button"
-                        onClick={() => setSel(i)}
                         aria-pressed={i === sel}
                         className={`text-left ${i === sel ? "text-fg" : "text-accent"}`}
                       >
