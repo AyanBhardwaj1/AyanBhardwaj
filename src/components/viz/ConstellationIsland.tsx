@@ -300,9 +300,18 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
                 }
               }}
               onPointerUp={() => {
-                if (drag.current?.moved) suppressClick.current = true;
+                const d = drag.current;
                 drag.current = null;
                 simRef.current?.release();
+                if (!d) return;
+                if (d.moved) {
+                  suppressClick.current = true;
+                  return;
+                }
+                // The svg holds pointer capture during a press, so the click
+                // event lands on the svg, not the node: activate a tap here.
+                const node = byId.get(d.id);
+                if (node) activate(node);
               }}
               onPointerCancel={() => {
                 drag.current = null;
@@ -395,7 +404,7 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
                     transform={`translate(${n.x} ${n.y})`}
                     tabIndex={focusId === n.id ? 0 : -1}
                     role={n.page ? "link" : "button"}
-                    aria-label={`${n.name}: ${n.tagline}${n.page ? ". Opens project page" : ""}`}
+                    aria-label={`${n.name}: ${n.tagline.replace(/\.$/, "")}${n.page ? ". Opens project page" : ""}`}
                     aria-pressed={n.page ? undefined : selected === n.id}
                     onPointerDown={(e) => {
                       const p = toSvg(e);
@@ -416,12 +425,14 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
                       setLastSeen(n.id);
                     }}
                     onBlur={() => setHover(null)}
-                    onClick={() => {
+                    onClick={(e) => {
+                      // Pointer taps are handled in the svg's onPointerUp;
+                      // only keyboard/assistive clicks (detail 0) land here.
                       if (suppressClick.current) {
                         suppressClick.current = false;
                         return;
                       }
-                      activate(n);
+                      if (e.detail === 0) activate(n);
                     }}
                     onKeyDown={(e) => {
                       const k = {

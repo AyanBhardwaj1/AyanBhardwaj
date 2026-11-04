@@ -245,7 +245,9 @@ export async function POST(request: Request) {
     );
 
   if (m === "offline")
-    return json(503, { error: "offline", message: OFFLINE_MESSAGE }, m);
+    // 200 (not 503) so an unconfigured key doesn't spam visitor consoles;
+    // the widget reads X-Ayan-Bot-Mode to show the offline state.
+    return json(200, { error: "offline", message: OFFLINE_MESSAGE }, m);
 
   if (m === "mock")
     return new Response(

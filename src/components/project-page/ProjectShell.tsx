@@ -51,6 +51,10 @@ export function ProjectShell({
   const themeAttr = barTheme === "inherit" ? {} : { "data-theme": barTheme };
   return (
     <>
+      {/* Non-sticky first element: the App Router scrolls to a segment's first
+          element on navigation, and skips it when that element (a sticky bar)
+          already looks in view, which left project pages mid-scroll. */}
+      <div aria-hidden="true" className="h-0" />
       <header
         {...themeAttr}
         className="bg-bg/85 border-line sticky top-0 z-50 border-b backdrop-blur-md"

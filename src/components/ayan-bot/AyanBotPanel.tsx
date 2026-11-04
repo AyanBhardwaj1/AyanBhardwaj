@@ -166,8 +166,9 @@ export default function AyanBotPanel({
           body: JSON.stringify({ messages: history }),
           signal: ctrl.signal,
         });
-        setMode(res.headers.get("x-ayan-bot-mode"));
-        if (!res.ok || !res.body) {
+        const resMode = res.headers.get("x-ayan-bot-mode");
+        setMode(resMode);
+        if (!res.ok || !res.body || resMode === "offline") {
           let message = "ayan-bot hit a snag. Try again in a moment.";
           try {
             const j = (await res.json()) as { message?: unknown };

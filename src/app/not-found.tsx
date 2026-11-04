@@ -1,5 +1,11 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { ui } from "@/content/content";
+
+export const metadata: Metadata = {
+  title: "404 · Security not found",
+  robots: { index: false },
+};
 
 export default function NotFound() {
   return (
