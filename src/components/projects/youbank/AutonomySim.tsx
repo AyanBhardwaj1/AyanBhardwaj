@@ -94,12 +94,35 @@ export function AutonomySim() {
   const st = useMemo(() => engineState(good, bad), [good, bad]);
   const curve = useMemo(() => curvePath(st.a, st.b), [st.a, st.b]);
 
+  const root = useRef<HTMLDivElement>(null);
+  const touched = useRef(false);
+  const simRef = useRef<() => void>(() => {});
+
   useEffect(
     () => () => {
       if (timer.current) window.clearInterval(timer.current);
     },
     [],
   );
+
+  // The first time the panel is mostly on screen, a simulated person starts
+  // sending drafts, so the curve is already moving when a visitor arrives.
+  // Any click of theirs takes over.
+  useEffect(() => {
+    const el = root.current;
+    if (!el || !("IntersectionObserver" in window)) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        io.disconnect();
+        if (!touched.current) simRef.current();
+      },
+      { threshold: 0.55 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   const add = (kind: Kind) => {
     // Take the id outside the updater: Strict Mode runs updaters twice.
@@ -139,6 +162,10 @@ export function AutonomySim() {
     }, 140);
   };
 
+  useEffect(() => {
+    simRef.current = simulate;
+  });
+
   const needed = Math.max(0, AUTOPILOT.minDecisions - st.n);
   const status = st.earned
     ? "Earned autopilot"
@@ -151,7 +178,13 @@ export function AutonomySim() {
   const recent = log.slice(-6).reverse();
 
   return (
-    <div className={s.panel} data-ui="">
+    <div
+      ref={root}
+      className={s.panel}
+      data-ui=""
+      onPointerDown={() => (touched.current = true)}
+      onKeyDown={() => (touched.current = true)}
+    >
       <div className={s.panelBar}>
         <span>
           <span className={s.amber}>ENGINE</span> · earned autonomy · kind:

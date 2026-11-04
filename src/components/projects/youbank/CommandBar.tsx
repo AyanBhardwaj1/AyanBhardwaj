@@ -1,14 +1,50 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { s } from "./styles";
 
 /**
  * The page's own command line. Section codes jump to a section; terminal
  * function codes (WACC, GP, IRAT...) jump to that row of the function table,
- * so "SNOW WACC" works like it does in the product. Without JS the function
- * keys are plain anchor links.
+ * so "SNOW WACC" works like it does in the product. Physical F1-F8 press the
+ * matching key (as on a terminal keyboard), and the strip follows the section
+ * in view. Without JS the function keys are plain anchor links.
  */
+
+/** Once the jump settles, the target "loads" like a terminal screen: an amber
+ * scan line wipes over it and the content resolves behind it. */
+function loadScreen(el: HTMLElement) {
+  const target =
+    el.tagName === "TR" ? el : (el.querySelector<HTMLElement>("header") ?? el);
+  let done = false;
+  const run = () => {
+    if (done) return;
+    done = true;
+    window.removeEventListener("scrollend", run);
+    target.animate(
+      [
+        { clipPath: "inset(0 100% 0 0)", opacity: 0.35 },
+        { clipPath: "inset(0 0 0 0)", opacity: 1 },
+      ],
+      { duration: 380, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
+    );
+    target.animate(
+      [
+        {
+          boxShadow: "inset 3px 0 0 #f5a623",
+          backgroundColor: "rgb(245 166 35 / 0.10)",
+        },
+        {
+          boxShadow: "inset 3px 0 0 transparent",
+          backgroundColor: "transparent",
+        },
+      ],
+      { duration: 1100, easing: "ease-out" },
+    );
+  };
+  window.addEventListener("scrollend", run, { once: true });
+  window.setTimeout(run, 900);
+}
 
 export type DeskSection = { code: string; label: string; id: string };
 
@@ -25,6 +61,9 @@ export function CommandBar({
   const inputId = useId();
   const listId = useId();
   const input = useRef<HTMLInputElement>(null);
+  const strip = useRef<HTMLElement>(null);
+  const [pressed, setPressed] = useState<string | null>(null);
+  const goRef = useRef<(raw: string) => void>(() => {});
 
   const words = q.trim().toUpperCase().split(/\s+/).filter(Boolean);
   const last = words.at(-1) ?? "";
@@ -62,7 +101,7 @@ export function CommandBar({
     // Move focus for keyboard and screen reader users without a second scroll.
     if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "-1");
     el.focus({ preventScroll: true });
-    el.setAttribute("data-loaded", String(Date.now()));
+    if (!reduce) loadScreen(el);
     setActive(sec ? sec.code : "FUNC");
     setMsg(
       sec
@@ -71,6 +110,61 @@ export function CommandBar({
     );
     setQ("");
   };
+
+  useEffect(() => {
+    goRef.current = go;
+  });
+
+  // Physical F1-F8, like the function row on a terminal keyboard.
+  useEffect(() => {
+    let t = 0;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+      const m = /^F([1-9])$/.exec(e.key);
+      if (!m) return;
+      const sec = sections[Number(m[1]) - 1];
+      if (!sec) return;
+      e.preventDefault();
+      setPressed(sec.code);
+      window.clearTimeout(t);
+      t = window.setTimeout(() => setPressed(null), 220);
+      goRef.current(sec.code);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.clearTimeout(t);
+    };
+  }, [sections]);
+
+  // Light the key of the section in view.
+  useEffect(() => {
+    const els = sections
+      .map((x) => document.getElementById(x.id))
+      .filter((x): x is HTMLElement => !!x);
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const en of entries) {
+          if (!en.isIntersecting) continue;
+          const sec = sections.find((x) => x.id === en.target.id);
+          if (sec) setActive(sec.code);
+        }
+      },
+      { rootMargin: "-35% 0px -60% 0px" },
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [sections]);
+
+  // Keep the lit key visible in the strip on narrow screens, without
+  // scrolling the page itself.
+  useEffect(() => {
+    const nav = strip.current;
+    const key = nav?.querySelector<HTMLElement>("[aria-current]");
+    if (!nav || !key || nav.scrollWidth <= nav.clientWidth) return;
+    const left = key.offsetLeft - (nav.clientWidth - key.offsetWidth) / 2;
+    nav.scrollTo({ left, behavior: "smooth" });
+  }, [active]);
 
   return (
     <div className={s.cmd} data-ui="">
@@ -118,13 +212,16 @@ export function CommandBar({
             GO
           </button>
         </form>
-        <nav aria-label="Page functions" className={s.keys}>
+        <nav ref={strip} aria-label="Page functions" className={s.keys}>
           <ul>
             {sections.map((x, i) => (
               <li key={x.code}>
                 <a
                   href={`#${x.id}`}
                   className={active === x.code ? s.fkeyOn : s.fkey}
+                  aria-current={active === x.code ? "location" : undefined}
+                  aria-keyshortcuts={`F${i + 1}`}
+                  data-pressed={pressed === x.code ? "" : undefined}
                   onClick={(e) => {
                     e.preventDefault();
                     go(x.code);

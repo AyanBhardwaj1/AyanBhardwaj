@@ -265,7 +265,9 @@ export function StudioBuild() {
                       className={
                         Math.abs(x.w - wacc) < 0.0026 ? s.barFillOn : s.barFill
                       }
-                      style={{ width: `${(x.ev / sensMax) * 100}%` }}
+                      style={{
+                        width: `${((x.ev / sensMax) * 100).toFixed(2)}%`,
+                      }}
                     />
                   </span>
                   <span className={s.barValue}>{money(x.ev)}</span>
@@ -279,7 +281,7 @@ export function StudioBuild() {
               {m.fcf.map((f, i) => (
                 <span
                   key={YEARS[i]}
-                  style={{ height: `${(f / fcfMax) * 100}%` }}
+                  style={{ height: `${((f / fcfMax) * 100).toFixed(2)}%` }}
                 >
                   <em>{YEARS[i].slice(2, 4)}</em>
                 </span>
