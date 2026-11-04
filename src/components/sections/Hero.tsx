@@ -129,6 +129,7 @@ export function Hero({
               height={headshot.height}
               sizes="(max-width: 768px) 168px, 260px"
               preload
+              fetchPriority="high"
               className="aspect-[4/5] w-full object-cover object-[50%_30%] contrast-[1.08] grayscale transition-[filter] duration-700 group-hover:grayscale-0"
             />
             {/* duotone grade: warm shadows + amber rim, fades on hover */}
