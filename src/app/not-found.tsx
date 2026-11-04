@@ -42,6 +42,7 @@ function Delisted() {
       />
       <circle className="nf-dot" cx="600" cy="118" r="4" fill="var(--down)" />
       <text
+        className="max-sm:hidden"
         x="316"
         y="106"
         fill="var(--fg-muted)"
