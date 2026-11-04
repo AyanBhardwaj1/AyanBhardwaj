@@ -70,6 +70,11 @@ export function Footer({ hasResume }: { hasResume: boolean }) {
           ))}
         </p>
       </div>
+      {/* Phones: room for the docked nav pill so it never covers the last line. */}
+      <div
+        aria-hidden="true"
+        className="h-[calc(5rem+env(safe-area-inset-bottom))] md:hidden"
+      />
     </footer>
   );
 }

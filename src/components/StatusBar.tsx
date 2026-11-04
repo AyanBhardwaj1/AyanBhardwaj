@@ -28,6 +28,8 @@ export function StatusBar() {
           <PaletteTrigger className="border-line-strong hover:border-muted hover:text-fg inline-flex min-h-6 items-center gap-1.5 rounded-sm border px-2 transition-colors" />
         </div>
       </div>
+      {/* Reading progress (CSS scroll timeline; absent where unsupported). */}
+      <span aria-hidden="true" className="scroll-progress" />
     </aside>
   );
 }

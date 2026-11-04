@@ -138,14 +138,53 @@ function TypeCard({ p }: { p: Project }) {
       aria-hidden="true"
       className="relative flex h-full flex-col justify-between overflow-hidden bg-[radial-gradient(120%_90%_at_100%_0%,var(--accent-glow),transparent_60%)] p-5"
     >
-      <span className="t-label text-muted">
+      {/* HUD rings: a quiet, slowly turning motif so the card isn't just type. */}
+      <svg
+        viewBox="0 0 200 200"
+        className="type-rings text-accent pointer-events-none absolute top-1/2 -right-10 size-[min(70%,260px)] -translate-y-1/2"
+        fill="none"
+        stroke="currentColor"
+      >
+        <circle
+          cx="100"
+          cy="100"
+          r="96"
+          strokeOpacity=".35"
+          strokeDasharray="60 14"
+        />
+        <circle
+          cx="100"
+          cy="100"
+          r="74"
+          strokeOpacity=".18"
+          strokeDasharray="2 6"
+        />
+        <circle
+          cx="100"
+          cy="100"
+          r="54"
+          strokeOpacity=".45"
+          strokeDasharray="110 30"
+        />
+        <circle cx="100" cy="100" r="30" strokeOpacity=".25" />
+        <circle
+          cx="100"
+          cy="100"
+          r="6"
+          fill="currentColor"
+          fillOpacity=".7"
+          stroke="none"
+        />
+        <path d="M100 0v22M100 178v22M0 100h22M178 100h22" strokeOpacity=".4" />
+      </svg>
+      <span className="t-label text-muted relative">
         {p.category} ·{" "}
         {p.builtAt ? `Built at ${p.builtAt}` : (p.context ?? "Independent")}
       </span>
-      <span className="tilt-layer text-[clamp(36px,5vw,64px)] leading-[0.9] font-extrabold tracking-[-0.04em] uppercase [font-stretch:118%]">
+      <span className="tilt-layer relative text-[clamp(36px,5vw,64px)] leading-[0.9] font-extrabold tracking-[-0.04em] uppercase [font-stretch:118%]">
         {p.name}
       </span>
-      <span className="t-data text-accent">
+      <span className="t-data text-accent relative">
         {p.stack.slice(0, 3).join(" · ")}
       </span>
     </div>

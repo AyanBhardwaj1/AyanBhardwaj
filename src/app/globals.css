@@ -1134,3 +1134,45 @@ img.tilt-layer {
 .project-card:focus-within img.tilt-layer {
   filter: none;
 }
+
+/* Status bar reading progress: a hairline of amber that fills with scroll. */
+.scroll-progress {
+  display: none;
+}
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .scroll-progress {
+      display: block;
+      position: absolute;
+      inset-inline: 0;
+      bottom: -1px;
+      height: 1px;
+      background: var(--accent);
+      transform-origin: left;
+      transform: scaleX(0);
+      animation: scroll-progress linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+@keyframes scroll-progress {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Typographic project cards: the HUD rings turn slowly (the whole SVG, so
+   it stays on the compositor), faster on hover. */
+@media (prefers-reduced-motion: no-preference) {
+  .type-rings {
+    animation: ring-spin 60s linear infinite;
+  }
+  .project-card:hover .type-rings {
+    animation-duration: 12s;
+  }
+}
+@keyframes ring-spin {
+  to {
+    rotate: 1turn;
+  }
+}
