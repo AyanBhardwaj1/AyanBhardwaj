@@ -14,7 +14,7 @@ import { hasProjectPage, projectHref } from "./projects";
  * Pure data (no React), so it is safe on both sides of the boundary.
  */
 
-export type CommandGroup = "Go" | "Projects" | "Links" | "Settings";
+export type CommandGroup = "Go" | "Ask" | "Projects" | "Links" | "Settings";
 
 export type CommandAction =
   | { type: "scroll"; id: string }
@@ -23,7 +23,8 @@ export type CommandAction =
   | { type: "copy"; value: string; toast: string }
   | { type: "theme" }
   | { type: "shortcuts" }
-  | { type: "help" };
+  | { type: "help" }
+  | { type: "bot" };
 
 export type Command = {
   id: string;
@@ -115,6 +116,16 @@ export const commands: Command[] = [
     "hire",
     "reach",
   ]),
+  {
+    id: "ask.bot",
+    mnemonic: "ASK",
+    title: "Ask ayan-bot",
+    hint: "Ask anything about Ayan. Type ASK or BOT, then your question",
+    group: "Ask",
+    keywords: ["bot", "ask", "chat", "question", "ayan-bot", "assistant"],
+    action: { type: "bot" },
+    href: "/functions#bot",
+  },
   {
     id: "link.mail",
     mnemonic: "MAIL",
@@ -336,3 +347,18 @@ export const parseMnemonic = (input: string) =>
     .replace(/\s+go$/i, "")
     .trim()
     .toUpperCase();
+
+/** "ASK what is YouBank <GO>" / "bot ..." → the question, or null if not an ask. */
+export function parseAsk(input: string): string | null {
+  const m = /^(?:ask|bot)(?:\s+([\s\S]*))?$/i.exec(
+    input.trim().replace(/\s*<go>$/i, ""),
+  );
+  return m ? (m[1] ?? "").trim() : null;
+}
+
+/** Opens the ayan-bot widget (mounted in the root layout), optionally with a question. */
+export function openAyanBot(prompt = "") {
+  window.dispatchEvent(
+    new CustomEvent("ayan-bot:open", { detail: { prompt } }),
+  );
+}
