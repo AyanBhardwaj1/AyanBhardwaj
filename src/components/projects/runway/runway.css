@@ -1374,3 +1374,16 @@
   font-size: 15px;
   color: var(--rw-muted);
 }
+
+/* readout values tick in when they change (keyed remount) */
+@media (prefers-reduced-motion: no-preference) {
+  html.js .rw-tick {
+    animation: rw-tick 240ms var(--rw-ease);
+  }
+}
+@keyframes rw-tick {
+  from {
+    opacity: 0.2;
+    transform: translateY(-6px);
+  }
+}
