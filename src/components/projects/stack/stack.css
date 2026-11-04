@@ -1083,3 +1083,87 @@
 .st-root[data-instant] * {
   transition: none !important;
 }
+
+/* ---------- hero: the workspace assembles on load ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .st-hero .st-app {
+    animation: st-assemble 720ms cubic-bezier(0.16, 1, 0.3, 1) 80ms both;
+  }
+  .st-hero .st-sidebar > *,
+  .st-hero .st-sidebar li,
+  .st-hero .st-page > *,
+  .st-hero .st-dueCard {
+    animation: st-piece 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .st-hero .st-sidebar ul {
+    animation: none;
+  }
+  .st-hero .st-sidebar > .st-ws {
+    animation-delay: 260ms;
+  }
+  .st-hero .st-sidebar li:nth-child(1) {
+    animation-delay: 300ms;
+  }
+  .st-hero .st-sidebar li:nth-child(2) {
+    animation-delay: 340ms;
+  }
+  .st-hero .st-sidebar li:nth-child(3) {
+    animation-delay: 380ms;
+  }
+  .st-hero .st-sidebar li:nth-child(4) {
+    animation-delay: 420ms;
+  }
+  .st-hero .st-sidebar li:nth-child(5) {
+    animation-delay: 460ms;
+  }
+  .st-hero .st-sidebar li:nth-child(6) {
+    animation-delay: 500ms;
+  }
+  .st-hero .st-page > :nth-child(1) {
+    animation-delay: 300ms;
+  }
+  .st-hero .st-page > :nth-child(2) {
+    animation-delay: 360ms;
+  }
+  .st-hero .st-page > :nth-child(3) {
+    animation-delay: 420ms;
+  }
+  .st-hero .st-page > :nth-child(4) {
+    animation-delay: 480ms;
+  }
+  .st-hero .st-page > :nth-child(5) {
+    animation-delay: 560ms;
+  }
+  .st-hero .st-page > .st-dueRow {
+    animation: none;
+  }
+  .st-hero .st-dueCard:nth-child(1) {
+    animation-delay: 620ms;
+  }
+  .st-hero .st-dueCard:nth-child(2) {
+    animation-delay: 680ms;
+  }
+  .st-hero .st-dueCard:nth-child(3) {
+    animation-delay: 740ms;
+  }
+}
+@keyframes st-assemble {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes st-piece {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
