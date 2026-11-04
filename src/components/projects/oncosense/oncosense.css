@@ -229,6 +229,10 @@
 .os-seg button:active {
   transform: scale(0.96);
 }
+.os-seg-led {
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+}
 .os-led {
   display: inline-block;
   width: 8px;

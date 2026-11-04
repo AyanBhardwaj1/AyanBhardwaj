@@ -163,6 +163,7 @@ export function Graph() {
   const wide = useMedia(WIDE);
   const find = usePaletteFind();
   const searchId = useId();
+  const searchInput = useRef<HTMLInputElement>(null);
   const state = useRef({
     alpha: 1,
     grow: 0,
@@ -220,7 +221,9 @@ export function Graph() {
   const matchRef = useRef(matches);
 
   const preview = wide && seen && !dismissed;
-  const shown = sel ?? (preview ? (hover ?? fallback) : null);
+  // Hover previews; a palette search previews its top hit.
+  const shown =
+    sel ?? (preview ? (hover ?? palette?.ids[0] ?? fallback) : null);
   // Reserve the inspector's column from the start on desktop, so the panel
   // sliding in never covers spores.
   const inset = wide && (!dismissed || sel !== null);
@@ -513,6 +516,7 @@ export function Graph() {
           Graph search
         </label>
         <input
+          ref={searchInput}
           id={searchId}
           className="myc-graphSearch"
           value={query}
@@ -522,23 +526,25 @@ export function Graph() {
           maxLength={40}
         />
         <span className="myc-graphCount" aria-live="polite">
-          {palette ? (
-            <>
-              {matches?.size} lit by the palette search “{palette.q}”
-              <button
-                type="button"
-                className="myc-graphClear"
-                onClick={() => setIgnored(palette)}
-              >
-                Clear
-              </button>
-            </>
-          ) : matches ? (
-            `${matches.size} of ${PAGES.length} visible`
-          ) : (
-            `${PAGES.length} pages · ${edges.length} hyphae`
-          )}
+          {palette
+            ? `${matches?.size} of ${PAGES.length} lit by the palette search “${palette.q}”`
+            : matches
+              ? `${matches.size} of ${PAGES.length} visible`
+              : `${PAGES.length} pages · ${edges.length} hyphae`}
         </span>
+        {palette && (
+          <button
+            type="button"
+            className="myc-graphClear"
+            onClick={() => {
+              setIgnored(palette);
+              // The button goes away; keep focus in the graph's controls.
+              searchInput.current?.focus();
+            }}
+          >
+            Clear
+          </button>
+        )}
       </div>
       <div className="myc-graphStage">
         <canvas
@@ -598,7 +604,7 @@ export function Graph() {
               >
                 {page.domain}
               </p>
-              <h4>{page.title}</h4>
+              <h3>{page.title}</h3>
               <p className="myc-insExcerpt">{page.excerpt}</p>
               <dl>
                 <div>

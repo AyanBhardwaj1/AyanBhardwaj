@@ -82,7 +82,7 @@ export default function Page() {
             <a
               href={LINKS.code}
               {...ext}
-              className="wf-link ml-2 text-[16px] font-semibold"
+              className="wf-link inline-flex min-h-11 items-center text-[16px] font-semibold sm:ml-2"
             >
               Code on GitHub
               <span className="sr-only"> (opens in a new tab)</span>

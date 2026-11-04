@@ -102,9 +102,11 @@ export function QuickCapture() {
     const later = (fn: () => void, ms: number) =>
       timers.push(window.setTimeout(fn, ms));
     let running = false;
+    let cancelTray = () => {};
     const onTouch = () => {
       touched.current = true;
       cancelView();
+      cancelTray();
       if (!running) return;
       running = false;
       timers.forEach((t) => window.clearTimeout(t));
@@ -131,21 +133,35 @@ export function QuickCapture() {
             const part = line.slice(0, i);
             later(() => setQ(part), t);
           }
-          later(() => setDemo("file"), t + 520);
+          const land = () => {
+            setDemo("file");
+            later(() => {
+              running = false;
+              setDemo(null);
+              file(line);
+            }, 180);
+          };
+          // On phones the workspace sits below the parse: file it once the
+          // visitor can see where it lands.
           later(() => {
-            running = false;
-            setDemo(null);
-            file(line);
-          }, t + 700);
+            const tray = el.querySelector(`.${s.tray}`);
+            const r = tray?.getBoundingClientRect();
+            if (!tray || !r || r.top < window.innerHeight - 120) land();
+            else {
+              setDemo(null);
+              cancelTray = onFirstView(tray, () => later(land, 300), 0.5);
+            }
+          }, t + 520);
         }, 450);
       },
-      0.5,
+      0.6,
     );
     el.addEventListener("pointerdown", onTouch);
     el.addEventListener("keydown", onTouch);
     el.addEventListener("focusin", onTouch);
     return () => {
       cancelView();
+      cancelTray();
       timers.forEach((t) => window.clearTimeout(t));
       el.removeEventListener("pointerdown", onTouch);
       el.removeEventListener("keydown", onTouch);
@@ -274,7 +290,7 @@ export function QuickCapture() {
                         {item.kind}
                       </span>
                       <span className={s.trayTitle}>{item.title}</span>
-                      {item.where && (
+                      {fresh && item.where && (
                         <span className={s.trayWhere}>{item.where}</span>
                       )}
                     </span>

@@ -819,8 +819,10 @@
   .rw-glide[data-armed] .rw-gsPath,
   .rw-glide[data-armed] .rw-gsMid,
   .rw-glide[data-armed] .rw-gsAmber {
-    stroke-dasharray: 1 1;
-    stroke-dashoffset: 1.02; /* past 1 so round caps leave no dot */
+    /* one dash the path's length, a longer gap so no repeat peeks in at the
+       end, and an offset just past 1 so round caps leave no dot */
+    stroke-dasharray: 1 2;
+    stroke-dashoffset: 1.02;
   }
   .rw-glide[data-armed] .rw-gsActDraw {
     clip-path: inset(0 100% 0 0);

@@ -43,7 +43,7 @@ export function SourcePicker({
   label?: string;
 }) {
   return (
-    <div className="os-seg" role="group" aria-label={label}>
+    <div className="os-seg os-seg-led" role="group" aria-label={label}>
       {SOURCES.map((s) => (
         <button
           key={s}

@@ -746,9 +746,13 @@ html:has(.st-root input:not([value="terminal"]):checked)
   display: grid;
   gap: 2px;
 }
-@media (min-width: 560px) and (max-width: 899px) {
+@media (max-width: 899px) {
+  /* Two columns keep the workspace in view under the parse on phones. */
   .st-tray ul {
     grid-template-columns: 1fr 1fr;
+  }
+  .st-trayRow:has([data-fresh]) {
+    grid-column: 1 / -1;
   }
 }
 .st-trayRow {
@@ -797,6 +801,9 @@ html:has(.st-root input:not([value="terminal"]):checked)
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.st-trayItem:not([data-fresh]) {
+  padding-block: 4px;
 }
 .st-trayWhere {
   grid-column: 2;

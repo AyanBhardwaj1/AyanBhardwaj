@@ -828,13 +828,13 @@
 }
 .myc-graphClear {
   min-height: 32px;
-  margin-left: 10px;
   padding: 0 12px;
   border: 1px solid var(--mline);
   border-radius: 999px;
   background: none;
   color: var(--mtx-2);
-  font: inherit;
+  font-family: var(--mono);
+  font-size: 12px;
   cursor: pointer;
 }
 .myc-graphClear:hover {
@@ -907,7 +907,7 @@
 .myc-close:hover {
   background: var(--panel-2);
 }
-.myc-inspector h4 {
+.myc-inspector h3 {
   margin: 6px 32px 8px 0;
   font-size: 18px;
   font-weight: 600;
