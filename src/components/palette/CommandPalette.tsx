@@ -16,6 +16,7 @@ import {
 } from "@/lib/commands";
 import { cycleShortcutMode, getTheme } from "@/lib/prefs";
 import { switchTheme } from "@/components/ui/ThemeToggle";
+import { stopScroll } from "@/lib/scroll";
 import "./palette.css";
 
 type Props = {
@@ -276,6 +277,7 @@ export default function CommandPalette({
         return scrollTo(a.id);
       case "route":
         close();
+        stopScroll();
         return router.push(a.href);
       case "external":
         window.open(a.href, "_blank", "noopener,noreferrer");
