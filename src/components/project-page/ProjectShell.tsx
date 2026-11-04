@@ -30,6 +30,7 @@
 import Link from "next/link";
 import { ViewTransition } from "react";
 import { projectMnemonic } from "@/content/extras";
+import { JsonLd, projectJsonLd } from "@/lib/jsonld";
 import { getProject, prevNext, type ProjectSlug } from "@/lib/projects";
 import { PointerFx } from "../motion/PointerFx";
 import { RevealObserver } from "../motion/RevealObserver";
@@ -51,6 +52,7 @@ export function ProjectShell({
   const themeAttr = barTheme === "inherit" ? {} : { "data-theme": barTheme };
   return (
     <>
+      <JsonLd data={projectJsonLd(slug)} />
       {/* Non-sticky first element: the App Router scrolls to a segment's first
           element on navigation, and skips it when that element (a sticky bar)
           already looks in view, which left project pages mid-scroll. */}

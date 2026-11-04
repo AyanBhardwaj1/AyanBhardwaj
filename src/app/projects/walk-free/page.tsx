@@ -26,12 +26,6 @@ export const metadata = projectMetadata("walk-free", {
   title: "Walk-Free: the shady way across campus",
   description:
     "Heat-aware walking for campuses and cities. Walk-Free colours every path by how hot it feels at the hour you walk it, finds the shadiest way there, and lets Meta's Muse Spark plan the walk.",
-  image: {
-    src: SHOTS.hero.src,
-    width: SHOTS.hero.width,
-    height: SHOTS.hero.height,
-    alt: "Walk-Free at UT Austin with a shade route across campus",
-  },
 });
 
 // two landscape shots stacked beside the phone, then the landing page full width

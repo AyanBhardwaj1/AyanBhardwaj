@@ -25,12 +25,6 @@ export const metadata = projectMetadata("oncosense", {
   title: "OncoSense: a wearable that reads light back from skin",
   description:
     "A wearable optical band built in person at MIT Lincoln Laboratory with Eric Niu: red and near-infrared light into the skin, a 10-channel spectral sensor, and a tiny on-band neural network, with a browser monitor. Research prototype, not a medical device.",
-  image: {
-    src: PHOTOS.worn.src,
-    width: PHOTOS.worn.width,
-    height: PHOTOS.worn.height,
-    alt: "The OncoSense band worn on a forearm",
-  },
 });
 
 const ext = { target: "_blank", rel: "noopener noreferrer" } as const;

@@ -1,12 +1,32 @@
 import { ImageResponse } from "next/og";
 import { profile, seo } from "@/content/content";
+import { ogFonts } from "@/lib/og";
 
 export const alt = seo.ogTitle;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+/** A drawn ▲ (the mono subset has no geometric shapes). */
+function Up({
+  children,
+  color = "#9a958c",
+}: {
+  children: React.ReactNode;
+  color?: string;
+}) {
+  return (
+    <span style={{ display: "flex", alignItems: "center", gap: 10, color }}>
+      <svg width="14" height="12" viewBox="0 0 14 12">
+        <path d="M7 0 14 12H0z" fill={color} />
+      </svg>
+      {children}
+    </span>
+  );
+}
+
 /** After Hours OG card: expanded name, amber ://, mono meta. Generated at build. No year anywhere. */
-export default function OpengraphImage() {
+export default async function OpengraphImage() {
+  const fonts = await ogFonts();
   return new ImageResponse(
     <div
       style={{
@@ -19,6 +39,7 @@ export default function OpengraphImage() {
         background:
           "radial-gradient(900px circle at 85% 0%, rgba(255,163,26,0.16), transparent 60%), #0b0b0a",
         color: "#f2eee7",
+        fontFamily: "Archivo",
       }}
     >
       <div
@@ -27,7 +48,8 @@ export default function OpengraphImage() {
           justifyContent: "space-between",
           fontSize: 22,
           color: "#9a958c",
-          letterSpacing: 2,
+          letterSpacing: 1,
+          fontFamily: "Plex",
         }}
       >
         <span style={{ display: "flex" }}>
@@ -71,17 +93,18 @@ export default function OpengraphImage() {
         style={{
           display: "flex",
           gap: 28,
-          fontSize: 22,
+          fontSize: 20,
           color: "#9a958c",
           letterSpacing: 1,
+          fontFamily: "Plex",
         }}
       >
-        <span style={{ color: "#3ddc84" }}>▲ MOSS (YC F25)</span>
-        <span>▲ KOYAL AI (YC F25)</span>
-        <span>▲ YOUBANK</span>
+        <Up color="#3ddc84">MOSS (YC F25)</Up>
+        <Up>KOYAL AI (YC F25)</Up>
+        <Up>YOUBANK</Up>
         <span>CSB HONORS · UT AUSTIN</span>
       </div>
     </div>,
-    size,
+    { ...size, fonts },
   );
 }

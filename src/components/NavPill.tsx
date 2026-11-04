@@ -57,7 +57,10 @@ export function NavPill({ items }: { items: NavItem[] }) {
   }, [open]);
 
   return (
-    <div className="no-print pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-4 md:top-14 md:bottom-auto">
+    <div
+      data-nav-open={open}
+      className="no-print pointer-events-none fixed inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-50 flex justify-start px-4 md:top-14 md:bottom-auto md:justify-center"
+    >
       <div
         ref={ref}
         className={`border-line bg-bg-elev/85 pointer-events-auto rounded-[26px] border p-1.5 shadow-[var(--shadow-float)] backdrop-blur-[12px] transition-[width] duration-300 ${

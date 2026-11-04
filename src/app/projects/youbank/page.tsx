@@ -24,7 +24,7 @@ import {
   studio,
 } from "./data";
 
-export const metadata = projectMetadata("youbank", { image: media.lead });
+export const metadata = projectMetadata("youbank");
 
 const LIVE = "https://youbank.dev/";
 

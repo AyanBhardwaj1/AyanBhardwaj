@@ -303,8 +303,8 @@ function MossSdkGroup({ apps }: { apps: Project[] }) {
                 <span className="text-fg">{p.tagline}</span>{" "}
                 <span className="text-[16px]">{p.description}</span>
               </span>
-              <span className="t-data text-muted md:col-span-3 md:text-right">
-                {p.stack.slice(0, 3).join("  ·  ")}
+              <span className="t-data text-muted flex flex-wrap items-baseline gap-x-3 gap-y-1 md:col-span-3 md:flex-col md:items-end md:text-right">
+                <span>{p.stack.slice(0, 3).join("  ·  ")}</span>
                 <Stars id={p.id} />
               </span>
               {media && (
@@ -543,12 +543,12 @@ export function Projects() {
                 id={`project-${p.id}`}
                 className="more-row border-line grid gap-2 border-b py-5 md:grid-cols-12 md:items-baseline md:gap-6"
               >
-                <span className="md:col-span-3">
+                <span className="min-w-0 md:col-span-4">
                   <a
                     href={p.links.code}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="link t-h3"
+                    className="link t-h3 [overflow-wrap:anywhere]"
                   >
                     {p.name}
                     <span className="sr-only">
@@ -561,7 +561,7 @@ export function Projects() {
                   {p.tagline}{" "}
                   <span className="text-[16px]">{p.description}</span>
                 </span>
-                <span className="t-data text-muted md:col-span-4 md:text-right">
+                <span className="t-data text-muted md:col-span-3 md:text-right">
                   {(p.metrics ?? p.stack).slice(0, 3).join("  ·  ")}
                 </span>
               </li>

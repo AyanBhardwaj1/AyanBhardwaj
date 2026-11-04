@@ -45,16 +45,13 @@ export function prevNext(slug: ProjectSlug) {
 
 /**
  * Per-page metadata. Title becomes "<title> · Ayan Bhardwaj" via the root
- * template. Pass `image` (a /public path) to use a page-specific OG image;
- * otherwise the site's default card is used.
+ * template. Share images come from the segment's own opengraph-image.tsx and
+ * twitter-image.tsx (branded cards built by src/lib/og.tsx), which Next ranks
+ * above anything set here.
  */
 export function projectMetadata(
   slug: ProjectSlug,
-  overrides: {
-    title?: string;
-    description?: string;
-    image?: { src: string; width: number; height: number; alt: string };
-  } = {},
+  overrides: { title?: string; description?: string } = {},
 ): Metadata {
   const p = getProject(slug);
   const title =
@@ -62,41 +59,22 @@ export function projectMetadata(
   const description = overrides.description ?? p.description;
   // Relative: resolved against metadataBase (SITE_URL) in the root layout.
   const url = `/projects/${slug}`;
-  const images = overrides.image
-    ? [
-        {
-          url: overrides.image.src,
-          width: overrides.image.width,
-          height: overrides.image.height,
-          alt: overrides.image.alt,
-        },
-      ]
-    : [
-        {
-          url: "/opengraph-image",
-          width: 1200,
-          height: 630,
-          alt: `${profile.name}: software engineer`,
-        },
-      ];
   return {
     title,
     description,
-    alternates: { canonical: `/projects/${slug}` },
+    alternates: { canonical: url },
     openGraph: {
       type: "article",
       url,
       siteName: profile.name,
       title: `${p.name} · ${profile.name}`,
       description,
-      images,
       locale: "en_US",
     },
     twitter: {
       card: "summary_large_image",
       title: `${p.name} · ${profile.name}`,
       description,
-      images: images.map((i) => i.url),
     },
   };
 }

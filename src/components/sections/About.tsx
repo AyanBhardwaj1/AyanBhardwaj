@@ -107,7 +107,7 @@ export function About() {
             </div>
             <div className="md:col-span-7">
               <p className="text-muted max-w-[62ch]">{csb.paragraph}</p>
-              <dl className="border-line mt-8 grid grid-cols-3 gap-4 border-t pt-6">
+              <dl className="border-line mt-8 grid grid-cols-1 gap-5 border-t pt-6 sm:grid-cols-3 sm:gap-4">
                 {[
                   ["2", "degrees, one program"],
                   ["Honors", "coursework in both"],
@@ -115,11 +115,13 @@ export function About() {
                 ].map(([v, l]) => (
                   <div key={l}>
                     <dt className="sr-only">{l}</dt>
-                    <dd>
-                      <span className="block text-[clamp(32px,4vw,48px)] leading-none font-semibold tracking-[-0.04em] [font-stretch:112%]">
+                    <dd className="flex items-baseline gap-4 sm:block">
+                      <span className="block w-[4.2em] shrink-0 text-[clamp(32px,4vw,48px)] leading-none font-semibold tracking-[-0.04em] [font-stretch:112%] sm:w-auto">
                         {v}
                       </span>
-                      <span className="t-label text-muted mt-2 block">{l}</span>
+                      <span className="t-label text-muted block sm:mt-2">
+                        {l}
+                      </span>
                     </dd>
                   </div>
                 ))}

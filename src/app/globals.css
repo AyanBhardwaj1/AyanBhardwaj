@@ -976,3 +976,11 @@ html:not(.js) .section-rule::after {
     transform: none;
   }
 }
+
+/* Phones: the nav pill and the ayan-bot launcher share the bottom row. When
+   the pill expands to full width, the launcher steps aside. */
+@media (max-width: 767px) {
+  body:has([data-nav-open="true"]) .bot-launcher {
+    display: none;
+  }
+}

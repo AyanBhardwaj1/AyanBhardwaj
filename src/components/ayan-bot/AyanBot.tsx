@@ -57,18 +57,37 @@ export function AyanBot() {
         onFocus={() => void loadPanel()}
         aria-haspopup="dialog"
         aria-expanded={open}
-        className={`no-print group ${open ? "hidden" : "inline-flex"} border-line-strong bg-bg-elev/90 text-fg hover:border-accent/60 focus-visible:border-accent fixed right-4 bottom-[calc(5.25rem+env(safe-area-inset-bottom))] z-[60] h-11 items-center gap-2 rounded-full border pr-4 pl-3 font-mono text-[12px] tracking-wide shadow-[var(--shadow-float)] backdrop-blur-[12px] transition-[border-color,transform] duration-200 hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0 md:right-6 md:bottom-6`}
+        className={`bot-launcher no-print group ${open ? "hidden" : "inline-flex"} border-line-strong bg-bg-elev/90 text-fg hover:border-accent/60 focus-visible:border-accent fixed right-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-[60] size-[50px] items-center justify-center gap-2 rounded-full border font-mono text-[12px] tracking-wide shadow-[var(--shadow-float)] backdrop-blur-[12px] transition-[border-color,transform] duration-200 hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0 md:right-6 md:bottom-6 md:h-11 md:w-auto md:justify-start md:pr-4 md:pl-3`}
       >
-        <span aria-hidden="true" className="relative flex size-2">
+        <span aria-hidden="true" className="relative hidden size-2 md:flex">
           <span className="bg-accent absolute inline-flex size-full animate-ping rounded-full opacity-60 [animation-iteration-count:4] motion-reduce:hidden" />
           <span className="bg-accent relative inline-flex size-2 rounded-full" />
         </span>
-        <span>
-          <span className="text-muted group-hover:text-fg hidden transition-colors sm:inline">
+        {/* Compact chat glyph on phones, where it docks beside the nav pill. */}
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          className="size-5 md:hidden"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+        >
+          <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4h0A1.5 1.5 0 0 1 4 14.5z" />
+          <circle cx="9" cy="9.5" r="1" fill="currentColor" stroke="none" />
+          <circle cx="15" cy="9.5" r="1" fill="currentColor" stroke="none" />
+        </svg>
+        <span
+          aria-hidden="true"
+          className="bg-accent absolute top-2.5 right-2.5 size-2 rounded-full ring-2 ring-[var(--bg-elev)] md:hidden"
+        />
+        <span className="hidden md:inline">
+          <span className="text-muted group-hover:text-fg transition-colors">
             ask{" "}
           </span>
           ayan-bot
         </span>
+        <span className="sr-only md:hidden">ayan-bot</span>
         <span className="sr-only">: chat about Ayan&apos;s work</span>
       </button>
       {mounted && (
