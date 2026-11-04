@@ -279,17 +279,19 @@ export function NetProbe() {
               12
             </text>
           </svg>
-          <table className="sr-only">
-            <caption>{`Network output for the example "${c.label}"`}</caption>
-            <tbody>
-              {CLASSES.map((k, i) => (
-                <tr key={k.name}>
-                  <th scope="row">{k.name}</th>
-                  <td>{Math.round(c.p[i] * 100)}%</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="sr-only">
+            <table>
+              <caption>{`Network output for the example "${c.label}"`}</caption>
+              <tbody>
+                {CLASSES.map((k, i) => (
+                  <tr key={k.name}>
+                    <th scope="row">{k.name}</th>
+                    <td>{Math.round(c.p[i] * 100)}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           <details className="os-small mt-2">
             <summary className="cursor-pointer py-2">
               The 12 input features

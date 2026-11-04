@@ -158,25 +158,27 @@ export function Spectrum() {
             );
           })}
         </svg>
-        <table className="sr-only">
-          <caption>Reflectance by AS7341 channel, percent</caption>
-          <thead>
-            <tr>
-              <th scope="col">Channel</th>
-              <th scope="col">Reflectance</th>
-            </tr>
-          </thead>
-          <tbody>
-            {BANDS.map((b, i) => (
-              <tr key={b.id}>
-                <th scope="row">
-                  {b.nm === b.id ? b.id : `${b.id}, ${b.nm} nm`}
-                </th>
-                <td>{Math.round(exact[i] * 100)}%</td>
+        <div className="sr-only">
+          <table>
+            <caption>Reflectance by AS7341 channel, percent</caption>
+            <thead>
+              <tr>
+                <th scope="col">Channel</th>
+                <th scope="col">Reflectance</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {BANDS.map((b, i) => (
+                <tr key={b.id}>
+                  <th scope="row">
+                    {b.nm === b.id ? b.id : `${b.id}, ${b.nm} nm`}
+                  </th>
+                  <td>{Math.round(exact[i] * 100)}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
         <div className="mt-6 grid gap-x-8 gap-y-4 sm:grid-cols-2">
           <div>
