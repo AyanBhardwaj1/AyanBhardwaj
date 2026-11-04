@@ -21,6 +21,79 @@ const TABS = ["Watchlist", "Research", "AI summary"] as const;
 const SUMMARY =
   "Revenue +18% YoY on data-center demand. Gross margin held at 74.9% (10-Q, p.31). Guidance implies a softer Q4; watch inventory days.";
 
+const POINTS = 48;
+
+/** A deterministic intraday path ending at each symbol's demo price. */
+function initialSeries(): Record<string, number[]> {
+  const out: Record<string, number[]> = {};
+  BASE.forEach((r, i) => {
+    const rand = seeded(11 + i * 17);
+    const pts: number[] = [];
+    let v = r.px / (1 + r.chg / 100);
+    for (let k = 0; k < POINTS - 1; k++) {
+      pts.push(v);
+      const drift = (r.px - v) / (POINTS - k);
+      v += drift + (rand() - 0.5) * r.px * 0.004;
+    }
+    pts.push(r.px);
+    out[r.sym] = pts;
+  });
+  return out;
+}
+
+function Spark({ pts, up }: { pts: number[]; up: boolean }) {
+  const min = Math.min(...pts);
+  const max = Math.max(...pts);
+  const span = max - min || 1;
+  const W = 300;
+  const H = 72;
+  const xy = pts.map(
+    (v, i) =>
+      [
+        (i / (pts.length - 1)) * W,
+        H - 6 - ((v - min) / span) * (H - 12),
+      ] as const,
+  );
+  const line = xy.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+  const color = up ? "var(--up)" : "var(--down)";
+  const last = xy[xy.length - 1];
+  return (
+    <div className="relative">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        preserveAspectRatio="none"
+        className="block h-[72px] w-full overflow-visible lg:h-[104px]"
+        aria-hidden="true"
+      >
+        <defs>
+          <linearGradient id="mt-fill" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stopColor={color} stopOpacity="0.22" />
+            <stop offset="1" stopColor={color} stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <polygon points={`0,${H} ${line} ${W},${H}`} fill="url(#mt-fill)" />
+        <polyline
+          points={line}
+          fill="none"
+          stroke={color}
+          strokeWidth="1.5"
+          vectorEffect="non-scaling-stroke"
+          strokeLinejoin="round"
+        />
+      </svg>
+      <span
+        aria-hidden="true"
+        className="absolute size-[5px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+        style={{
+          left: "100%",
+          top: `${(last[1] / H) * 100}%`,
+          background: color,
+        }}
+      />
+    </div>
+  );
+}
+
 function seeded(seed: number) {
   return () => {
     seed = (seed * 1664525 + 1013904223) % 4294967296;
@@ -35,6 +108,9 @@ export function MiniTerminal() {
     BASE.map((r) => ({ ...r, flash: 0 as -1 | 0 | 1 })),
   );
   const [typed, setTyped] = useState(SUMMARY.length);
+  const [series, setSeries] = useState(initialSeries);
+  const rowsRef = useRef(rows);
+  const [focus, setFocus] = useState(BASE[0].sym);
   const [live, setLive] = useState(false);
 
   useEffect(() => {
@@ -61,18 +137,24 @@ export function MiniTerminal() {
     if (!live || tab !== "Watchlist") return;
     const rand = seeded(7);
     const id = window.setInterval(() => {
-      setRows((prev) =>
-        prev.map((r) => {
-          if (rand() > 0.35) return { ...r, flash: 0 };
-          const pct = (0.1 + rand() * 0.3) * (rand() > 0.45 ? 1 : -1);
-          return {
-            ...r,
-            px: r.px * (1 + pct / 100),
-            chg: r.chg + pct,
-            flash: pct > 0 ? 1 : -1,
-          };
-        }),
-      );
+      // One tick: derive the next rows once, then update table and charts.
+      const next = rowsRef.current.map((r) => {
+        if (rand() > 0.35) return { ...r, flash: 0 as const };
+        const pct = (0.1 + rand() * 0.3) * (rand() > 0.45 ? 1 : -1);
+        return {
+          ...r,
+          px: r.px * (1 + pct / 100),
+          chg: r.chg + pct,
+          flash: (pct > 0 ? 1 : -1) as -1 | 1,
+        };
+      });
+      rowsRef.current = next;
+      setRows(next);
+      setSeries((all) => {
+        const out = { ...all };
+        for (const r of next) out[r.sym] = [...all[r.sym].slice(1), r.px];
+        return out;
+      });
     }, 900);
     return () => window.clearInterval(id);
   }, [live, tab]);
@@ -115,35 +197,65 @@ export function MiniTerminal() {
       </div>
       <div role="tabpanel" aria-label={tab} className="min-h-0 flex-1 p-3">
         {tab === "Watchlist" && (
-          <table className="w-full tabular-nums">
-            <caption className="sr-only">
-              Illustrative watchlist with demo prices
-            </caption>
-            <thead className="text-muted">
-              <tr>
-                <th className="pb-2 text-left font-normal">SYM</th>
-                <th className="pb-2 text-right font-normal">LAST</th>
-                <th className="pb-2 text-right font-normal">CHG%</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr
-                  key={r.sym}
-                  className={`transition-colors duration-300 ${r.flash === 1 ? "bg-up/15" : r.flash === -1 ? "bg-down/15" : ""}`}
-                >
-                  <td className="text-accent py-1">{r.sym}</td>
-                  <td className="py-1 text-right">{r.px.toFixed(2)}</td>
-                  <td
-                    className={`py-1 text-right ${r.chg > 0 ? "text-up" : r.chg < 0 ? "text-down" : "text-muted"}`}
-                  >
-                    {r.chg >= 0 ? "+" : ""}
-                    {r.chg.toFixed(2)}
-                  </td>
+          <div className="flex h-full flex-col">
+            <table className="w-full tabular-nums">
+              <caption className="sr-only">
+                Illustrative watchlist with demo prices. Choose a symbol to
+                chart it.
+              </caption>
+              <thead className="text-muted">
+                <tr>
+                  <th className="pb-2 text-left font-normal">SYM</th>
+                  <th className="pb-2 text-right font-normal">LAST</th>
+                  <th className="pb-2 text-right font-normal">CHG%</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr
+                    key={r.sym}
+                    onClick={() => setFocus(r.sym)}
+                    className={`cursor-pointer transition-colors duration-300 ${r.flash === 1 ? "bg-up/15" : r.flash === -1 ? "bg-down/15" : focus === r.sym ? "bg-card" : "hover:bg-card"}`}
+                  >
+                    <td className="py-1">
+                      <button
+                        type="button"
+                        aria-pressed={focus === r.sym}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setFocus(r.sym);
+                        }}
+                        className={`text-accent -mx-1 rounded-[3px] px-1 text-left ${focus === r.sym ? "underline decoration-1 underline-offset-4" : ""}`}
+                      >
+                        {r.sym}
+                      </button>
+                    </td>
+                    <td className="py-1 text-right">{r.px.toFixed(2)}</td>
+                    <td
+                      className={`py-1 text-right ${r.chg > 0 ? "text-up" : r.chg < 0 ? "text-down" : "text-muted"}`}
+                    >
+                      {r.chg >= 0 ? "+" : ""}
+                      {r.chg.toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {(() => {
+              const row = rows.find((r) => r.sym === focus) ?? rows[0];
+              return (
+                <div className="border-line mt-auto border-t pt-3">
+                  <p className="text-muted mb-2 flex justify-between text-[11px]">
+                    <span>
+                      <span className="text-fg">{row.sym}</span> · intraday
+                    </span>
+                    <span>GP &lt;GO&gt;</span>
+                  </p>
+                  <Spark pts={series[row.sym]} up={row.chg >= 0} />
+                </div>
+              );
+            })()}
+          </div>
         )}
         {tab === "Research" && (
           <div className="space-y-2">

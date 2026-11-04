@@ -1,5 +1,6 @@
 import { links, ui } from "@/content/content";
 import { Reveal } from "../motion/Reveal";
+import "./lower/lower.css";
 import { CopyEmail } from "../ui/CopyEmail";
 import { SectionHeader } from "../ui/SectionHeader";
 
@@ -11,10 +12,9 @@ export function Contact({ hasResume }: { hasResume: boolean }) {
     ...(links.twitter.enabled ? [links.twitter] : []),
     ...(hasResume ? [links.resume] : []),
   ];
-  const [lead, last] = [
-    ui.contact.heading.split(" ").slice(0, -1).join(" "),
-    ui.contact.heading.split(" ").at(-1),
-  ];
+  const all = ui.contact.heading.split(" ");
+  const words = all.slice(0, -1);
+  const last = all.at(-1);
 
   return (
     <section id="contact" aria-labelledby="contact-title" className="section-y">
@@ -26,28 +26,69 @@ export function Contact({ hasResume }: { hasResume: boolean }) {
           title="Contact"
         />
         <div className="grid gap-12 lg:grid-cols-12 lg:items-end">
-          <Reveal className="lg:col-span-6">
+          <div className="lw-close lg:col-span-6" data-inview="">
             <p className="t-display-sm max-w-[10ch]">
-              {lead}{" "}
-              <span className="t-serif text-accent font-normal tracking-normal">
-                {last}
+              {words.map((w, i) => (
+                <span key={i}>
+                  <span className="lw-word">
+                    <span style={{ "--i": i } as React.CSSProperties}>{w}</span>
+                  </span>{" "}
+                </span>
+              ))}
+              <span className="relative inline-block">
+                <span className="lw-word">
+                  <span
+                    style={{ "--i": words.length } as React.CSSProperties}
+                    className="t-serif text-accent font-normal tracking-normal"
+                  >
+                    {last}
+                  </span>
+                </span>
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 300 20"
+                  preserveAspectRatio="none"
+                  className="lw-swash text-accent"
+                >
+                  <path
+                    d="M4 14C60 6 140 3 296 9"
+                    pathLength={1}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                  />
+                </svg>
               </span>
             </p>
-            <p className="text-muted mt-8 max-w-[44ch]">{ui.contact.body}</p>
-          </Reveal>
+            <p
+              className="lw-fade text-muted mt-8 max-w-[44ch]"
+              style={{ "--d": "620ms" } as React.CSSProperties}
+            >
+              {ui.contact.body}
+            </p>
+          </div>
           <Reveal className="lg:col-span-6" delay={0.08}>
             <div className="card t-data p-5 md:p-7" data-theme="dark">
-              <p className="text-muted">
-                <span className="text-accent">&gt;</span> contact --method email
+              <p className="text-muted flex flex-wrap items-center justify-between gap-2">
+                <span>
+                  <span className="text-accent">&gt;</span> contact --method
+                  email
+                </span>
+                <span className="inline-flex items-center gap-2 text-[12px]">
+                  <span
+                    aria-hidden="true"
+                    className="lw-pulse bg-up text-up size-1.5 rounded-full"
+                  />
+                  inbox open
+                </span>
               </p>
               <div className="border-line mt-4 flex flex-wrap items-center gap-3 border-b pb-6">
-                <a
+                <CopyEmail
+                  email={email}
                   href={links.email.href}
-                  className="link text-fg mr-auto text-[17px] break-all"
-                >
-                  {email}
-                </a>
-                <CopyEmail email={email} copiedText={ui.contact.copied} />
+                  copiedText={ui.contact.copied}
+                />
                 <a
                   href={links.email.href}
                   className="pill min-h-10"

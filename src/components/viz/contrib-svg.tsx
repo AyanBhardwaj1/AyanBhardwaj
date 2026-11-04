@@ -2,7 +2,10 @@
  * SVG renderers for the contribution surface. Rendered on the server for the
  * initial HTML and re-rendered in the browser when the range/view changes,
  * from compact data (counts + levels), so the payload stays small.
+ * Motion hooks (md-bar / md-cell / md-mbar + a --d stagger) are styled in
+ * sections/mid/mid.css and only run once the island marks itself in view.
  */
+import type { CSSProperties } from "react";
 
 export type CompactRange = {
   key: string;
@@ -84,8 +87,10 @@ export function IsoSkyline({ range }: { range: CompactRange }) {
       role="img"
       aria-label={range.summary}
     >
-      <polygon points={floor} fill="var(--heat-0)" />
-      <path d={grid} stroke="var(--line)" strokeWidth="0.6" fill="none" />
+      <g className="md-floor">
+        <polygon points={floor} fill="var(--heat-0)" />
+        <path d={grid} stroke="var(--line)" strokeWidth="0.6" fill="none" />
+      </g>
       {bars.map((b) => {
         const top = [
           iso(b.w, b.d, b.h),
@@ -106,7 +111,11 @@ export function IsoSkyline({ range }: { range: CompactRange }) {
           iso(b.w + 1, b.d),
         ];
         return (
-          <g key={`${b.w}-${b.d}`}>
+          <g
+            key={`${b.w}-${b.d}`}
+            className="md-bar"
+            style={{ "--d": `${b.w * 11 + b.d * 9}ms` } as CSSProperties}
+          >
             <title>{dayLabel(range.start, b.w, b.d, b.count)}</title>
             <polygon
               className={`iso-right-${b.level}`}
@@ -175,6 +184,8 @@ export function HeatGrid({ range }: { range: CompactRange }) {
           c === null ? null : (
             <rect
               key={`${w}-${d}`}
+              className="md-cell"
+              style={{ "--d": `${w * 9}ms` } as CSSProperties}
               x={w * STEP}
               y={18 + d * STEP}
               width={CELL}
@@ -206,6 +217,8 @@ export function MonthlyBars({ monthly }: { monthly: CompactRange["monthly"] }) {
         return (
           <rect
             key={m.month}
+            className="md-mbar"
+            style={{ "--d": `${i * 40}ms` } as CSSProperties}
             x={i * 14 + 2}
             y={40 - h}
             width="10"

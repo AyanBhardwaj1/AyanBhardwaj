@@ -108,6 +108,8 @@ export function Spectrum() {
           {BANDS.map((b, i) => {
             const x = 44 + i * 55.5;
             const h = (Math.min(MAX, R[i]) / MAX) * 240;
+            // the number follows the noise-free value, so it never jitters
+            const hx = (Math.min(MAX, exact[i]) / MAX) * 240;
             return (
               <g key={b.id}>
                 <rect
@@ -143,10 +145,11 @@ export function Spectrum() {
                 </text>
                 <text
                   x={x + 20}
-                  y={Math.max(36, 254 - h)}
+                  y={254}
                   textAnchor="middle"
+                  className="os-mono os-spec-num"
+                  style={{ transform: `translateY(${-Math.min(hx, 218)}px)` }}
                   fontSize="15"
-                  className="os-mono"
                   fill="var(--os-ink)"
                 >
                   {Math.round(exact[i] * 100)}
@@ -155,25 +158,27 @@ export function Spectrum() {
             );
           })}
         </svg>
-        <table className="sr-only">
-          <caption>Reflectance by AS7341 channel, percent</caption>
-          <thead>
-            <tr>
-              <th scope="col">Channel</th>
-              <th scope="col">Reflectance</th>
-            </tr>
-          </thead>
-          <tbody>
-            {BANDS.map((b, i) => (
-              <tr key={b.id}>
-                <th scope="row">
-                  {b.nm === b.id ? b.id : `${b.id}, ${b.nm} nm`}
-                </th>
-                <td>{Math.round(exact[i] * 100)}%</td>
+        <div className="sr-only">
+          <table>
+            <caption>Reflectance by AS7341 channel, percent</caption>
+            <thead>
+              <tr>
+                <th scope="col">Channel</th>
+                <th scope="col">Reflectance</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {BANDS.map((b, i) => (
+                <tr key={b.id}>
+                  <th scope="row">
+                    {b.nm === b.id ? b.id : `${b.id}, ${b.nm} nm`}
+                  </th>
+                  <td>{Math.round(exact[i] * 100)}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
         <div className="mt-6 grid gap-x-8 gap-y-4 sm:grid-cols-2">
           <div>

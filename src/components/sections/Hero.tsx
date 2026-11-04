@@ -57,6 +57,8 @@ function Sparkline() {
       fill="none"
     >
       <path
+        className="hx-spark-line"
+        pathLength={1}
         d="M1 17 9 14l7 2 8-6 7 1 8-5 7 2 8-6 8-2"
         stroke="var(--accent)"
         strokeWidth="1.6"
@@ -66,23 +68,33 @@ function Sparkline() {
   );
 }
 
-/** Each letter rises in a stagger (CSS only; see .hero-letter). */
+/**
+ * Each letter rises out of a mask in a stagger (CSS only; see .hx-letter).
+ * Runs before hydration and needs no JS, so the name is never held back.
+ */
 function Letters({ word, delay = 0 }: { word: string; delay?: number }) {
-  return [...word].map((ch, i) => (
-    <span
-      key={i}
-      className="hero-letter"
-      style={
-        {
-          "--i": i,
-          "--line-delay": `${delay}ms`,
-        } as React.CSSProperties
-      }
-    >
-      {ch}
+  return (
+    <span aria-hidden="true" className="hx-line block whitespace-nowrap">
+      {[...word].map((ch, i) => (
+        <span
+          key={i}
+          className="hx-letter"
+          style={
+            {
+              "--i": i,
+              "--line-delay": `${delay}ms`,
+            } as React.CSSProperties
+          }
+        >
+          {ch}
+        </span>
+      ))}
     </span>
-  ));
+  );
 }
+
+/** Staggered entrance for the supporting copy (opacity + small rise). */
+const rise = (ms: number) => ({ "--d": `${ms}ms` }) as React.CSSProperties;
 
 export function Hero({
   ticker,
@@ -95,38 +107,37 @@ export function Hero({
     <section
       id="top"
       aria-label="Introduction"
-      className="relative flex min-h-svh flex-col pt-24 md:pt-36"
+      className="relative flex min-h-svh flex-col pt-16 md:pt-36"
     >
       <div className="container-page relative flex flex-1 flex-col items-center text-center">
-        <p className="t-label text-muted mb-8 md:mb-10">
+        <p
+          className="hx-rise t-label text-muted mb-5 text-balance md:mb-10"
+          style={rise(0)}
+        >
           <span className="text-accent">{"//"}</span> SWE + AI · CS &amp;
           Business (CSB Honors) @ UT Austin
         </p>
 
         <h1 aria-label={profile.name} className="t-display relative z-0">
-          <span aria-hidden="true" className="block whitespace-nowrap">
-            <Letters word="Ayan" />
-          </span>
-          <span aria-hidden="true" className="block whitespace-nowrap">
-            <Letters word="Bhardwaj" delay={140} />
-          </span>
+          <Letters word="Ayan" delay={40} />
+          <Letters word="Bhardwaj" delay={130} />
         </h1>
 
         <div
-          className="relative z-10 -mt-[0.06em] flex justify-center md:-mt-[0.32em]"
+          className="relative z-10 mt-5 flex justify-center sm:-mt-[0.06em] md:-mt-[0.32em]"
           style={{ fontSize: "clamp(40px, 13vw, 196px)" }}
         >
-          <Spark className="bob absolute top-[-0.2em] left-[-1.4em] hidden size-[0.42em] md:block" />
-          <Candles className="bob absolute right-[-1.5em] bottom-[0.6em] hidden size-[0.5em] [animation-delay:-3s] md:block" />
-          <figure className="hero-portrait group border-line-strong bg-card relative w-[clamp(168px,20vw,260px)] overflow-hidden rounded-xl border text-base">
+          <Spark className="hx-glyph absolute top-[-0.2em] left-[-1.4em] hidden size-[0.42em] md:block" />
+          <Candles className="hx-glyph hx-glyph-b absolute right-[-1.5em] bottom-[0.6em] hidden size-[0.5em] md:block" />
+          <figure className="hx-portrait group border-line-strong bg-card relative w-[clamp(144px,20vw,260px)] overflow-hidden rounded-xl border text-base">
             <Image
               src={headshot.src}
               alt={headshot.alt}
               width={headshot.width}
               height={headshot.height}
-              sizes="(max-width: 768px) 168px, 260px"
+              sizes="(max-width: 768px) 144px, 260px"
               preload
-              className="aspect-[4/5] w-full object-cover object-[50%_30%] contrast-[1.08] grayscale transition-[filter] duration-700 group-hover:grayscale-0"
+              className="hx-portrait-img aspect-[4/5] w-full object-cover object-[50%_30%] contrast-[1.08] grayscale transition-[filter] duration-700 group-hover:grayscale-0"
             />
             {/* duotone grade: warm shadows + amber rim, fades on hover */}
             <span
@@ -138,27 +149,41 @@ export function Hero({
               className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-white/10 ring-inset"
             />
           </figure>
-          <span className="t-label border-line-strong bg-bg/80 absolute top-[0.15em] left-full ml-3 hidden rounded-full border px-3 py-1.5 whitespace-nowrap backdrop-blur sm:block">
+          <span className="hx-chip hx-chip-r t-label border-line-strong bg-bg/80 absolute top-4 left-[calc(100%-2.25rem)] rounded-full border px-3 py-1.5 whitespace-nowrap backdrop-blur sm:top-[0.15em] sm:left-full sm:ml-3">
             <span className="text-up">▲</span> YC × 2
           </span>
-          <span className="t-label border-line-strong bg-bg/80 absolute right-full bottom-[0.25em] mr-3 hidden rounded-full border px-3 py-1.5 whitespace-nowrap backdrop-blur sm:block">
+          <span className="hx-chip hx-chip-l t-label border-line-strong bg-bg/80 absolute right-[calc(100%-4.5rem)] bottom-6 rounded-full border px-3 py-1.5 whitespace-nowrap backdrop-blur sm:right-full sm:bottom-[0.25em] sm:mr-3">
             <span className="text-accent">●</span>{" "}
             {profile.status?.label ?? "Building YouBank"}
           </span>
         </div>
 
-        <p className="t-lead mt-10 max-w-[24ch] text-balance md:mt-14">
+        <p
+          className="hx-rise t-lead mt-7 max-w-[24ch] text-balance md:mt-14"
+          style={rise(420)}
+        >
           {profile.headline}
         </p>
-        <p className="text-muted mt-4 max-w-[52ch]">
+        <p className="hx-rise text-muted mt-4 max-w-[52ch]" style={rise(500)}>
           <span className="md:hidden">{profile.subheadlineShort}</span>
           <span className="hidden md:inline">{profile.subheadline}</span>
         </p>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <a href="#projects" className="pill pill-solid" data-magnetic="">
+        <div
+          className="hx-rise mt-6 grid w-full max-w-[22rem] grid-cols-2 gap-2 sm:mt-8 sm:flex sm:w-auto sm:max-w-none sm:flex-wrap sm:justify-center sm:gap-3"
+          style={rise(580)}
+        >
+          <a
+            href="#projects"
+            className="pill pill-solid col-span-2"
+            data-magnetic=""
+          >
             See my work
           </a>
-          <a href="#contact" className="pill" data-magnetic="">
+          <a
+            href="#contact"
+            className={`pill ${hasResume ? "" : "col-span-2"}`}
+            data-magnetic=""
+          >
             Get in touch
           </a>
           {hasResume && (
@@ -177,7 +202,10 @@ export function Hero({
           )}
         </div>
 
-        <div className="mt-auto flex w-full flex-col items-center gap-6 pt-16 pb-8 text-left sm:flex-row sm:items-end sm:justify-between">
+        <div
+          className="hx-rise mt-auto flex w-full flex-col items-center gap-6 pt-16 pb-8 text-left sm:flex-row sm:items-end sm:justify-between"
+          style={rise(700)}
+        >
           <div className="flex items-end gap-4">
             <span className="text-[clamp(32px,4vw,48px)] leading-none font-semibold tracking-[-0.035em]">
               $AYAN
@@ -195,7 +223,9 @@ export function Hero({
           </div>
         </div>
       </div>
-      <Ticker items={ticker} />
+      <div className="hx-ticker">
+        <Ticker items={ticker} />
+      </div>
     </section>
   );
 }

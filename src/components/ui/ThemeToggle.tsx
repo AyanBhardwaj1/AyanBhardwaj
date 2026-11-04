@@ -20,7 +20,12 @@ export function switchTheme(origin?: { x: number; y: number }) {
     Math.max(x, window.innerWidth - x),
     Math.max(y, window.innerHeight - y),
   );
+  // Marks the transition as a theme switch, so the page-navigation crossfade
+  // on the root (globals.css) stands down for the circular reveal.
+  const root = document.documentElement;
+  root.dataset.vt = "theme";
   const t = document.startViewTransition(() => flushSync(() => setTheme(next)));
+  t.finished.finally(() => delete root.dataset.vt).catch(() => {});
   t.ready
     .then(() => {
       document.documentElement.animate(

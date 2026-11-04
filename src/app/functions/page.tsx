@@ -31,14 +31,19 @@ export default function FunctionsPage() {
         <span className="t-data text-accent">KEYS &lt;GO&gt;</span>.
       </p>
       <div className="mt-6">
-        <PaletteTrigger label="Open the palette" className="pill" />
+        <PaletteTrigger label="Open the palette" className="pill" alwaysLabel />
       </div>
       {groups.map((g) => (
         <section key={g} aria-labelledby={`fn-${g}`} className="mt-16">
           <h2 id={`fn-${g}`} className="t-label text-muted mb-3">
             /{g}
           </h2>
-          <table className="t-data border-line w-full border-t text-left">
+          <table className="t-data border-line w-full table-fixed border-t text-left">
+            <colgroup>
+              <col className="w-28 md:w-36" />
+              <col className="w-auto sm:w-[34%]" />
+              <col className="hidden sm:table-column" />
+            </colgroup>
             <thead className="sr-only">
               <tr>
                 <th scope="col">Mnemonic</th>
@@ -53,16 +58,16 @@ export default function FunctionsPage() {
                   <tr
                     key={c.id}
                     id={c.id.split(".").at(-1)}
-                    className="border-line border-b align-top"
+                    className="border-line hover:bg-card focus-within:bg-card target:bg-card relative border-b align-top transition-colors duration-150"
                   >
-                    <td className="text-accent w-24 py-3 pr-4">
+                    <td className="text-accent py-3 pr-4 pl-2">
                       {c.mnemonic}{" "}
                       <span className="text-muted">&lt;GO&gt;</span>
                     </td>
                     <td className="py-3 pr-4">
                       <a
                         href={c.href}
-                        className="link text-fg"
+                        className="link text-fg after:absolute after:inset-0 after:content-['']"
                         {...(c.href.startsWith("http")
                           ? { target: "_blank", rel: "noopener noreferrer" }
                           : {})}

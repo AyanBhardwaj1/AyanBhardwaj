@@ -1,0 +1,620 @@
+/* ------------------------------------------------------------------ */
+/* Home, lower half: project cards, Moss SDK index, Independent list,  */
+/* contact close. Owned by Projects.tsx / Contact.tsx. Prefix: lw-.    */
+/* Transform, opacity and clip-path only. Hover motion is gated to     */
+/* fine pointers; every hidden start state is behind html.js; reduced  */
+/* motion gets the end state.                                          */
+/* ------------------------------------------------------------------ */
+
+.lw-card {
+  --lw-ease: cubic-bezier(0.23, 1, 0.32, 1);
+  isolation: isolate;
+  transition:
+    transform 560ms var(--lw-ease),
+    border-color 240ms var(--lw-ease);
+}
+/* Bigger, softer shadow on its own layer: fade it, never animate box-shadow. */
+.lw-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  box-shadow:
+    0 28px 60px -28px rgb(0 0 0 / 0.65),
+    0 0 0 1px var(--line-strong);
+  opacity: 0;
+  transition: opacity 360ms var(--lw-ease);
+  pointer-events: none;
+}
+:root[data-theme="light"] .lw-card::after {
+  box-shadow:
+    0 28px 60px -30px rgb(60 40 10 / 0.28),
+    0 0 0 1px var(--line-strong);
+}
+
+/* Cursor-follow light on the card's 1px border (masked ring). */
+.lw-edge {
+  position: absolute;
+  inset: -1px;
+  z-index: 2;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: radial-gradient(
+    260px circle at var(--gx, 50%) var(--gy, 0%),
+    color-mix(in oklab, var(--accent) 85%, transparent),
+    transparent 70%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  opacity: 0;
+  transition: opacity 320ms var(--lw-ease);
+}
+/* Soft spotlight that follows the cursor across a panel. */
+.lw-spot {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    420px circle at var(--gx, 50%) var(--gy, 0%),
+    var(--accent-glow),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 320ms var(--lw-ease);
+}
+
+.lw-media {
+  background: var(--bg);
+  transform: translateZ(0);
+}
+.lw-media-img {
+  transform-origin: 50% 40%;
+  transition: transform 900ms var(--lw-ease);
+}
+/* Light glint over the media, at the cursor. */
+.lw-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    360px circle at var(--gx, 50%) var(--gy, 0%),
+    rgb(255 255 255 / 0.12),
+    transparent 60%
+  );
+  mix-blend-mode: soft-light;
+  opacity: 0;
+  transition: opacity 320ms var(--lw-ease);
+}
+
+/* "Open project" pill: an arrow chip at rest that unfolds into the label. */
+.lw-cta {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  height: 36px;
+  padding: 0 4px 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: color-mix(in oklab, var(--bg) 82%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: var(--fg);
+  clip-path: inset(0 0 0 calc(100% - 36px) round 999px);
+  transition: clip-path 420ms var(--lw-ease);
+}
+.lw-cta-label {
+  opacity: 0;
+  transform: translateX(6px);
+  transition:
+    opacity 200ms var(--lw-ease),
+    transform 420ms var(--lw-ease);
+}
+.lw-cta-arrow {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 14px;
+  line-height: 1;
+}
+.lw-cta-arrow > span {
+  display: inline-block;
+  transition: transform 420ms var(--lw-ease);
+}
+
+/* Hover / focus state for the whole card. */
+.lw-card:is(:hover, :focus-within) .lw-edge,
+.lw-card:is(:hover, :focus-within) .lw-spot,
+.lw-card:is(:hover, :focus-within) .lw-sheen,
+.lw-card:is(:hover, :focus-within)::after {
+  opacity: 1;
+}
+.lw-card:is(:hover, :focus-within) .lw-cta {
+  clip-path: inset(0 0 0 0 round 999px);
+}
+.lw-card:is(:hover, :focus-within) .lw-cta-label {
+  opacity: 1;
+  transform: none;
+}
+.lw-card:hover .lw-cta-arrow > span {
+  transform: translateX(2px);
+}
+.lw-card:has(.card-link:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .lw-card[data-tilt]:hover {
+    transform: perspective(1400px) translate3d(0, -6px, 0)
+      rotateX(calc(var(--py, 0) * -2.2deg)) rotateY(calc(var(--px, 0) * 2.6deg));
+  }
+  .lw-card[data-lift]:hover {
+    transform: translate3d(0, -4px, 0);
+  }
+  .lw-card:hover .lw-media-img {
+    transform: scale(1.045)
+      translate3d(calc(var(--px, 0) * -6px), calc(var(--py, 0) * -5px), 0);
+  }
+  .lw-card[data-tilt]:hover:active,
+  .lw-card[data-lift]:hover:active {
+    transition-duration: 160ms;
+    transform: perspective(1400px) translate3d(0, -2px, 0) scale(0.992);
+  }
+}
+
+/* Touch: no hover, so the affordance is always shown and taps get a press. */
+@media (hover: none) {
+  .lw-cta {
+    clip-path: inset(0 0 0 0 round 999px);
+  }
+  .lw-cta-label {
+    opacity: 1;
+    transform: none;
+  }
+  .lw-card {
+    transition-duration: 220ms;
+  }
+  .lw-card[data-tilt]:active {
+    transform: scale(0.985);
+  }
+  .lw-card[data-tilt]:active .lw-edge {
+    opacity: 1;
+  }
+}
+
+/* Featured card's "Case study" line nudges its arrow on hover. */
+.lw-case {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.lw-case > span {
+  display: inline-block;
+  transition: transform 420ms var(--lw-ease);
+}
+.lw-card:hover .lw-case > span {
+  transform: translateX(4px);
+}
+
+/* ------------------------------------------------------------------ */
+/* Built on the Moss SDK: an index that builds itself, row by row.     */
+/* ------------------------------------------------------------------ */
+.lw-sdk {
+  --lw-ease: cubic-bezier(0.23, 1, 0.32, 1);
+}
+.lw-scan {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.lw-scan::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 30%;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--accent-glow) 75%,
+    color-mix(in oklab, var(--accent) 55%, transparent) 100%
+  );
+  transform: translateY(-110%);
+  opacity: 0;
+}
+.lw-sdk.is-in .lw-scan::before {
+  animation: lw-scan 1500ms cubic-bezier(0.65, 0, 0.35, 1) 150ms 1 both;
+}
+@keyframes lw-scan {
+  0% {
+    opacity: 1;
+    transform: translateY(-110%);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(340%);
+  }
+}
+
+/* Header: the idx counter ticks and the mark's cells light in sequence. */
+.lw-mark-cell {
+  animation: lw-cell 2.8s cubic-bezier(0.65, 0, 0.35, 1) var(--d, 0ms) infinite;
+  animation-play-state: paused;
+}
+.lw-sdk.is-in .lw-mark-cell {
+  animation-play-state: running;
+}
+@keyframes lw-cell {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+  }
+  30% {
+    opacity: 1;
+  }
+}
+
+/* Rows: each one wipes in left to right after the scan passes it. */
+.lw-row {
+  position: relative;
+  isolation: isolate;
+  container-type: inline-size;
+  transition: background-color 200ms ease;
+}
+.js .lw-reveal .lw-row,
+.js .lw-row.lw-self {
+  opacity: 0;
+  transform: translate3d(-14px, 0, 0);
+  clip-path: inset(0 100% 0 0);
+  transition:
+    opacity 500ms var(--lw-ease),
+    transform 700ms var(--lw-ease),
+    clip-path 800ms var(--lw-ease),
+    background-color 200ms ease;
+  transition-delay: calc(var(--i, 0) * 70ms + 220ms);
+}
+.js .lw-row.lw-self {
+  /* Never clip an observed element: IntersectionObserver honours its clip-path. */
+  clip-path: none;
+  transition-delay: 60ms;
+}
+.js .lw-reveal.is-in .lw-row,
+.js .lw-row.lw-self.is-in {
+  opacity: 1;
+  transform: none;
+  /* Extends above the row so the hover peek is never clipped. */
+  clip-path: inset(-280px 0 0 0);
+}
+/* Once revealed, hovers respond instantly (no leftover stagger delay). */
+.js .lw-reveal.is-in .lw-row:hover,
+.js .lw-row.lw-self.is-in:hover {
+  transition-delay: 0ms;
+}
+
+.lw-bar {
+  position: absolute;
+  left: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform-origin: top;
+  transform: scaleY(0);
+  transition: transform 600ms var(--lw-ease);
+  transition-delay: calc(var(--i, 0) * 70ms + 520ms);
+}
+.lw-reveal.is-in .lw-bar,
+html:not(.js) .lw-bar {
+  transform: scaleY(1);
+}
+
+/* Hover: an accent wash fills from the left, the name steps in, an arrow lands. */
+.lw-wash {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--accent) 11%, transparent),
+    color-mix(in oklab, var(--accent) 3%, transparent) 60%,
+    transparent
+  );
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 520ms var(--lw-ease);
+}
+.lw-name {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4em;
+  transition:
+    transform 420ms var(--lw-ease),
+    color 200ms ease;
+}
+.lw-go {
+  display: inline-block;
+  color: var(--accent);
+  font-size: 0.7em;
+  opacity: 0;
+  transform: translate(-6px, 4px);
+  transition:
+    opacity 200ms ease,
+    transform 420ms var(--lw-ease);
+}
+.lw-idx {
+  transition: color 200ms ease;
+}
+.lw-row:is(:hover, :focus-within) .lw-wash {
+  transform: scaleX(1);
+}
+.lw-row:is(:hover, :focus-within) .lw-name {
+  transform: translateX(6px);
+  color: var(--accent);
+}
+.lw-row:is(:hover, :focus-within) .lw-go {
+  opacity: 1;
+  transform: none;
+}
+.lw-row:is(:hover, :focus-within) .lw-idx {
+  color: var(--fg);
+}
+.lw-row:has(.lw-link:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.lw-link:focus-visible {
+  outline: none;
+}
+
+/* Peek: the app's screenshot rides along with the cursor above the row. */
+.lw-peek {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% - 12px);
+  z-index: 20;
+  width: 220px;
+  pointer-events: none;
+  opacity: 0;
+  translate: clamp(24px, calc(var(--gx, 70cqw) - 110px), calc(100cqw - 244px)) 0;
+  transform: translateY(10px) scale(0.94) rotate(-1.5deg);
+  transform-origin: 50% 100%;
+  box-shadow: 0 24px 48px -20px rgb(0 0 0 / 0.6);
+  transition:
+    opacity 180ms ease,
+    transform 380ms var(--lw-ease),
+    translate 520ms var(--lw-ease);
+}
+.lw-row:hover {
+  z-index: 3;
+}
+.lw-row:hover .lw-peek {
+  opacity: 1;
+  transform: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Contact: a close worth reaching.                                   */
+/* ------------------------------------------------------------------ */
+.lw-close {
+  --lw-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+.lw-word {
+  display: inline-block;
+  overflow: clip;
+  overflow-clip-margin: 0.2em;
+  vertical-align: top;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+.lw-word > span {
+  display: inline-block;
+}
+.js .lw-close .lw-word > span {
+  transform: translate3d(0, 105%, 0) rotate(3deg);
+  transform-origin: 0 100%;
+  transition: transform 1000ms var(--lw-ease);
+  transition-delay: calc(var(--i, 0) * 90ms + 80ms);
+}
+.js .lw-close.is-in .lw-word > span {
+  transform: none;
+}
+/* The hand-drawn underline under the last word draws in after it lands. */
+.lw-swash {
+  position: absolute;
+  left: -2%;
+  right: -4%;
+  bottom: -0.2em;
+  width: 106%;
+  height: 0.32em;
+  overflow: visible;
+  pointer-events: none;
+}
+.lw-swash path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.js .lw-close .lw-swash path {
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 900ms cubic-bezier(0.65, 0, 0.35, 1) 760ms;
+}
+.js .lw-close.is-in .lw-swash path {
+  stroke-dashoffset: 0;
+}
+.js .lw-close .lw-fade {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
+  transition:
+    opacity 700ms var(--lw-ease),
+    transform 700ms var(--lw-ease);
+  transition-delay: var(--d, 500ms);
+}
+.js .lw-close.is-in .lw-fade {
+  opacity: 1;
+  transform: none;
+}
+
+/* Availability dot on the contact console. */
+.lw-pulse {
+  position: relative;
+}
+.lw-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: currentColor;
+  animation: lw-pulse 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+@keyframes lw-pulse {
+  0% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(3.2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lw-card,
+  .lw-card:hover,
+  .lw-card:active {
+    transform: none !important;
+  }
+  .js .lw-reveal .lw-row,
+  .js .lw-row.lw-self,
+  .js .lw-close .lw-word > span,
+  .js .lw-close .lw-fade {
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+  }
+  .lw-bar {
+    transform: scaleY(1);
+  }
+  .js .lw-close .lw-swash path {
+    stroke-dashoffset: 0;
+  }
+  .lw-mark-cell,
+  .lw-pulse::after,
+  .lw-sdk.is-in .lw-scan::before {
+    animation: none;
+  }
+  .lw-peek {
+    transform: none;
+    left: auto;
+    right: 32px;
+  }
+  /* Own rule: next to transform, the minifier folds translate: none into
+     transform: translate(0, 0) and the base translate survives, pushing the
+     peek past the viewport (horizontal scroll). */
+  .lw-row .lw-peek {
+    translate: none;
+  }
+  .lw-row:is(:hover, :focus-within) .lw-name {
+    transform: none;
+  }
+}
+
+/* Copy email: labels roll vertically, the check draws, the address glows. */
+.lw-copy {
+  overflow: hidden;
+  transition:
+    background-color 240ms var(--ease-expo),
+    border-color 240ms var(--ease-expo),
+    color 240ms var(--ease-expo),
+    transform 120ms var(--ease-expo);
+}
+.lw-copy[data-state="copied"] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.lw-copy[data-state="failed"] {
+  border-color: var(--down);
+  color: var(--down);
+}
+.lw-copy-track {
+  display: grid;
+}
+.lw-copy-a,
+.lw-copy-b {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition:
+    transform 420ms cubic-bezier(0.23, 1, 0.32, 1),
+    opacity 200ms ease;
+}
+.lw-copy-b {
+  transform: translateY(110%);
+  opacity: 0;
+}
+.lw-copy:not([data-state="idle"]) .lw-copy-a {
+  transform: translateY(-110%);
+  opacity: 0;
+}
+.lw-copy:not([data-state="idle"]) .lw-copy-b {
+  transform: none;
+  opacity: 1;
+}
+.lw-check path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.lw-copy[data-state="copied"] .lw-check path {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 360ms cubic-bezier(0.65, 0, 0.35, 1) 140ms;
+}
+.lw-addr {
+  background-image:
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(var(--accent-glow), var(--accent-glow));
+  background-size:
+    0% 1px,
+    0% 100%;
+  background-position:
+    0 100%,
+    0 0;
+  transition:
+    background-size 520ms cubic-bezier(0.23, 1, 0.32, 1),
+    color 240ms ease;
+}
+.lw-addr:is(:hover, :focus-visible) {
+  background-size:
+    100% 1px,
+    0% 100%;
+}
+.lw-addr[data-state="copied"] {
+  color: var(--accent);
+  background-size:
+    100% 1px,
+    100% 100%;
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { s } from "./styles";
 
 const NODES = [
@@ -33,6 +33,15 @@ const byId = Object.fromEntries(NODES.map((n) => [n.id, n]));
 
 export function NoteGraph() {
   const [active, setActive] = useState<string>("heaps");
+  const scroller = useRef<HTMLDivElement>(null);
+
+  // On narrow screens the graph scrolls sideways; start centred on the
+  // lecture note instead of its left edge.
+  useEffect(() => {
+    const el = scroller.current;
+    if (el && el.scrollWidth > el.clientWidth)
+      el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
+  }, []);
   const near = new Set(
     EDGES.flatMap((e) =>
       e.a === active ? [e.b] : e.b === active ? [e.a] : [],
@@ -44,14 +53,14 @@ export function NoteGraph() {
 
   return (
     <div className={s.graph} data-ui="">
-      <div className={s.graphScroll}>
+      <div ref={scroller} className={s.graphScroll}>
         <svg
           viewBox="0 0 660 360"
           className="block h-auto w-full min-w-[560px]"
           role="group"
           aria-label="Graph of notes. Solid lines are links you made; dashed lines are connections Stack found."
         >
-          {EDGES.map((e) => {
+          {EDGES.map((e, i) => {
             const A = byId[e.a];
             const B = byId[e.b];
             const on = e.a === active || e.b === active;
@@ -63,10 +72,11 @@ export function NoteGraph() {
                 x2={B.x}
                 y2={B.y}
                 className={`${e.found ? s.edgeFound : s.edgeMade} ${on ? s.edgeOn : ""}`}
+                style={{ "--i": i } as React.CSSProperties}
               />
             );
           })}
-          {NODES.map((n) => {
+          {NODES.map((n, i) => {
             const isActive = n.id === active;
             const w = n.label.length * 7.4 + 22;
             return (
@@ -74,6 +84,7 @@ export function NoteGraph() {
                 key={n.id}
                 transform={`translate(${n.x} ${n.y})`}
                 className={`${s.node} ${isActive ? s.nodeActive : near.has(n.id) ? s.nodeNear : ""}`}
+                style={{ "--i": i } as React.CSSProperties}
                 tabIndex={0}
                 role="button"
                 aria-pressed={isActive}

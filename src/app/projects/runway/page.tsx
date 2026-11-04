@@ -67,7 +67,26 @@ export default function Page() {
           <section className={s.hero} aria-labelledby="project-title">
             <div className="container-page">
               <div className={s.heroTop}>
-                <ProjectName slug="runway" className={s.h1} />
+                <div className={s.heroLead}>
+                  <dl className={s.strip}>
+                    <div>
+                      <dt>Built at</dt>
+                      <dd>
+                        <span className={s.beacon} aria-hidden="true" />
+                        AITX &amp; MLOps World
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Where</dt>
+                      <dd>Austin Tech Week</dd>
+                    </div>
+                    <div>
+                      <dt>When</dt>
+                      <dd>Oct 2026</dd>
+                    </div>
+                  </dl>
+                  <ProjectName slug="runway" className={s.h1} />
+                </div>
                 <div className={s.heroIntro}>
                   <p className={s.statement}>
                     Know the day your startup&apos;s cash runs out, and find the

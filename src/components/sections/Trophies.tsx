@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { organizations } from "@/content/content";
 import { trophies } from "@/content/extras";
 import { Plaque } from "../ui/Plaque";
@@ -19,7 +20,7 @@ export function Trophies() {
       id="trophies"
       aria-labelledby="trophies-title"
       data-theme="dark"
-      className="section-y border-line bg-bg-elev text-fg border-y"
+      className="section-y border-line bg-bg-elev text-fg border-y py-[clamp(80px,10vw,144px)]"
     >
       <div className="container-page">
         <SectionHeader
@@ -29,9 +30,12 @@ export function Trophies() {
           title="Leadership & recognition"
         />
         <p className="t-label text-muted -mt-8 mb-10 md:-mt-14">
-          Click a plaque for the story
+          Flip a plaque for the story
         </p>
-        <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <ul
+          className="md-plq-grid grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          data-inview=""
+        >
           {csb && (
             <Plaque
               wide
@@ -55,10 +59,17 @@ export function Trophies() {
             />
           ))}
         </ul>
-        <div className="mt-12 flex flex-wrap items-center gap-3">
+        <div
+          className="md-stagger mt-12 flex flex-wrap items-center gap-3"
+          data-inview=""
+        >
           <span className="t-label text-muted">Also active in</span>
-          {organizations.map((o) => (
-            <span key={o.name} className="chip">
+          {organizations.map((o, i) => (
+            <span
+              key={o.name}
+              className="chip"
+              style={{ "--i": i + 1 } as CSSProperties}
+            >
               {o.short ?? o.name}
             </span>
           ))}

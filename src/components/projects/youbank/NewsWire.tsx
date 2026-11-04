@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { s } from "./styles";
 
 export type WireItem = {
@@ -22,6 +22,31 @@ export function NewsWire({ items }: { items: WireItem[] }) {
   const root = useRef<HTMLDivElement>(null);
   const paused = useRef(false);
   const visible = useRef(false);
+  const list = useRef<HTMLOListElement>(null);
+  const tallest = useRef(0);
+
+  // A new card slides in on top and the rest are pushed down by its height
+  // (FLIP, transform only). The list keeps the tallest height it has shown,
+  // so headline lengths never make the section below jump.
+  useLayoutEffect(() => {
+    const ol = list.current;
+    if (!ol) return;
+    const h = ol.offsetHeight;
+    if (h > tallest.current) {
+      tallest.current = h;
+      ol.style.minHeight = `${h}px`;
+    }
+    if (tick === 0) return;
+    const first = ol.children[0] as HTMLElement | undefined;
+    if (!first) return;
+    const dy = first.offsetHeight;
+    for (const li of Array.from(ol.children).slice(1)) {
+      (li as HTMLElement).animate(
+        [{ transform: `translateY(-${dy}px)` }, { transform: "none" }],
+        { duration: 560, easing: "cubic-bezier(0.16, 1, 0.3, 1)" },
+      );
+    }
+  }, [tick]);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -65,7 +90,7 @@ export function NewsWire({ items }: { items: WireItem[] }) {
           <span className={s.liveDot} aria-hidden="true" /> every 10 min
         </span>
       </div>
-      <ol className={s.wireList}>
+      <ol ref={list} className={s.wireList}>
         {shown.map((it, i) => (
           <li
             key={`${it.form}-${i === 0 ? tick : (start + i) % items.length}`}

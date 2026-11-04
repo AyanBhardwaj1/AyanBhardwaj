@@ -3,7 +3,7 @@ import { CareerChartIsland, type ChartPoint } from "./CareerChartIsland";
 
 const W = 960;
 const H = 320;
-const PAD = { l: 8, r: 56, t: 24, b: 32 };
+const PAD = { l: 8, r: 44, t: 48, b: 32 };
 
 /** GP <GO>: the AYAN index. Geometry computed at build; the island adds the crosshair. */
 export function CareerChart() {

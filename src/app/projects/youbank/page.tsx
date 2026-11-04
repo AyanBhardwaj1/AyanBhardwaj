@@ -160,7 +160,7 @@ export default function Page() {
               />
             </figure>
           </div>
-          <dl className={`${s.statRow} lg:col-span-12`}>
+          <dl data-inview="" className={`${s.statRow} lg:col-span-12`}>
             {stats.map(([n, l]) => (
               <div key={l}>
                 <dt>{l}</dt>
@@ -301,6 +301,7 @@ export default function Page() {
                 <li
                   key={step}
                   className={step === "sendDraft()" ? s.pipeKey : undefined}
+                  style={{ "--i": i } as React.CSSProperties}
                 >
                   <span className={s.pipeNum} aria-hidden="true">
                     {i + 1}

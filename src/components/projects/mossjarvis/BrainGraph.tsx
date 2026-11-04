@@ -226,22 +226,39 @@ export function BrainGraph() {
     [edges, nodes, sel],
   );
 
+  // Centre of the laid-out graph (labels hang below nodes, hence +8), so the
+  // archive sits in the middle of the stage instead of drifting up-left.
+  const mid = useMemo(() => {
+    if (!nodes.length) return { x: 0, y: 0 };
+    const xs = nodes.map((n) => n.x);
+    const ys = nodes.map((n) => n.y);
+    return {
+      x: (Math.min(...xs) + Math.max(...xs)) / 2,
+      y: (Math.min(...ys) + Math.max(...ys)) / 2 + 8,
+    };
+  }, [nodes]);
+
   useEffect(() => {
     const c = canvas.current;
     if (!c) return;
     const ctx = c.getContext("2d");
     if (!ctx) return;
-    const draw = () => {
+    let size = { w: 0, h: 0, dpr: 1 };
+    const measure = () => {
       const dpr = window.devicePixelRatio || 1;
-      const w = c.clientWidth;
-      const h = c.clientHeight;
-      c.width = w * dpr;
-      c.height = h * dpr;
+      size = { w: c.clientWidth, h: c.clientHeight, dpr };
+      c.width = size.w * dpr;
+      c.height = size.h * dpr;
+    };
+    measure();
+    const draw = (t = -1) => {
+      const { w, h, dpr } = size;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
       const fit = Math.min(w, h) / 420;
       ctx.translate(w / 2 + view.x, h / 2 + view.y);
       ctx.scale(fit * view.k, fit * view.k);
+      ctx.translate(-mid.x, -mid.y);
       const linked = new Set(neighbours.map((x) => x.n.id));
       for (const e of edges) {
         const on = e.a === sel || e.b === sel;
@@ -268,24 +285,118 @@ export function BrainGraph() {
         ctx.fill();
         ctx.stroke();
         ctx.shadowBlur = 0;
-        ctx.fillStyle = isSel || near ? "#c9faff" : "#62cadd";
-        ctx.font = "11px ui-monospace, SFMono-Regular, Menlo, monospace";
-        ctx.textAlign = "center";
-        ctx.fillText(n.id, n.x, n.y + r + 13);
       });
+      // Labels after all nodes, placed greedily: below the node, or above it
+      // when that would collide with a label already placed. The selected
+      // node and its neighbours are placed first so they win.
+      ctx.font = "11px ui-monospace, SFMono-Regular, Menlo, monospace";
+      ctx.textAlign = "center";
+      ctx.lineWidth = 4;
+      ctx.lineJoin = "round";
+      const placed: [number, number, number, number][] = [];
+      // Total overlap with labels already placed (0 = free).
+      const hit = (b: [number, number, number, number]) =>
+        placed.reduce(
+          (sum, p) =>
+            sum +
+            Math.max(0, Math.min(b[2], p[2]) - Math.max(b[0], p[0])) *
+              Math.max(0, Math.min(b[3], p[3]) - Math.max(b[1], p[1])),
+          0,
+        );
+      const order = nodes
+        .map((n, i) => ({
+          n,
+          i,
+          rank: i === sel ? 0 : linked.has(n.id) ? 1 : 2,
+        }))
+        .sort((a, b) => a.rank - b.rank);
+      for (const { n, rank } of order) {
+        const r = 5 + n.deg * 0.9;
+        const half = ctx.measureText(n.id).width / 2 + 2;
+        const below = n.y + r + 13;
+        const above = n.y - r - 6;
+        const box = (yy: number): [number, number, number, number] => [
+          n.x - half,
+          yy - 10,
+          n.x + half,
+          yy + 3,
+        ];
+        // First free spot, else the least crowded one.
+        let y = below;
+        let best = Infinity;
+        for (const yy of [below, above, below + 13, above - 13]) {
+          const o = hit(box(yy));
+          if (o < best) {
+            best = o;
+            y = yy;
+          }
+          if (o === 0) break;
+        }
+        placed.push(box(y));
+        ctx.strokeStyle = "#02070d";
+        ctx.strokeText(n.id, n.x, y);
+        ctx.fillStyle = rank < 2 ? "#c9faff" : "#62cadd";
+        ctx.fillText(n.id, n.x, y);
+      }
+      // Signals: a pulse leaves the selected memory along each link, faster
+      // along stronger ones, like recall propagating through the archive.
+      if (t >= 0) {
+        const a = nodes[sel];
+        ctx.shadowColor = "#9af5ff";
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = "#e6fdff";
+        neighbours.forEach(({ n, w: wt }, i) => {
+          const period = 1900 - Math.min(wt, 1) * 700;
+          const f = ((t + i * 260) % period) / period;
+          const e = 1 - (1 - f) ** 2;
+          ctx.globalAlpha = f < 0.85 ? 1 : (1 - f) / 0.15;
+          ctx.beginPath();
+          ctx.arc(a.x + (n.x - a.x) * e, a.y + (n.y - a.y) * e, 2.4, 0, 7);
+          ctx.fill();
+        });
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
+      }
+    };
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let raf = 0;
+    let on = false;
+    const loop = (t: number) => {
+      draw(t);
+      raf = requestAnimationFrame(loop);
+    };
+    const start = () => {
+      if (still || on) return;
+      on = true;
+      raf = requestAnimationFrame(loop);
+    };
+    const stop = () => {
+      on = false;
+      cancelAnimationFrame(raf);
     };
     draw();
-    const ro = new ResizeObserver(draw);
+    const ro = new ResizeObserver(() => {
+      measure();
+      draw();
+    });
     ro.observe(c);
-    return () => ro.disconnect();
-  }, [nodes, edges, sel, view, neighbours]);
+    const io = new IntersectionObserver(([en]) =>
+      en.isIntersecting ? start() : stop(),
+    );
+    io.observe(c);
+    return () => {
+      stop();
+      ro.disconnect();
+      io.disconnect();
+    };
+  }, [nodes, edges, sel, view, neighbours, mid]);
 
   const toWorld = (cx: number, cy: number) => {
     const c = canvas.current!;
     const fit = Math.min(c.clientWidth, c.clientHeight) / 420;
     return {
-      x: (cx - c.clientWidth / 2 - view.x) / (fit * view.k),
-      y: (cy - c.clientHeight / 2 - view.y) / (fit * view.k),
+      x: (cx - c.clientWidth / 2 - view.x) / (fit * view.k) + mid.x,
+      y: (cy - c.clientHeight / 2 - view.y) / (fit * view.k) + mid.y,
     };
   };
 

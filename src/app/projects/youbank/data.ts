@@ -19,11 +19,13 @@ export const sections = [
 export const pitch =
   "It does the work and learns how you do it: a keyboard-driven research terminal on SEC data, a Studio that builds the model and the deck while you watch, and an email agent that has to earn the right to send on its own.";
 
+/** Headline figures. Mirrors the card metrics in content.ts; keep in sync. */
 export const stats: [string, string][] = [
   ["35+", "terminal functions"],
   ["328", "tools: 230 AI workflows, 98 calculators"],
-  ["19", "output block kinds"],
-  ["3", "learning loops per account"],
+  ["0.97", "recall@5, up from 0.85 with cross-encoder reranking"],
+  ["90%+", "of drafts go out unedited"],
+  ["1,000+", "unit tests"],
   ["14", "styles, 7 dark and 7 light"],
 ];
 
@@ -253,9 +255,18 @@ export const build: [string, string][] = [
     "IMAP/SMTP or the Gmail API; mailbox credentials encrypted with AES-256-GCM",
   ],
   [
+    "ML",
+    "PyTorch services on Modal: a GraphSAGE model for M&A link prediction, and hybrid retrieval with cross-encoder reranking that lifted recall@5 from 0.85 to 0.97",
+  ],
+  [
     "ml/",
     "Python cores for LBO, odds and edge models, with tests, and an optional GPU retraining job on Modal",
   ],
+  [
+    "Quant",
+    "Models written from scratch in TypeScript: GARCH volatility, VaR with backtests, Monte Carlo valuation, a Treasury yield curve, Altman, Ohlson and Merton credit risk",
+  ],
+  ["Tests", "1,000+ unit tests"],
   [
     "desktop/",
     "Tauri 2 app in Rust: tray, youbank:// deep links, a global Quick ask hotkey, an opt-in local agent",
@@ -274,6 +285,8 @@ export const stack = [
   "OpenAI + Anthropic",
   "zod",
   "Python",
+  "PyTorch",
+  "Modal",
   "Rust",
   "Tauri 2",
   "Office.js",

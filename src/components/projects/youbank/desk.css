@@ -84,8 +84,9 @@
 }
 .yb-h1 {
   margin-top: 20px;
-  font-size: clamp(52px, 6.6vw, 100px);
-  overflow-wrap: anywhere;
+  /* Sized so "YouBank" never breaks: full-width below lg, a 5/12 column above. */
+  font-size: clamp(52px, 15vw, 120px);
+  white-space: nowrap;
   font-weight: 800;
   font-stretch: 118%;
   letter-spacing: -0.045em;
@@ -101,6 +102,11 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+@media (min-width: 1024px) {
+  .yb-h1 {
+    font-size: clamp(64px, 6vw, 96px);
+  }
 }
 @media (prefers-reduced-motion: no-preference) {
   .yb-h1 {
@@ -213,6 +219,67 @@
   display: flex;
   gap: 4px;
 }
+/* Narrow screens: the strip scrolls. A fade on the open edge says so, and
+   where scroll-driven animations exist it follows the scroll position. */
+@media (max-width: 767px) {
+  .yb-keys {
+    margin-inline: -16px;
+    padding-inline: 16px;
+    scroll-padding-inline: 16px;
+    scroll-snap-type: x proximity;
+    -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent);
+    mask-image: linear-gradient(90deg, #000 85%, transparent);
+  }
+  .yb-keys li {
+    scroll-snap-align: start;
+  }
+  @supports (animation-timeline: scroll(self inline)) {
+    .yb-keys {
+      -webkit-mask-image: linear-gradient(
+        90deg,
+        rgb(0 0 0 / var(--yb-fade-l)),
+        #000 12%,
+        #000 85%,
+        rgb(0 0 0 / var(--yb-fade-r))
+      );
+      mask-image: linear-gradient(
+        90deg,
+        rgb(0 0 0 / var(--yb-fade-l)),
+        #000 12%,
+        #000 85%,
+        rgb(0 0 0 / var(--yb-fade-r))
+      );
+      animation: yb-keyfade linear both;
+      animation-timeline: scroll(self inline);
+    }
+  }
+}
+@property --yb-fade-l {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+@property --yb-fade-r {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+@keyframes yb-keyfade {
+  0% {
+    --yb-fade-l: 1;
+    --yb-fade-r: 0;
+  }
+  8% {
+    --yb-fade-l: 0;
+  }
+  92% {
+    --yb-fade-r: 0;
+  }
+  100% {
+    --yb-fade-l: 0;
+    --yb-fade-r: 1;
+  }
+}
 .yb-fkey,
 .yb-fkeyOn {
   display: inline-flex;
@@ -233,6 +300,16 @@
 }
 .yb-fkey:hover {
   border-color: var(--d-amber);
+}
+.yb-fkey:active,
+.yb-fkeyOn:active,
+.yb-fkey[data-pressed],
+.yb-fkeyOn[data-pressed] {
+  transform: translateY(1px) scale(0.97);
+}
+.yb-fkey,
+.yb-fkeyOn {
+  transition-property: background-color, border-color, color, transform;
 }
 .yb-fkeyOn {
   background: var(--d-amber);
@@ -371,7 +448,8 @@
 .yb-statRow > div {
   display: flex;
   flex-direction: column-reverse;
-  gap: 6px;
+  justify-content: flex-end; /* figures share one baseline */
+  gap: 8px;
   padding: 18px 16px 4px 0;
 }
 .yb-statRow dd {
@@ -388,7 +466,56 @@
 }
 @media (min-width: 768px) {
   .yb-statRow {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1280px) {
+  .yb-statRow {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+/* Figures print in one after another, like quotes filling a monitor row. */
+@media (prefers-reduced-motion: no-preference) {
+  .js .yb-statRow > div {
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+      opacity 420ms ease-out,
+      transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--yb-d, 0ms);
+  }
+  .js .yb-statRow.is-in > div {
+    opacity: 1;
+    transform: none;
+  }
+  .yb-statRow > div:nth-child(2) {
+    --yb-d: 60ms;
+  }
+  .yb-statRow > div:nth-child(3) {
+    --yb-d: 120ms;
+  }
+  .yb-statRow > div:nth-child(4) {
+    --yb-d: 180ms;
+  }
+  .yb-statRow > div:nth-child(5) {
+    --yb-d: 240ms;
+  }
+  .yb-statRow > div:nth-child(6) {
+    --yb-d: 300ms;
+  }
+  .js .yb-statRow.is-in dd {
+    animation: yb-tick 900ms ease-out both;
+    animation-delay: var(--yb-d, 0ms);
+  }
+}
+@keyframes yb-tick {
+  0% {
+    color: #fff;
+    text-shadow: 0 0 18px rgb(245 166 35 / 0.6);
+  }
+  100% {
+    color: var(--d-amber);
+    text-shadow: none;
   }
 }
 
@@ -505,6 +632,11 @@
   fill: var(--d-fg);
   font-size: 15px;
   font-family: var(--font-mono);
+  /* a halo in the panel colour keeps the label legible over the curve */
+  paint-order: stroke;
+  stroke: var(--d-panel);
+  stroke-width: 5px;
+  stroke-linejoin: round;
 }
 .yb-floorOn,
 .yb-floorOff {
@@ -549,6 +681,33 @@
   border-radius: 4px;
   font-size: 13px;
   line-height: 1.35;
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* The moment autopilot is earned lands with a pulse, once. */
+  .yb-statusOn {
+    animation: yb-earn 1100ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .yb-badgeOn {
+    animation: yb-blink 1100ms steps(2, jump-none) 3;
+  }
+}
+@keyframes yb-earn {
+  0% {
+    box-shadow: 0 0 0 0 rgb(63 185 80 / 0.55);
+    transform: scale(0.98);
+  }
+  35% {
+    transform: scale(1.015);
+  }
+  100% {
+    box-shadow: 0 0 0 14px rgb(63 185 80 / 0);
+    transform: none;
+  }
+}
+@keyframes yb-blink {
+  50% {
+    opacity: 0.35;
+  }
 }
 .yb-statusOn {
   background: rgb(63 185 80 / 0.14);
@@ -657,6 +816,41 @@
 }
 .yb-fnTable code {
   color: var(--d-blue);
+}
+/* Phones: each function becomes a compact card instead of a table that
+   scrolls sideways with its last two columns out of sight. */
+@media (max-width: 639px) {
+  .yb-fnTable {
+    min-width: 0;
+  }
+  .yb-fnTable thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .yb-fnTable tbody tr {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    column-gap: 10px;
+    padding: 12px 14px;
+  }
+  .yb-fnTable tbody th {
+    grid-row: span 3;
+    width: auto;
+    padding: 0;
+  }
+  .yb-fnTable td {
+    padding: 0;
+  }
+  .yb-fnTable td + td {
+    margin-top: 4px;
+    font-size: 12px;
+  }
+  .yb-fnTable td code {
+    overflow-wrap: anywhere;
+  }
 }
 
 /* ---------- studio ---------- */
@@ -884,8 +1078,44 @@
   border-radius: 4px;
   background: var(--d-panel);
 }
+.yb-pipe li {
+  position: relative;
+}
 .yb-pipe code {
   color: var(--d-blue);
+}
+/* A message travels the loop: each step lights in turn, top to bottom,
+   then the loop rests. Opacity on a pseudo-element only, so it composites. */
+@media (prefers-reduced-motion: no-preference) {
+  .yb-pipe li::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    border: 1px solid var(--d-amber);
+    background: linear-gradient(90deg, var(--d-amber-soft), transparent 70%);
+    box-shadow: 0 0 18px -4px rgb(245 166 35 / 0.45);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .is-in > .yb-pipe li::after {
+    animation: yb-pass 7s linear infinite;
+    animation-delay: calc(var(--i, 0) * 0.42s + 0.4s);
+  }
+}
+@keyframes yb-pass {
+  0% {
+    opacity: 0;
+  }
+  2% {
+    opacity: 1;
+  }
+  9% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 .yb-pipeKey {
   border-color: var(--d-amber) !important;

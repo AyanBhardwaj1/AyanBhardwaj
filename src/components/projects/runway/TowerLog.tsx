@@ -76,6 +76,9 @@ export function TowerLog() {
                 </span>
                 <span className={s.logOk}>ok</span> {l.note}
                 {l.ms ? <span className={s.logMs}> {l.ms}</span> : null}
+                {!done && i === shown - 1 ? (
+                  <span className={s.caret} aria-hidden="true" />
+                ) : null}
                 {"\n"}
               </span>
             ))}
@@ -88,15 +91,31 @@ export function TowerLog() {
       </div>
 
       <div className={s.inbox}>
-        <h3 className={s.inboxHead}>Inbox, by dollar impact</h3>
+        <h3 className={s.inboxHead}>
+          <span>Inbox, by dollar impact</span>
+          <span
+            className={s.inboxCount}
+            data-all={cleared.size === FINDINGS.length ? "" : undefined}
+          >
+            {cleared.size} of {FINDINGS.length} cleared
+          </span>
+        </h3>
         <ul className={s.inboxList}>
-          {FINDINGS.map((f) => {
+          {!done ? (
+            <li className={s.inboxWait} aria-hidden="true">
+              Waiting for Autopilot to file its drafts…
+            </li>
+          ) : null}
+          {FINDINGS.map((f, i) => {
             const ok = cleared.has(f.id);
             return (
               <li
                 key={f.id}
                 className={s.draft}
                 data-cleared={ok ? "" : undefined}
+                data-pending={done ? undefined : ""}
+                inert={!done}
+                style={{ "--i": i } as React.CSSProperties}
               >
                 <span className={s.draftMain}>
                   <span className={s.draftTitle}>{f.draft}</span>

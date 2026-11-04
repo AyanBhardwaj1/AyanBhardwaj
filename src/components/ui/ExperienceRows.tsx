@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
+import "../sections/mid/mid.css";
 
 export type ExperienceRow = {
   id: string;
@@ -17,9 +18,12 @@ export type ExperienceRow = {
 };
 
 /**
- * Majd-style hairline rows. Click/Enter expands; hovering a row dims its
- * siblings and rotates the + (desktop). All content stays in the DOM order a
- * screen reader expects; the toggle is a real button with aria-expanded.
+ * Majd-style hairline rows. Click/Enter/Space expands (one open at a time);
+ * the panel height animates via grid-template-rows 0fr → 1fr (no measuring),
+ * its content fades up with a short bullet stagger, and the + turns into ×.
+ * Hovering the list dims sibling rows (fine pointers only). Content stays in
+ * screen-reader order; the toggle is a real button with aria-expanded and the
+ * panel is a labelled region.
  */
 export function ExperienceRows({
   rows,
@@ -30,22 +34,24 @@ export function ExperienceRows({
 }) {
   const [open, setOpen] = useState<string | null>(rows[0]?.id ?? null);
   return (
-    <ul className="group/list border-line border-t">
+    <ul className="md-acc border-line border-t">
       {rows.map((r) => {
         const isOpen = open === r.id;
         return (
           <li
             key={r.id}
             id={`exp-${r.id}`}
-            className="border-line border-b transition-opacity duration-200 md:group-hover/list:opacity-40 md:focus-within:!opacity-100 md:hover:!opacity-100"
+            className="md-acc-row border-line border-b"
+            data-open={isOpen}
           >
             <h3>
               <button
                 type="button"
+                id={`exp-btn-${r.id}`}
                 aria-expanded={isOpen}
                 aria-controls={`exp-panel-${r.id}`}
                 onClick={() => setOpen(isOpen ? null : r.id)}
-                className="group hover:bg-card grid min-h-24 w-full grid-cols-[1fr_auto] items-center gap-x-6 gap-y-1 px-2 py-5 text-left transition-colors duration-200 md:grid-cols-12 md:px-4"
+                className="md-acc-btn grid min-h-24 w-full grid-cols-[1fr_auto] items-center gap-x-6 gap-y-1 px-2 py-5 text-left md:grid-cols-12 md:px-4"
               >
                 <span className="flex flex-wrap items-center gap-3 md:col-span-5">
                   <span className="t-h3">{r.company}</span>
@@ -53,11 +59,16 @@ export function ExperienceRows({
                 </span>
                 <span
                   aria-hidden="true"
-                  className={`border-line-strong row-span-2 grid size-8 place-items-center rounded-full border text-lg transition-transform duration-[240ms] md:order-last md:col-span-1 md:row-span-1 md:justify-self-end ${
-                    isOpen ? "rotate-45" : "group-hover:rotate-45"
-                  }`}
+                  className="md-acc-icon row-span-2 md:order-last md:col-span-1 md:row-span-1 md:justify-self-end"
                 >
-                  +
+                  <svg viewBox="0 0 12 12" width="12" height="12">
+                    <path
+                      d="M6 1v10M1 6h10"
+                      stroke="currentColor"
+                      strokeWidth="1.4"
+                      strokeLinecap="round"
+                    />
+                  </svg>
                 </span>
                 <span className="text-muted md:col-span-3">{r.role}</span>
                 <span className="t-data text-muted md:col-span-3 md:text-right">
@@ -67,11 +78,12 @@ export function ExperienceRows({
             </h3>
             <div
               id={`exp-panel-${r.id}`}
-              className="collapsible"
-              data-open={isOpen}
+              role="region"
+              aria-labelledby={`exp-btn-${r.id}`}
+              className="md-acc-panel"
             >
               <div>
-                <div className="grid gap-6 px-2 pb-8 md:grid-cols-12 md:px-4">
+                <div className="md-acc-body grid gap-6 px-2 pb-8 md:grid-cols-12 md:px-4">
                   <div className="md:col-span-5">
                     <p className="text-muted max-w-[44ch]">{r.summary}</p>
                     <p className="t-data text-muted mt-4">
@@ -97,7 +109,11 @@ export function ExperienceRows({
                   <div className="md:col-span-7">
                     <ul className="space-y-3">
                       {r.bullets.map((b, i) => (
-                        <li key={i} className="text-muted flex gap-3">
+                        <li
+                          key={i}
+                          className="md-acc-item text-muted flex gap-3"
+                          style={{ "--i": i } as CSSProperties}
+                        >
                           <span
                             aria-hidden="true"
                             className="text-accent pt-[0.1em]"

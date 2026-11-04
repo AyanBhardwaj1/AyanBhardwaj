@@ -74,7 +74,10 @@ export function ContributionSurface({
                 style={{ opacity: 1 - i * 0.17 }}
               />
               <span className="text-fg">{l.name}</span>{" "}
-              {(l.share * 100).toFixed(l.share < 0.1 ? 1 : 0)}%
+              {l.share < 0.001
+                ? "<0.1"
+                : (l.share * 100).toFixed(l.share < 0.1 ? 1 : 0)}
+              %
             </li>
           ))}
         </ul>

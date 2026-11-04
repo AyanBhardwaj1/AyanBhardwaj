@@ -62,21 +62,27 @@ export function WasteConsole() {
         <dl className={s.readGrid}>
           <div>
             <dt>Runway</dt>
-            <dd>{r.months.toFixed(1)} months</dd>
+            <dd key={r.months.toFixed(1)} className={s.tick}>
+              {r.months.toFixed(1)} months
+            </dd>
           </div>
           <div>
             <dt>Saved</dt>
-            <dd>{usd(r.saved)}/mo</dd>
+            <dd key={r.saved} className={s.tick}>
+              {usd(r.saved)}/mo
+            </dd>
           </div>
           <div>
             <dt>Gained</dt>
-            <dd>
+            <dd key={r.daysGained} className={s.tick}>
               {r.daysGained} {r.daysGained === 1 ? "day" : "days"}
             </dd>
           </div>
           <div>
             <dt>Refunds</dt>
-            <dd>{r.refund ? `$${r.refund.toFixed(2)}` : "$0"}</dd>
+            <dd key={r.refund} className={s.tick}>
+              {r.refund ? `$${r.refund.toFixed(2)}` : "$0"}
+            </dd>
           </div>
         </dl>
         <button

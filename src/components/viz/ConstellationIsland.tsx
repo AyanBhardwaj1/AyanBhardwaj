@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ConstellationData, StarNode } from "@/lib/constellation";
 import type { Body, Sim } from "./graph-physics";
+import "../sections/lower/graph.css";
 
 /**
  * EQS <GO>: project constellation. Layout arrives precomputed from the server.
@@ -25,6 +26,16 @@ import type { Body, Sim } from "./graph-physics";
  */
 
 const mq = "(min-width: 768px)";
+
+/** A gently bowed edge: quadratic curve with its control point off the midpoint. */
+const curve = (ax: number, ay: number, bx: number, by: number) => {
+  const mx = (ax + bx) / 2;
+  const my = (ay + by) / 2;
+  const k = 0.12;
+  const cx = mx - (by - ay) * k;
+  const cy = my + (bx - ax) * k;
+  return `M${ax.toFixed(1)} ${ay.toFixed(1)}Q${cx.toFixed(1)} ${cy.toFixed(1)} ${bx.toFixed(1)} ${by.toFixed(1)}`;
+};
 const subscribe = (cb: () => void) => {
   const m = window.matchMedia(mq);
   m.addEventListener("change", cb);
@@ -43,9 +54,17 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
   const [predict, setPredict] = useState(false);
   const [hover, setHover] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
+  // First time the map is on screen: stars and links draw in once.
+  const [entered, setEntered] = useState(false);
+  const [settled, setSettled] = useState(false);
+  useEffect(() => {
+    if (!entered) return;
+    const t = window.setTimeout(() => setSettled(true), 2400);
+    return () => window.clearTimeout(t);
+  }, [entered]);
   const [focusId, setFocusId] = useState<string>(data.nodes[0]?.id ?? "");
   const nodeRefs = useRef(new Map<string, SVGGElement>());
-  const edgeRefs = useRef(new Map<string, SVGLineElement>());
+  const edgeRefs = useRef(new Map<string, SVGPathElement>());
   const predRefs = useRef(new Map<string, SVGGElement>());
   const svgRef = useRef<SVGSVGElement>(null);
   const simRef = useRef<Sim | null>(null);
@@ -59,6 +78,26 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
     () => new Map(data.nodes.map((n) => [n.id, n])),
     [data.nodes],
   );
+  // Labels sit under their star; when two would collide, the later one
+  // moves above its star. Approximate text width: ~6.2px per character.
+  const above = useMemo(() => {
+    const out = new Set<string>();
+    const placed: { x: number; y: number; w: number }[] = [];
+    for (const n of data.nodes) {
+      const w = n.name.length * 6.2;
+      let y = n.y + n.r + 15;
+      const hit = placed.some(
+        (p) =>
+          Math.abs(p.y - y) < 14 && Math.abs(p.x - n.x) < (p.w + w) / 2 + 6,
+      );
+      if (hit) {
+        out.add(n.id);
+        y = n.y - n.r - 9;
+      }
+      placed.push({ x: n.x, y, w });
+    }
+    return out;
+  }, [data.nodes]);
   const neighbors = useMemo(() => {
     const m = new Map<string, Set<string>>(
       data.nodes.map((n) => [n.id, new Set()]),
@@ -78,8 +117,11 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
     if (
       window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
       !("IntersectionObserver" in window)
-    )
+    ) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- static map: show it at once
+      setEntered(true);
       return;
+    }
     let cancelled = false;
     let visible = false;
     const draw = (b: Map<string, Body>) => {
@@ -96,10 +138,7 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
         const a = b.get(s0);
         const c = b.get(t0);
         if (!a || !c) continue;
-        el.setAttribute("x1", a.x.toFixed(1));
-        el.setAttribute("y1", a.y.toFixed(1));
-        el.setAttribute("x2", c.x.toFixed(1));
-        el.setAttribute("y2", c.y.toFixed(1));
+        el.setAttribute("d", curve(a.x, a.y, c.x, c.y));
       }
       for (const [k, el] of predRefs.current) {
         const [s0, t0] = k.split("|");
@@ -137,8 +176,19 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
       { rootMargin: "120px" },
     );
     io.observe(svg);
+    // The draw-in waits until the map is properly on screen.
+    const seen = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setEntered(true);
+        seen.disconnect();
+      },
+      { rootMargin: "0px 0px -20% 0px" },
+    );
+    seen.observe(svg);
     return () => {
       cancelled = true;
+      seen.disconnect();
       io.disconnect();
       simRef.current?.stop();
       simRef.current = null;
@@ -286,7 +336,7 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
             <svg
               ref={svgRef}
               viewBox={`0 0 ${data.width} ${data.height}`}
-              className="h-auto w-full min-w-[640px] select-none"
+              className={`lw-graph h-auto w-full min-w-[640px] select-none ${entered ? "is-in" : ""} ${settled ? "is-settled" : ""} ${lit ? "is-lit" : ""}`}
               role="group"
               aria-label="Project constellation map. Use arrow keys to move between projects, Enter to open one, Space to pin its details."
               onPointerMove={(e) => {
@@ -302,6 +352,10 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
               onPointerUp={() => {
                 const d = drag.current;
                 drag.current = null;
+                if (d)
+                  nodeRefs.current
+                    .get(d.id)
+                    ?.firstElementChild?.classList.remove("is-held");
                 simRef.current?.release();
                 if (!d) return;
                 if (d.moved) {
@@ -314,6 +368,11 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
                 if (node) activate(node);
               }}
               onPointerCancel={() => {
+                const d = drag.current;
+                if (d)
+                  nodeRefs.current
+                    .get(d.id)
+                    ?.firstElementChild?.classList.remove("is-held");
                 drag.current = null;
                 simRef.current?.release();
               }}
@@ -335,25 +394,25 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
                 </text>
               ))}
               <g aria-hidden="true">
-                {data.edges.map((e) => {
+                {data.edges.map((e, i) => {
                   const a = byId.get(e.source)!;
                   const b = byId.get(e.target)!;
-                  const on = lit && (e.source === lit || e.target === lit);
+                  const on = !!lit && (e.source === lit || e.target === lit);
                   return (
-                    <line
+                    <path
                       key={`${e.source}-${e.target}`}
                       ref={(el) => {
                         const k = `${e.source}|${e.target}`;
                         if (el) edgeRefs.current.set(k, el);
                         else edgeRefs.current.delete(k);
                       }}
-                      x1={a.x}
-                      y1={a.y}
-                      x2={b.x}
-                      y2={b.y}
-                      stroke={on ? "var(--accent)" : "var(--fg)"}
-                      strokeOpacity={on ? 0.8 : lit ? 0.06 : 0.16}
-                      strokeWidth={on ? 1.25 : 1}
+                      d={curve(a.x, a.y, b.x, b.y)}
+                      fill="none"
+                      pathLength={e.kind === "same-cluster" ? undefined : 1}
+                      className={`lw-edge-line ${e.kind === "same-cluster" ? "lw-edge-cluster" : ""} ${on ? "is-on" : ""}`}
+                      style={
+                        { "--d": `${200 + i * 14}ms` } as React.CSSProperties
+                      }
                     />
                   );
                 })}
@@ -391,9 +450,11 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
                     );
                   })}
               </g>
-              {data.nodes.map((n) => {
+              {data.nodes.map((n, i) => {
                 const dim = isDim(n);
                 const active = lit === n.id;
+                const near =
+                  !!lit && !active && !!neighbors.get(lit)?.has(n.id);
                 return (
                   <g
                     key={n.id}
@@ -410,6 +471,9 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
                       const p = toSvg(e);
                       if (!p || e.button !== 0) return;
                       drag.current = { id: n.id, ...p, moved: false };
+                      nodeRefs.current
+                        .get(n.id)
+                        ?.firstElementChild?.classList.add("is-held");
                       simRef.current?.grab(n.id, p.x, p.y);
                       svgRef.current?.setPointerCapture(e.pointerId);
                     }}
@@ -456,51 +520,68 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
                     }}
                     className="cursor-grab outline-none active:cursor-grabbing [&:focus-visible_.star-ring]:opacity-100"
                     style={{
-                      opacity: dim ? 0.18 : 1,
-                      transition: "opacity 200ms",
+                      opacity: dim ? 0.2 : 1,
+                      transition:
+                        "opacity 240ms cubic-bezier(0.23, 1, 0.32, 1)",
                       touchAction: "none",
                     }}
                   >
-                    <circle
-                      className="star-ring opacity-0"
-                      cx={0}
-                      cy={0}
-                      r={n.r + 6}
-                      fill="none"
-                      stroke="var(--accent)"
-                      strokeWidth="2"
-                    />
-                    {n.significance >= 4 && (
+                    <g
+                      className={`lw-star ${active ? "is-active" : ""} ${near ? "is-near" : ""}`}
+                      style={
+                        {
+                          "--d": `${Math.round(Math.hypot(n.x - data.width / 2, n.y - data.height / 2) * 1.1) + i * 6}ms`,
+                        } as React.CSSProperties
+                      }
+                    >
                       <circle
+                        className="star-ring opacity-0"
                         cx={0}
                         cy={0}
-                        r={n.r + 4}
-                        fill="var(--accent)"
-                        opacity="0.12"
+                        r={n.r + 6}
+                        fill="none"
+                        stroke="var(--accent)"
+                        strokeWidth="2"
                       />
-                    )}
-                    <circle
-                      cx={0}
-                      cy={0}
-                      r={n.r}
-                      fill={
-                        active || selected === n.id
-                          ? "var(--accent)"
-                          : "var(--fg)"
-                      }
-                      stroke="var(--bg-card)"
-                      strokeWidth="2"
-                    />
-                    {(n.significance >= 3 || active) && (
+                      <circle
+                        className="lw-star-pulse"
+                        cx={0}
+                        cy={0}
+                        r={n.r + 3}
+                        fill="none"
+                        stroke="var(--accent)"
+                      />
+                      {n.significance >= 4 && (
+                        <circle
+                          cx={0}
+                          cy={0}
+                          r={n.r + 5}
+                          fill="var(--accent)"
+                          opacity="0.14"
+                        />
+                      )}
+                      <circle
+                        className="lw-star-core"
+                        cx={0}
+                        cy={0}
+                        r={n.r}
+                        fill={
+                          active || selected === n.id
+                            ? "var(--accent)"
+                            : "var(--fg)"
+                        }
+                        stroke="var(--bg-card)"
+                        strokeWidth="2"
+                      />
                       <text
                         x={0}
-                        y={n.r + 14}
+                        y={above.has(n.id) ? -n.r - 9 : n.r + 15}
                         textAnchor="middle"
-                        className="pointer-events-none fill-[var(--fg)] font-sans text-[12px] font-medium"
+                        className={`lw-star-label pointer-events-none font-sans font-medium ${n.significance >= 3 || active || near ? "text-[12px]" : "text-[11px] opacity-70"} ${active ? "fill-[var(--accent)]" : "fill-[var(--fg)]"}`}
                       >
                         {n.name}
                       </text>
-                    )}
+                    </g>
                   </g>
                 );
               })}
@@ -535,7 +616,8 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
                   page. Drag one and it springs back.
                 </p>
                 <p>
-                  Size = significance. Lines = shared stack or shared cluster.
+                  Size = significance. Solid line = shared stack. Dotted =
+                  shared cluster.
                 </p>
               </div>
             )}

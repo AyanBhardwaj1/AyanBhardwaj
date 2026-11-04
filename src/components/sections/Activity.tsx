@@ -29,7 +29,7 @@ export function Activity() {
     <section
       id="activity"
       aria-labelledby="activity-title"
-      className="section-y"
+      className="section-y pt-[clamp(80px,10vw,144px)]"
     >
       <div className="container-page">
         <SectionHeader

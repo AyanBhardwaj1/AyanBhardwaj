@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 /**
  * Ambient-rejection scope. Firmware v2 reads each sample twice, LED off then
@@ -20,6 +20,7 @@ const SCENES: { id: Scene; label: string }[] = [
 const N = 72;
 const FULL = 65535;
 const SIG = 16000;
+const STEP_MS = 110;
 
 type Sample = { off: number; on: number; gain: number };
 
@@ -50,6 +51,8 @@ export function Scope() {
   const [diff, setDiff] = useState(true);
   const [data, setData] = useState<Sample[]>([]);
   const ref = useRef<HTMLDivElement>(null);
+  const trace = useRef<SVGGElement>(null);
+  const live = useRef(false);
 
   useEffect(() => {
     const reduce = window.matchMedia(
@@ -83,23 +86,34 @@ export function Scope() {
     let id = 0;
     const run = () => {
       next(buf);
+      live.current = true;
       setData([...buf]);
     };
-    const io = new IntersectionObserver(([e]) => {
+    let seen = false;
+    const sync = () => {
       window.clearInterval(id);
-      if (e.isIntersecting) id = window.setInterval(run, 110);
+      if (seen && !document.hidden) id = window.setInterval(run, STEP_MS);
+    };
+    const io = new IntersectionObserver(([e]) => {
+      seen = e.isIntersecting;
+      sync();
     });
     if (ref.current) io.observe(ref.current);
+    document.addEventListener("visibilitychange", sync);
     return () => {
       window.clearInterval(id);
       io.disconnect();
+      document.removeEventListener("visibilitychange", sync);
     };
   }, [scene]);
 
   const W = 600;
   const H = 240;
+  const DX = W / (N - 2);
   const y = (v: number) => 12 + (1 - v / FULL) * (H - 24);
-  const x = (i: number) => (i / (N - 1)) * W;
+  // The oldest sample sits one step left of the frame, so sliding the trace
+  // one step right on every new sample never shows a gap.
+  const x = (i: number) => (i - 1) * DX;
   const line = (f: (s: Sample) => number) =>
     data.map((s, i) => `${x(i).toFixed(1)},${y(f(s)).toFixed(1)}`).join(" ");
 
@@ -111,6 +125,18 @@ export function Scope() {
     SATURATED: !!last && last.on >= FULL,
   };
   const outF = diff ? (s: Sample) => s.on - s.off : (s: Sample) => s.on;
+
+  // Glide between samples instead of jumping: each new sample shifts the
+  // polylines one step left, so start them one step right and slide back.
+  useLayoutEffect(() => {
+    const g = trace.current;
+    if (!g || !live.current || typeof g.animate !== "function") return;
+    live.current = false;
+    g.animate(
+      [{ transform: `translateX(${DX}px)` }, { transform: "translateX(0)" }],
+      { duration: STEP_MS, easing: "linear" },
+    );
+  }, [data, DX]);
 
   return (
     <div ref={ref} className="os-screen">
@@ -154,25 +180,36 @@ export function Scope() {
           >
             65,535 full scale
           </text>
-          <polyline
-            points={line((s) => s.off)}
-            fill="none"
-            stroke="var(--os-warn)"
-            strokeWidth="2"
-          />
-          <polyline
-            points={line((s) => s.on)}
-            fill="none"
-            stroke="var(--os-ink-soft)"
-            strokeWidth="2"
-            strokeDasharray="5 4"
-          />
-          <polyline
-            points={line(outF)}
-            fill="none"
-            stroke="var(--os-teal)"
-            strokeWidth="3.5"
-          />
+          <g ref={trace}>
+            <polyline
+              points={line((s) => s.off)}
+              fill="none"
+              stroke="var(--os-warn)"
+              strokeWidth="2"
+            />
+            <polyline
+              points={line((s) => s.on)}
+              fill="none"
+              stroke="var(--os-ink-soft)"
+              strokeWidth="2"
+              strokeDasharray="5 4"
+            />
+            <polyline
+              points={line(outF)}
+              fill="none"
+              stroke="var(--os-teal)"
+              strokeWidth="3.5"
+            />
+            {last ? (
+              <circle
+                cx={x(data.length - 1)}
+                cy={y(outF(last))}
+                r="5"
+                fill="var(--os-teal)"
+                className="os-scope-head"
+              />
+            ) : null}
+          </g>
         </svg>
         <ul className="os-small mt-3 flex flex-wrap gap-x-6 gap-y-1">
           <li>
