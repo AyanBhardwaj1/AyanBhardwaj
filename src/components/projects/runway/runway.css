@@ -1355,7 +1355,7 @@
   }
   .rw-draft[data-pending] {
     opacity: 0;
-    transform: translateX(18px);
+    transform: translateY(10px);
     transition-delay: 0ms;
   }
 }

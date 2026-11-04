@@ -42,8 +42,11 @@ function Head({
 
 function Shot({
   img,
+  wide = false,
 }: {
   img: { src: string; alt: string; width: number; height: number };
+  /** spans both gallery columns */
+  wide?: boolean;
 }) {
   return (
     <figure className={s.shot}>
@@ -52,7 +55,11 @@ function Shot({
         alt={img.alt}
         width={img.width}
         height={img.height}
-        sizes="(max-width: 768px) 100vw, 600px"
+        sizes={
+          wide
+            ? "(min-width: 1280px) 1184px, (min-width: 768px) 92vw, 100vw"
+            : "(min-width: 1280px) 584px, (min-width: 768px) 46vw, 100vw"
+        }
         className="h-auto w-full"
       />
     </figure>
@@ -316,7 +323,7 @@ export default function Page() {
           </Head>
           <div className="grid gap-4 md:grid-cols-2">
             <Reveal className="md:col-span-2">
-              <Shot img={media.lead} />
+              <Shot img={media.lead} wide />
             </Reveal>
             {[...media.styles, ...media.screens].map((m, i) => (
               <Reveal
@@ -324,7 +331,7 @@ export default function Page() {
                 delay={(i % 2) * 0.05}
                 className={i === 2 ? "md:col-span-2" : undefined}
               >
-                <Shot img={m} />
+                <Shot img={m} wide={i === 2} />
               </Reveal>
             ))}
           </div>
