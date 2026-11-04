@@ -17,6 +17,7 @@ import { SectionHeader } from "../ui/SectionHeader";
 import { ConstellationIsland } from "../viz/ConstellationIsland";
 import { CountUp } from "../motion/CountUp";
 import { MiniTerminal } from "../viz/MiniTerminal";
+import { StarIcon } from "../ui/StarIcon";
 
 const host = (url: string) =>
   url.replace(/^https?:\/\//, "").replace(/\/$/, "");
@@ -42,7 +43,7 @@ function Stars({ id }: { id: string }) {
   if (!n) return null;
   return (
     <span className="t-data text-muted">
-      <span aria-hidden="true">★</span> {n}
+      <StarIcon /> {n}
       <span className="sr-only"> GitHub stars</span>
     </span>
   );
@@ -316,7 +317,14 @@ function MossSdkGroup({ apps }: { apps: Project[] }) {
         </div>
         <p className="t-data text-muted">
           <span className="text-accent">idx</span> {apps.length}/{apps.length}{" "}
-          indexed{stars ? ` · ★ ${stars}` : ""}
+          indexed
+          {stars ? (
+            <>
+              {" · "}
+              <StarIcon /> {stars}
+              <span className="sr-only"> GitHub stars</span>
+            </>
+          ) : null}
         </p>
       </header>
       <ul className="relative">
@@ -547,7 +555,10 @@ export function Projects() {
           aside={
             <>
               {moss.length + mossSdk.length} apps ·{" "}
-              <span className="text-fg">★ {mossStars}</span> combined
+              <span className="text-fg">
+                <StarIcon /> {mossStars}
+              </span>
+              <span className="sr-only"> GitHub stars</span> combined
             </>
           }
         />

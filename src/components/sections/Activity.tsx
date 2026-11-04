@@ -1,4 +1,5 @@
 import profileFile from "@/data/github-profile.json";
+import { StarIcon } from "../ui/StarIcon";
 import { links } from "@/content/content";
 import { githubStats } from "@/lib/github";
 import { SectionHeader } from "../ui/SectionHeader";
@@ -40,8 +41,9 @@ export function Activity() {
           aside={
             <p className="t-data text-muted max-w-[40ch]">
               Public GitHub only, log-scaled so one big day doesn&apos;t flatten
-              the rest. {githubStats.publicRepos} public repos · ★{" "}
-              {githubStats.ownStars} ·{" "}
+              the rest. {githubStats.publicRepos} public repos · <StarIcon />{" "}
+              {githubStats.ownStars}
+              <span className="sr-only"> GitHub stars</span> ·{" "}
               <a
                 href={links.github.href}
                 target="_blank"
