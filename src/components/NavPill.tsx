@@ -15,8 +15,8 @@ const PINNED_ZONE = 160;
 const INTENT = 12;
 
 /**
- * Floating pill nav (design §5.1): top-center on desktop, docked bottom-center
- * on mobile. It steps out of the way while you read (hides on scroll down,
+ * Floating pill nav (design §5.1): top-center on desktop; on mobile it docks
+ * bottom-left and shares that baseline with the round ayan-bot launcher. It steps out of the way while you read (hides on scroll down,
  * returns on scroll up, near the top, on focus, or while open), so it never
  * sits on body text. The collapsed pill names the section you are in
  * ("ayan://bhardwaj/projects"); the ··· button expands it in place into chip
@@ -81,6 +81,17 @@ export function NavPill({ items }: { items: NavItem[] }) {
     };
   }, []);
 
+  // Mirror the state on <html> so other fixed chrome (the ayan-bot launcher)
+  // can step aside in sync: html[data-nav-hidden="true"].
+  const isHidden = hidden && !open;
+  useEffect(() => {
+    const root = document.documentElement;
+    root.dataset.navHidden = String(isHidden);
+    return () => {
+      delete root.dataset.navHidden;
+    };
+  }, [isHidden]);
+
   useEffect(() => {
     if (!open) return;
     const panel = ref.current;
@@ -105,13 +116,15 @@ export function NavPill({ items }: { items: NavItem[] }) {
 
   return (
     <div
-      className="nav-dock no-print pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-4 md:top-12 md:bottom-auto"
-      data-hidden={hidden && !open ? "true" : "false"}
+      className="nav-dock no-print pointer-events-none fixed inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-50 flex justify-start px-4 md:top-12 md:bottom-auto md:justify-center"
+      data-hidden={isHidden ? "true" : "false"}
     >
       <div
         ref={ref}
         className={`nav-pill border-line bg-bg-elev/90 pointer-events-auto rounded-[26px] border p-1.5 shadow-[var(--shadow-float)] backdrop-blur-[14px] backdrop-saturate-150 ${
-          open ? "w-[min(100%,34rem)]" : "w-[17.5rem]"
+          open
+            ? "w-[calc(100%-3.5rem)] md:w-[min(100%,34rem)]"
+            : "w-[calc(100%-3.5rem)] max-w-[20rem] md:w-[17.5rem]"
         }`}
       >
         <nav aria-label="Primary">

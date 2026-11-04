@@ -29,6 +29,9 @@ const instrument = Instrument_Serif({
   weight: "400",
   style: ["italic"],
   display: "swap",
+  // Accent face, never above the fold: don't spend a preload on it (it was
+  // flagged "preloaded but not used" on mobile). It swaps in when first used.
+  preload: false,
 });
 
 export const metadata: Metadata = {

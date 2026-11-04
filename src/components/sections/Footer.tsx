@@ -14,7 +14,11 @@ export function Footer({ hasResume }: { hasResume: boolean }) {
       data-theme="dark"
       className="border-line bg-bg-elev text-fg relative overflow-hidden border-t"
     >
-      <div className="container-page grid gap-10 pt-20 pb-12 md:grid-cols-3">
+      <div
+        data-reveal-stagger=""
+        style={{ "--stagger": "90ms" } as React.CSSProperties}
+        className="container-page grid gap-10 pt-20 pb-12 md:grid-cols-3"
+      >
         <div>
           <h2 className="t-label text-muted mb-4">/Quick links</h2>
           <ul className="flex flex-wrap gap-2">

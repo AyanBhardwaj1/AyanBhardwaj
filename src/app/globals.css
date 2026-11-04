@@ -180,7 +180,9 @@
 
   html {
     -webkit-text-size-adjust: 100%;
-    scroll-padding-top: 6.5rem;
+    /* Sections carry their own top padding; only clear the 32px status bar.
+       Bare anchors (project cards) get extra room via scroll-margin below. */
+    scroll-padding-top: 2rem;
     background: var(--bg);
   }
 
@@ -213,6 +215,10 @@
   }
   :where(a, button, summary):not([class]):focus-visible {
     border-radius: 2px;
+  }
+
+  [id^="project-"] {
+    scroll-margin-top: 5rem;
   }
 
   [tabindex="-1"]:focus {
@@ -1250,7 +1256,7 @@ html:not(.js) .section-rule::after {
 
 /* ---------- Footer wordmark: letters rise as the page ends ---------- */
 .wm {
-  font-size: 15.5vw;
+  font-size: 12.4vw;
   font-weight: 800;
   font-stretch: 118%;
   letter-spacing: -0.045em;
@@ -1278,8 +1284,8 @@ html:not(.js) .section-rule::after {
   color: transparent;
   background: linear-gradient(
     to bottom,
-    color-mix(in oklab, var(--fg) 22%, transparent) 10%,
-    color-mix(in oklab, var(--fg) 4%, transparent) 95%
+    color-mix(in oklab, var(--fg) 34%, transparent) 0%,
+    color-mix(in oklab, var(--fg) 9%, transparent) 100%
   );
   -webkit-background-clip: text;
   background-clip: text;
