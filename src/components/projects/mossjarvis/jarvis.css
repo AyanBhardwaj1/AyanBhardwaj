@@ -1723,7 +1723,9 @@ html[data-jarvis-boot] .jv-boot::after {
 .jv-brainCanvas {
   display: block;
   width: 100%;
-  height: clamp(360px, 52vw, 560px);
+  /* Fills the row when the inspector beside it is taller. */
+  height: 100%;
+  min-height: clamp(360px, 52vw, 560px);
   touch-action: none;
   cursor: grab;
 }
