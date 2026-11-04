@@ -58,6 +58,16 @@ function samplePaths(n: number, pt: (m: number, c: number) => string) {
 }
 
 const MID = DEMO.cash / DEMO.netBurn;
+
+/** Side view of a small jet, nose at +x, centred on its wheels (0,0). */
+const PLANE =
+  "M-22,-6 L-17,-6 L-11,-1.5 L6,-1.5 Q15,-1.5 18,1.2 Q15,3.6 6,3.6 L-15,3.6 Z M-4,-1.5 L-11,-9 L-7,-9 L3,-1.5 Z M-6,3.6 L-12,10 L-8,10 L1,3.6 Z";
+
+function slopeDeg(g: Geo, x: (m: number) => number, y: (c: number) => number) {
+  const dx = x(MID) - x(0);
+  const dy = g.B - y(DEMO.cash);
+  return (Math.atan2(dy, dx) * 180) / Math.PI;
+}
 const ACT = (DEMO.cash + 119.99) / (DEMO.netBurn - 2570);
 
 function Chart({ g, id, wide }: { g: Geo; id: string; wide: boolean }) {
@@ -120,9 +130,36 @@ function Chart({ g, id, wide }: { g: Geo; id: string; wide: boolean }) {
         <path d={straight(DEMO.cash + 119.99, ACT)} className={s.gsAct} />
       </g>
 
+      {/* touchdown: a ring that ripples once the aircraft lands */}
+      <circle cx={x(MID)} cy={g.B} r={7} className={s.gsRing} />
+      <circle cx={x(MID)} cy={g.B} r={6} className={s.gsTouch} />
+
+      {/* the aircraft flies today's burn line from now to zero cash */}
+      <g
+        className={s.gsPlane}
+        style={
+          {
+            "--x0": `${x(0)}px`,
+            "--y0": `${y(DEMO.cash)}px`,
+            "--x1": `${x(MID)}px`,
+            "--y1": `${g.B}px`,
+          } as React.CSSProperties
+        }
+      >
+        <g
+          className={s.gsPlanePitch}
+          style={
+            {
+              "--pitch": `${slopeDeg(g, x, y).toFixed(1)}deg`,
+            } as React.CSSProperties
+          }
+        >
+          <path d={PLANE} className={s.gsPlaneBody} />
+        </g>
+      </g>
+
       {wide && (
         <g className={s.gsLabels}>
-          <circle cx={x(MID)} cy={g.B} r={6} className={s.gsTouch} />
           <text
             x={x(3.6)}
             y={y(DEMO.cash * (1 - 3.6 / DEMO.revenueDrop)) + 110}

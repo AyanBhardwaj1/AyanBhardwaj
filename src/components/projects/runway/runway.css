@@ -1164,3 +1164,213 @@
 .rw-close .rw-btn:hover {
   background: #0b4a46;
 }
+
+/* ── hero lead: flight strip above the name ─────────────────────── */
+
+.rw-heroLead {
+  display: grid;
+  gap: 28px;
+  align-content: space-between;
+}
+@media (min-width: 1024px) {
+  .rw-heroLead {
+    align-self: stretch;
+  }
+}
+.rw-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 0;
+  margin: 0;
+  font-size: 15px;
+}
+.rw-strip > div {
+  display: grid;
+  gap: 4px;
+  padding-inline: 0 22px;
+  margin-inline: 0 22px;
+  border-right: 1px solid rgb(168 178 195 / 0.22);
+}
+.rw-strip > div:last-child {
+  border-right: 0;
+  margin-right: 0;
+  padding-right: 0;
+}
+.rw-strip dt {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rw-muted);
+}
+.rw-strip dd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.rw-beacon {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--rw-amber);
+  box-shadow: 0 0 10px 2px rgb(245 158 11 / 0.45);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .rw-beacon {
+    animation: rw-beacon 2.4s ease-in-out infinite;
+  }
+}
+@keyframes rw-beacon {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* ── glide slope: the aircraft and the touchdown ripple ─────────── */
+
+.rw-gsPlane {
+  transform: translate(var(--x1), calc(var(--y1) - 11px));
+}
+.rw-gsPlanePitch {
+  scale: 1.35;
+}
+.rw-glideNarrow .rw-gsPlanePitch {
+  scale: 0.9;
+}
+.rw-gsPlaneBody {
+  fill: var(--rw-ink);
+  stroke: var(--rw-navy);
+  stroke-width: 2.5px;
+  stroke-linejoin: round;
+  paint-order: stroke;
+}
+.rw-gsRing {
+  fill: none;
+  stroke: var(--rw-cleared);
+  stroke-width: 2;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html.js .rw-gsPlane {
+    transform: translate(var(--x0), var(--y0));
+    opacity: 0;
+    transition:
+      transform 2400ms cubic-bezier(0.33, 0.1, 0.25, 1) 350ms,
+      opacity 300ms ease 350ms;
+  }
+  html.js .is-in .rw-gsPlane {
+    transform: translate(var(--x1), calc(var(--y1) - 11px));
+    opacity: 1;
+  }
+  /* Pitched down the slope on approach, flared level for touchdown. */
+  html.js .rw-gsPlanePitch {
+    rotate: var(--pitch);
+    transition: rotate 700ms cubic-bezier(0.33, 1, 0.68, 1) 2050ms;
+  }
+  html.js .is-in .rw-gsPlanePitch {
+    rotate: 0deg;
+  }
+  html.js .is-in .rw-gsRing {
+    animation: rw-ring 1400ms cubic-bezier(0.16, 1, 0.3, 1) 2650ms 2 both;
+  }
+}
+@keyframes rw-ring {
+  from {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(4.5);
+  }
+}
+
+/* ── runway lights: the aircraft rolling toward zero ─────────────── */
+
+.rw-roll {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform: translateY(var(--roll, 92%));
+  transition: transform 160ms linear;
+}
+.rw-rollJet {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: clamp(64px, 9vw, 116px);
+  height: auto;
+  fill: var(--rw-ink);
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 18px 14px rgb(0 0 0 / 0.55));
+}
+.rw-roll[data-zero] .rw-rollJet {
+  fill: var(--rw-amber);
+}
+
+/* ── tower log: drafts land in the inbox when the run files them ── */
+
+.rw-inboxHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.rw-inboxCount {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--rw-muted);
+  transition: color 260ms ease;
+}
+.rw-inboxCount[data-all] {
+  color: var(--rw-cleared);
+}
+.rw-caret {
+  display: inline-block;
+  width: 0.6em;
+  height: 1.1em;
+  vertical-align: -0.2em;
+  background: var(--rw-cleared);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .rw-caret {
+    animation: rw-beacon 1s steps(1, end) infinite;
+  }
+  .rw-draft {
+    transition:
+      background-color 260ms ease,
+      opacity 320ms ease calc(var(--i, 0) * 70ms),
+      transform 420ms var(--rw-ease) calc(var(--i, 0) * 70ms);
+  }
+  .rw-draft[data-pending] {
+    opacity: 0;
+    transform: translateX(18px);
+    transition-delay: 0ms;
+  }
+}
+.rw-caret {
+  margin-left: 0.4em;
+}
+.rw-inboxList {
+  position: relative;
+}
+.rw-inboxWait {
+  position: absolute;
+  inset: 0 0 auto;
+  padding: 18px;
+  border: 1px dashed rgb(168 178 195 / 0.3);
+  border-radius: 6px;
+  font-size: 15px;
+  color: var(--rw-muted);
+}
