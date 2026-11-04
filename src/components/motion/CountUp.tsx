@@ -65,10 +65,16 @@ export function CountUp({
       { threshold: 0.6 },
     );
     io.observe(el);
-    return () => {
+    // Printing (or saving as PDF) shows the real figure, never a stray zero.
+    const settle = () => {
       io.disconnect();
       cancelAnimationFrame(frame);
       el.textContent = value;
+    };
+    window.addEventListener("beforeprint", settle);
+    return () => {
+      window.removeEventListener("beforeprint", settle);
+      settle();
     };
   }, [value, duration]);
 
