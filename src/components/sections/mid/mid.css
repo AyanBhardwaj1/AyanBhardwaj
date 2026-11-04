@@ -19,7 +19,7 @@
   flex-direction: column;
   justify-content: space-between;
   gap: clamp(40px, 7vw, 88px);
-  min-height: min(78svh, 640px);
+  min-height: min(64svh, 560px);
   padding: clamp(20px, 3vw, 32px);
   /* Terminal crop marks in the four corners. */
   background:
