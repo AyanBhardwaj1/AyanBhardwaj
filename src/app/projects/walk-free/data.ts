@@ -3,7 +3,7 @@ import type { ProjectPageData } from "@/components/project-page/types";
 export const data: ProjectPageData = {
   overview: [
     "Extreme heat is the deadliest weather in the US, and maps optimize for minutes, not shade. Walk-Free shows how hot every street will feel at the hour you walk it, then finds the shadiest way there.",
-    "Built for the Meta Global AI Developer Hackathon (Indie track). Meta's Muse Spark plans the walk in your own language, and the map works without an account at /demo.",
+    "Built for the Meta Global AI Developer Hackathon (Indie track). Meta's Muse Spark plans the walk in your own language, and the guest demo works without an account.",
   ],
   features: [
     {

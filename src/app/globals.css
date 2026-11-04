@@ -693,3 +693,286 @@ dialog.palette[open] > * {
     transform: translateY(6px);
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Motion layer v2: cards, Moss SDK group, hero letters, rules, VT.    */
+/* Transforms and opacity only; every move has a reduced-motion stop.  */
+/* ------------------------------------------------------------------ */
+
+.pill {
+  transition:
+    background-color 240ms var(--ease-expo),
+    border-color 240ms var(--ease-expo),
+    transform 120ms var(--ease-expo),
+    translate 420ms var(--ease-expo);
+}
+
+/* Project cards: lift, cursor-follow light, image parallax, CTA reveal. */
+.project-card {
+  transition:
+    transform 420ms var(--ease-expo),
+    border-color 240ms var(--ease-expo);
+}
+.card-glow {
+  opacity: 0;
+  background: radial-gradient(
+    380px circle at var(--gx, 50%) var(--gy, 0%),
+    var(--accent-glow),
+    transparent 65%
+  );
+  transition: opacity 300ms ease;
+}
+.tilt-layer {
+  scale: 1.02;
+  transition:
+    transform 700ms var(--ease-expo),
+    scale 700ms var(--ease-expo);
+}
+.card-cta {
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 240ms var(--ease-expo),
+    transform 240ms var(--ease-expo);
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .project-card:hover {
+    transform: translateY(-4px);
+  }
+  .project-card:hover .tilt-layer {
+    scale: 1.06;
+    transform: translate3d(
+      calc(var(--px, 0) * -10px),
+      calc(var(--py, 0) * -8px),
+      0
+    );
+  }
+}
+.project-card:hover .card-glow,
+.project-card:focus-within .card-glow {
+  opacity: 1;
+}
+.project-card:hover .card-cta,
+.project-card:focus-within .card-cta {
+  opacity: 1;
+  transform: none;
+}
+@media (hover: none) {
+  .card-cta {
+    opacity: 1;
+    transform: none;
+  }
+}
+.project-card:has(.card-link:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.card-link:focus-visible {
+  outline: none;
+}
+
+.live-dot {
+  box-shadow: 0 0 0 0 color-mix(in oklab, var(--up) 60%, transparent);
+  animation: live-ping 2.4s var(--ease-expo) infinite;
+}
+@keyframes live-ping {
+  70%,
+  100% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+
+/* Built on the Moss SDK: an index scan when the group arrives, rows that
+   "index" one after another, a quick retrieval sweep on hover, peek image. */
+.moss-scan::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 40%;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--accent-glow) 70%,
+    color-mix(in oklab, var(--accent) 45%, transparent) 100%
+  );
+  transform: translateY(-110%);
+  opacity: 0;
+}
+.moss-sdk.is-in .moss-scan::before {
+  animation: moss-scan 1400ms var(--ease-in-out) 200ms 1;
+}
+@keyframes moss-scan {
+  0% {
+    opacity: 1;
+    transform: translateY(-110%);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(260%);
+  }
+}
+.moss-bar {
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform-origin: top;
+  transform: scaleY(0);
+  transition: transform 500ms var(--ease-expo);
+  transition-delay: calc(var(--i, 0) * 90ms + 300ms);
+}
+.moss-sdk.is-in .moss-bar,
+html:not(.js) .moss-bar {
+  transform: scaleY(1);
+}
+.moss-row {
+  overflow: clip;
+  transition: background-color 180ms ease;
+}
+.moss-row::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    color-mix(in oklab, var(--accent) 14%, transparent) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+}
+.moss-row:hover,
+.moss-row:focus-within {
+  background: var(--bg-card-hover);
+  overflow: visible;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .moss-row:hover::after {
+    animation: moss-sweep 520ms var(--ease-expo) 1;
+  }
+}
+@keyframes moss-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}
+.moss-peek {
+  opacity: 0;
+  transform: translateY(8px) scale(0.96);
+  transform-origin: bottom right;
+  transition:
+    opacity 200ms ease,
+    transform 320ms var(--ease-expo);
+}
+.moss-row:hover .moss-peek {
+  opacity: 1;
+  transform: none;
+}
+.moss-cell {
+  animation: moss-cell 2.8s var(--ease-in-out) var(--d, 0ms) infinite;
+}
+@keyframes moss-cell {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+  }
+  30% {
+    opacity: 1;
+  }
+}
+
+/* Hero name: letters rise in a stagger (CSS only, runs before hydration). */
+.hero-letter {
+  display: inline-block;
+  animation: letter-in 900ms var(--ease-expo) both;
+  animation-delay: calc(var(--i, 0) * 38ms + var(--line-delay, 0ms));
+}
+@keyframes letter-in {
+  from {
+    opacity: 0.15;
+    filter: blur(10px);
+    transform: translateY(0.35em) rotate(4deg);
+  }
+}
+
+/* Section header rule draws in when the header arrives. */
+.section-rule {
+  position: relative;
+}
+.section-rule::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--line-strong);
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 1100ms var(--ease-expo) 120ms;
+}
+.section-rule.is-in::after,
+html:not(.js) .section-rule::after {
+  transform: none;
+}
+
+/* Count-up figures keep their width so nothing shifts while they run. */
+.count-up {
+  font-variant-numeric: tabular-nums;
+}
+
+/* View transitions into and out of project pages. */
+::view-transition-group(.vt-morph) {
+  animation-duration: 520ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+::view-transition-image-pair(.vt-morph) {
+  animation-name: vt-blur;
+}
+@keyframes vt-blur {
+  40% {
+    filter: blur(2px);
+  }
+}
+::view-transition-new(.vt-page-in) {
+  animation: vt-rise 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+::view-transition-old(.vt-page-out) {
+  animation: vt-fade 180ms ease-out both reverse;
+}
+@keyframes vt-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+@keyframes vt-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+  .moss-cell,
+  .live-dot,
+  .hero-letter {
+    animation: none !important;
+  }
+  .moss-bar,
+  .section-rule::after {
+    transform: none;
+  }
+}

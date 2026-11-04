@@ -33,7 +33,7 @@ export const projectMedia: Record<string, Media> = {
   },
   mycelium: {
     src: "/media/mycelium/graph.jpg",
-    alt: "Mycelium's graph view connecting related pages the user has read",
+    alt: "Mycelium's search palette (from its demo video): a concept query returning ranked pages the user has read",
     width: 1600,
     height: 900,
   },
@@ -72,6 +72,30 @@ export const projectMedia: Record<string, Media> = {
     alt: "DejaVu semantic journal cover",
     width: 1200,
     height: 630,
+  },
+  "walk-free": {
+    src: "/media/projects/walk-free/demo-utaustin.jpg",
+    alt: "Walk-Free at UT Austin: a 3D campus with a shaded walking route and route cards comparing sun exposure",
+    width: 1280,
+    height: 800,
+  },
+  runway: {
+    src: "/media/projects/runway/landing-hero.jpg",
+    alt: "Runway's landing page: a runway check card with cash, burn, months left and the date cash runs out",
+    width: 1440,
+    height: 900,
+  },
+  oncosense: {
+    src: "/media/projects/oncosense/photo-band-worn-electronics.jpg",
+    alt: "The OncoSense band worn on a forearm, with the microcontroller and wiring on the outer face",
+    width: 1164,
+    height: 910,
+  },
+  stack: {
+    src: "/media/projects/stack/hero-terminal-style.jpg",
+    alt: "Stack's landing page previewing a computer science workspace in its terminal style, with lecture notes and due dates",
+    width: 1440,
+    height: 900,
   },
   "golden-era-soccer": {
     src: "/media/golden-era/og.jpg",

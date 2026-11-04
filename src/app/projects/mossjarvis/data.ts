@@ -27,6 +27,7 @@ export const data: ProjectPageData = {
     "Live memory is a recent-turn buffer plus a Moss local SessionIndex; long-term memory syncs to Moss Cloud when quota allows.",
     "Any OpenRouter chat model can be selected.",
     "The macOS app is self-contained: it bundles the Next.js standalone build, Moss's native Apple Silicon module and Node itself.",
+    "Adapts the architecture and ingestion ideas of moss-brain by Aarush Nigam (MIT license), reimplemented in TypeScript.",
   ],
   facts: [
     ["Built at", "Moss · YC F25"],
