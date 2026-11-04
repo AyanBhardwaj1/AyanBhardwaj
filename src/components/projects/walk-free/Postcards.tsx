@@ -240,7 +240,8 @@ function Skyline({ c, seed }: { c: City; seed: number }) {
 
 export function Postcards() {
   return (
-    <ul className="wf-cards" aria-label="Seven fictional cities">
+    // Scrolls sideways below 1100px, so it takes focus for arrow keys.
+    <ul className="wf-cards" aria-label="Seven fictional cities" tabIndex={0}>
       {CITIES.map((c, i) => (
         <li key={c.name} className="wf-card">
           <div className="wf-card-sky" style={{ background: c.sky[0] }}>

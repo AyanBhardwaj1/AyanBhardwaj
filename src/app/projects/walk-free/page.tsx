@@ -7,6 +7,7 @@ import {
 import { CanopyReveal } from "@/components/projects/walk-free/CanopyReveal";
 import { DayPlate } from "@/components/projects/walk-free/DayPlate";
 import { PlantRow } from "@/components/projects/walk-free/PlantRow";
+import { Playing } from "@/components/projects/walk-free/Playing";
 import { Postcards } from "@/components/projects/walk-free/Postcards";
 import { RouteDuel } from "@/components/projects/walk-free/RouteDuel";
 import "@/components/projects/walk-free/walkfree.css";
@@ -309,9 +310,9 @@ export default function Page() {
               </p>
             </Reveal>
           </div>
-          <div className="mt-14">
+          <Playing className="mt-14">
             <Postcards />
-          </div>
+          </Playing>
         </div>
       </section>
 

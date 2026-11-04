@@ -330,11 +330,11 @@
 
 @keyframes wf-pop {
   from {
-    transform: scale(0);
+    transform: scale(0.6);
     opacity: 0;
   }
   70% {
-    transform: scale(1.18);
+    transform: scale(1.12);
     opacity: 1;
   }
   to {
@@ -563,11 +563,14 @@
     rgb(220 225 235 / 0.28) 14px 15px
   );
   background-size: 60px 60px;
+  /* oversized by one tile so moving it a tile is seamless (transform only) */
+  top: -60px;
+  right: -16px;
   animation: wx-rain 0.7s linear infinite;
 }
 @keyframes wx-rain {
   to {
-    background-position: -16px 60px;
+    transform: translate(-16px, 60px);
   }
 }
 .wx-streak {
@@ -581,7 +584,7 @@
   background-repeat: repeat-x;
   top: 34%;
   height: 3px;
-  inset-inline: 0;
+  inset-inline: -160px 0;
   bottom: auto;
   animation: wx-streak 1.4s linear infinite;
 }
@@ -591,8 +594,11 @@
 }
 @keyframes wx-streak {
   to {
-    background-position: 160px 0;
+    transform: translateX(160px);
   }
+}
+html.js .wf-play:not([data-playing]) [class*="wx-"] {
+  animation-play-state: paused;
 }
 .wx-aurora {
   top: 18%;

@@ -43,16 +43,23 @@ export function DayPlate() {
   const [hour, setHour] = useState(15);
   const pinned = useRef(false);
 
-  const metrics = useCallback(() => {
+  // Page-space position of the pinned section, measured on layout changes
+  // only (never inside the scroll handler).
+  const cache = useRef<{ top: number; travel: number } | null>(null);
+  const measure = useCallback(() => {
     const el = ref.current;
     if (!el) return null;
     const stage = el.firstElementChild as HTMLElement | null;
     const top = el.getBoundingClientRect().top + window.scrollY;
     const travel = el.offsetHeight - (stage?.offsetHeight ?? 0);
-    return { top: top - 48, travel: Math.max(1, travel) };
+    cache.current = { top: top - 48, travel: Math.max(1, travel) };
+    return cache.current;
   }, []);
+  const metrics = useCallback(() => cache.current ?? measure(), [measure]);
 
   useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     let raf = 0;
     const onScroll = () => {
@@ -71,17 +78,35 @@ export function DayPlate() {
       if (pinned.current) onScroll();
       else setHour(15);
     };
+    // Listen to scroll only while the section is near the viewport; settle
+    // on the nearest end when it leaves.
+    let on = false;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting === on) return;
+        on = e.isIntersecting;
+        if (on) window.addEventListener("scroll", onScroll, { passive: true });
+        else window.removeEventListener("scroll", onScroll);
+        onScroll();
+      },
+      { rootMargin: "10% 0px" },
+    );
+    io.observe(el);
+    const ro = new ResizeObserver(() => {
+      measure();
+      onScroll();
+    });
+    ro.observe(document.documentElement);
     setup();
     mq.addEventListener("change", setup);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
     return () => {
       cancelAnimationFrame(raf);
+      io.disconnect();
+      ro.disconnect();
       mq.removeEventListener("change", setup);
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
     };
-  }, [metrics]);
+  }, [measure, metrics]);
 
   const onSlide = (h: number) => {
     setHour(h);
