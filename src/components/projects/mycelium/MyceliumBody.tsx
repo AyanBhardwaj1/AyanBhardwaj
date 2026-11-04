@@ -6,6 +6,7 @@ import { getProject } from "@/lib/projects";
 import { Graph } from "./Graph";
 import { Ingest } from "./Ingest";
 import { Palette } from "./Palette";
+import { RestartCold } from "./RestartCold";
 import { Privacy } from "./Privacy";
 import "./mycelium.css";
 
@@ -37,7 +38,7 @@ function Chapter({
 
 export function MyceliumBody() {
   const p = getProject("mycelium");
-  const [lead, ...promo] = data.promo;
+  const promo = data.promo;
   return (
     <div className="myc-page">
       <div className="myc-haze" aria-hidden="true" />
@@ -80,23 +81,15 @@ export function MyceliumBody() {
                 <span className="sr-only"> (opens in a new tab)</span>
               </a>
             )}
-            <a href="#myc-search" className="myc-btn myc-btnGhost">
-              Try the palette <span aria-hidden="true">↓</span>
+            <a href="#myc-ingest" className="myc-btn myc-btnGhost">
+              See how it works <span aria-hidden="true">↓</span>
             </a>
           </div>
           <p className="myc-note">{data.noLive}</p>
         </div>
-        <figure className="myc-heroFig">
-          <Image
-            src={lead.src}
-            alt={lead.alt}
-            width={lead.width}
-            height={lead.height}
-            sizes="(max-width: 1024px) 100vw, 560px"
-            preload
-          />
-          <figcaption>Promo video title card</figcaption>
-        </figure>
+        <div className="myc-heroDemo" id="myc-palette">
+          <Palette autoplay />
+        </div>
       </section>
 
       <section
@@ -147,7 +140,49 @@ export function MyceliumBody() {
         title="Search by idea, not title."
       >
         <p className="myc-prose myc-wide">{data.searchNote}</p>
-        <Palette />
+        <figure className="myc-race" data-inview="">
+          <figcaption className="myc-raceHead">
+            One cold query, two answers
+          </figcaption>
+          <ol>
+            <li style={{ "--at": 0, "--to": 0.125 } as React.CSSProperties}>
+              <b>Keystroke</b>
+              <span>150 ms debounce</span>
+            </li>
+            <li
+              data-lane="cache"
+              style={{ "--at": 0.125, "--to": 0.21 } as React.CSSProperties}
+            >
+              <b>LOCAL CACHE</b>
+              <span>lexical fallback renders after about 250 ms</span>
+            </li>
+            <li
+              data-lane="wasm"
+              style={{ "--at": 0.125, "--to": 1 } as React.CSSProperties}
+            >
+              <b>LOCAL WASM</b>
+              <span>
+                Moss hits replace the fallback when they arrive; it gets 1.2 s
+                before timing out
+              </span>
+            </li>
+          </ol>
+          <p className="myc-raceAxis" aria-hidden="true">
+            <span>0</span>
+            <span>250 ms</span>
+            <span>1.2 s</span>
+          </p>
+        </figure>
+        <div className="myc-paletteNote">
+          <p>
+            The palette at the top of the page runs this race in your browser,
+            over a 40-page demo index with a tiny hashed embedding, not
+            Moss&apos;s model. The first query after a cold start shows it:{" "}
+            <b>LOCAL CACHE</b> answers while the index warms, then{" "}
+            <b>LOCAL WASM</b> results replace it.
+          </p>
+          <RestartCold />
+        </div>
       </Chapter>
 
       <Chapter
@@ -224,14 +259,14 @@ export function MyceliumBody() {
         <p className="myc-note myc-wide">{data.promoNote}</p>
         <div className="myc-promo">
           {promo.map((m, i) => (
-            <Reveal key={m.src} delay={(i % 3) * 0.06}>
+            <Reveal key={m.src} delay={(i % 2) * 0.06}>
               <figure>
                 <Image
                   src={m.src}
                   alt={m.alt}
                   width={m.width}
                   height={m.height}
-                  sizes="(max-width: 768px) 100vw, 400px"
+                  sizes="(max-width: 768px) 100vw, 600px"
                 />
               </figure>
             </Reveal>
