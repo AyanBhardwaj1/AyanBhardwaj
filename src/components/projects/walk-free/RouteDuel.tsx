@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Plan } from "./Plan";
 import {
   allExposure,
@@ -25,6 +25,25 @@ const HOUR = 15;
 export function RouteDuel() {
   const [alpha, setAlpha] = useState(3);
   const [show, setShow] = useState<"quick" | "shade">("shade");
+  // The highlighted walk draws itself in the first time the plan is on
+  // screen, then again on every switch (the path remounts on a new key).
+  const [seen, setSeen] = useState(false);
+  const plan = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = plan.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        setSeen(true);
+        io.disconnect();
+      },
+      { threshold: 0.4 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   const base = useMemo(() => {
     const shadows = shadowsAt(HOUR);
@@ -49,8 +68,11 @@ export function RouteDuel() {
   const extra = shade.len / base.quick.len - 1;
 
   return (
-    <div className="grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-12">
-      <div className="lg:col-span-7">
+    <div
+      className="wf-duel grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-12"
+      data-seen={seen ? "" : undefined}
+    >
+      <div className="lg:col-span-7" ref={plan}>
         <Plan
           id="wf-route-plan"
           shadows={base.shadows}
@@ -63,7 +85,7 @@ export function RouteDuel() {
         >
           <path
             d={ptsToD(other.pts)}
-            className="wf-route"
+            className="wf-route wf-route-other"
             stroke="var(--wf-ink)"
             strokeOpacity="0.35"
             strokeWidth="9"
@@ -164,11 +186,15 @@ export function RouteDuel() {
               title="Quickest"
               r={base.quick}
               active={show === "quick"}
+              drawKey={activeKey}
+              color="var(--wf-brick)"
             />
             <RouteCard
               title="More shade"
               r={shade}
               active={show === "shade"}
+              drawKey={activeKey}
+              color="var(--wf-shade)"
               note={
                 same
                   ? "Same as quickest"
@@ -195,11 +221,15 @@ function RouteCard({
   r,
   active,
   note,
+  drawKey,
+  color,
 }: {
   title: string;
   r: Route;
   active: boolean;
   note?: string;
+  drawKey: string;
+  color: string;
 }) {
   const fl = feelsLike(HOUR);
   const share = r.shadeLen / r.len;
@@ -212,6 +242,14 @@ function RouteCard({
         {title}
         {active && <span className="sr-only"> (highlighted)</span>}
       </h3>
+      {/* Fills in step with the line on the plan, in the line's colour. */}
+      <span
+        key={active ? drawKey : "idle"}
+        className="wf-duel-rule"
+        data-on={active ? "" : undefined}
+        style={{ "--c": color } as React.CSSProperties}
+        aria-hidden="true"
+      />
       <p className="wf-num wf-serif mt-1 text-[44px] leading-none">
         {Math.round(minutes(r.len))}
         <span className="text-[20px]"> min</span>

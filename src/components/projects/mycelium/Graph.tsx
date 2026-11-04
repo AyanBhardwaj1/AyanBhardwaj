@@ -9,6 +9,7 @@ import {
   useSyncExternalStore,
 } from "react";
 import { DOMAINS, PAGES, domainColor, type Page } from "./corpus";
+import { usePaletteFind, type PaletteFind } from "./link";
 import "./mycelium.css";
 
 type N = Page & {
@@ -126,17 +127,23 @@ function step(nodes: N[], edges: E[], alpha: number, sx = 1) {
   }
 }
 
-const mq = () => window.matchMedia("(prefers-reduced-motion: reduce)");
-const useReduced = () =>
+const useMedia = (query: string) =>
   useSyncExternalStore(
     (cb) => {
-      const m = mq();
+      const m = window.matchMedia(query);
       m.addEventListener("change", cb);
       return () => m.removeEventListener("change", cb);
     },
-    () => mq().matches,
+    () => window.matchMedia(query).matches,
     () => false,
   );
+const useReduced = () => useMedia("(prefers-reduced-motion: reduce)");
+
+/** Inspector column reserved on wide canvases: 320 panel + 12 inset + 12 gap. */
+const INSET = 344;
+const WIDE = "(min-width: 900px)";
+
+type View = { k: number; cx: number; cy: number; ox: number };
 
 export function Graph() {
   const edges = useMemo(() => affinity(), []);
@@ -146,17 +153,28 @@ export function Graph() {
   const [sel, setSel] = useState<number | null>(null);
   const [hover, setHover] = useState<number | null>(null);
   const [query, setQuery] = useState("");
+  // Desktop opens the inspector on a default page the first time the graph
+  // is on screen; closing it returns to click-to-inspect.
+  const [seen, setSeen] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  // A palette search the visitor cleared from the graph stays cleared here.
+  const [ignored, setIgnored] = useState<PaletteFind>(null);
   const reduce = useReduced();
+  const wide = useMedia(WIDE);
+  const find = usePaletteFind();
   const searchId = useId();
   const state = useRef({
     alpha: 1,
     grow: 0,
     sel,
     hover,
-    query,
+    shown: null as number | null,
+    rank: null as Map<number, number> | null,
+    inset: false,
+    settling: false,
     drag: -1 as number,
     sx: 0,
-    tf: { k: 1, cx: 0, cy: 0 },
+    tf: null as View | null,
   });
 
   const neighbours = useMemo(() => {
@@ -169,9 +187,27 @@ export function Graph() {
     return m;
   }, [edges]);
 
+  // The biggest, best-connected spore is a fair first page to inspect.
+  const fallback = useMemo(() => {
+    let best = 0;
+    PAGES.forEach((p, i) => {
+      const score =
+        (neighbours.get(i)?.length ?? 0) * 10 + p.revisits + p.matches;
+      const top =
+        (neighbours.get(best)?.length ?? 0) * 10 +
+        PAGES[best].revisits +
+        PAGES[best].matches;
+      if (score > top) best = i;
+    });
+    return best;
+  }, [neighbours]);
+
+  // The graph's own search wins while it has text; otherwise a live palette
+  // search lights its results here.
+  const palette = !query.trim() && find && find !== ignored ? find : null;
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return null;
+    if (!q) return palette ? new Set(palette.ids) : null;
     return new Set(
       PAGES.filter(
         (p) =>
@@ -180,8 +216,14 @@ export function Graph() {
           p.domain.includes(q),
       ).map((p) => p.id),
     );
-  }, [query]);
+  }, [query, palette]);
   const matchRef = useRef(matches);
+
+  const preview = wide && seen && !dismissed;
+  const shown = sel ?? (preview ? (hover ?? fallback) : null);
+  // Reserve the inspector's column from the start on desktop, so the panel
+  // sliding in never covers spores.
+  const inset = wide && (!dismissed || sel !== null);
 
   useEffect(() => {
     const c = canvas.current;
@@ -212,7 +254,8 @@ export function Graph() {
       const w = c.clientWidth;
       const h = c.clientHeight;
       // Fit the current layout's bounds (frozen while dragging).
-      if (st.drag >= 0) return { w, h, ...st.tf };
+      if (st.drag >= 0 && st.tf) return { w, h, ...st.tf };
+      const vw = st.inset && w >= 700 ? w - Math.min(INSET, w * 0.4) : w;
       let x0 = Infinity,
         x1 = -Infinity,
         y0 = Infinity,
@@ -224,21 +267,42 @@ export function Graph() {
         y1 = Math.max(y1, n.y + n.r);
       }
       // Screen-space margins leave room for labels without starving phones.
-      const px = Math.min(120, Math.max(28, w * 0.1));
-      const k = Math.min((w - px) / (x1 - x0), (h - 64) / (y1 - y0), 1.6);
-      const tf = { k, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 };
-      st.tf = tf;
-      return { w, h, ...tf };
+      const px = Math.min(120, Math.max(28, vw * 0.1));
+      const k = Math.min((vw - px) / (x1 - x0), (h - 64) / (y1 - y0), 1.6);
+      const goal: View = {
+        k,
+        cx: (x0 + x1) / 2,
+        cy: (y0 + y1) / 2,
+        ox: vw / 2,
+      };
+      const cur = st.tf;
+      // Ease towards a new framing (the inspector column opening or closing)
+      // instead of jumping; reduced motion snaps.
+      if (!cur || reduce) st.tf = goal;
+      else {
+        const e = 0.2;
+        cur.k += (goal.k - cur.k) * e;
+        cur.cx += (goal.cx - cur.cx) * e;
+        cur.cy += (goal.cy - cur.cy) * e;
+        cur.ox += (goal.ox - cur.ox) * e;
+        st.settling =
+          Math.abs(goal.ox - cur.ox) > 0.5 ||
+          Math.abs(goal.k - cur.k) / goal.k > 0.002 ||
+          Math.abs(goal.cx - cur.cx) * goal.k > 0.5 ||
+          Math.abs(goal.cy - cur.cy) * goal.k > 0.5;
+        if (!st.settling) st.tf = goal;
+      }
+      return { w, h, ...st.tf! };
     };
 
     const draw = () => {
       const dpr = window.devicePixelRatio || 1;
-      const { w, h, k, cx, cy } = view();
+      const { w, h, k, cx, cy, ox } = view();
       if (c.width !== Math.round(w * dpr)) c.width = Math.round(w * dpr);
       if (c.height !== Math.round(h * dpr)) c.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
-      ctx.translate(w / 2, h / 2);
+      ctx.translate(ox, h / 2);
       ctx.scale(k, k);
       ctx.translate(-cx, -cy);
       const focus = st.hover ?? st.sel;
@@ -296,6 +360,13 @@ export function Graph() {
           ctx.strokeStyle = "#f2edf8";
           ctx.lineWidth = 1.5;
           ctx.stroke();
+        } else if (i === st.shown) {
+          // The page open in the inspector, without dimming the rest.
+          ctx.strokeStyle = "rgba(242,237,248,0.55)";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, n.r + 4, 0, Math.PI * 2);
+          ctx.stroke();
         }
         if (on && (focus !== null || m) && (near.has(i) || m?.has(i)))
           labelled.push(i);
@@ -307,12 +378,19 @@ export function Graph() {
       ctx.fillStyle = "#f2edf8";
       ctx.font = `${11 / k}px ui-monospace, SFMono-Regular, Menlo, monospace`;
       ctx.textAlign = "center";
-      const edge = w / 2 / k;
+      const edge = ox / k;
       const lh = 14 / k;
       const placed: [number, number, number, number][] = [];
+      const rank = st.rank;
       labelled
         .sort((a, b) =>
-          a === focus ? -1 : b === focus ? 1 : ns[b].r - ns[a].r,
+          a === focus
+            ? -1
+            : b === focus
+              ? 1
+              : rank
+                ? (rank.get(a) ?? 99) - (rank.get(b) ?? 99)
+                : ns[b].r - ns[a].r,
         )
         .forEach((i) => {
           const n = ns[i];
@@ -359,9 +437,11 @@ export function Graph() {
         st.grow = Math.min(1, st.grow + dt / 1600);
         dirty = true;
       }
+      if (st.settling) dirty = true;
       if (dirty) draw();
       dirty = false;
-      if (st.alpha > 0.02 || st.grow < 1) raf = requestAnimationFrame(loop);
+      if (st.alpha > 0.02 || st.grow < 1 || st.settling)
+        raf = requestAnimationFrame(loop);
     };
     const kick = () => {
       dirty = true;
@@ -372,7 +452,10 @@ export function Graph() {
 
     const io = new IntersectionObserver(([e]) => {
       visible = e.isIntersecting;
-      if (visible) kick();
+      if (visible) {
+        setSeen(true);
+        kick();
+      }
     });
     io.observe(c);
     const ro = new ResizeObserver(kick);
@@ -390,16 +473,23 @@ export function Graph() {
     const st = state.current;
     st.sel = sel;
     st.hover = hover;
-    st.query = query;
+    st.shown = shown;
+    st.inset = inset;
+    st.rank = palette ? new Map(palette.ids.map((id, r) => [id, r])) : null;
     matchRef.current = matches;
     (st as unknown as { kick?: () => void }).kick?.();
-  }, [sel, hover, query, matches]);
+  }, [sel, hover, shown, inset, palette, matches]);
 
   const pick = (clientX: number, clientY: number) => {
     const c = canvas.current!;
     const r = c.getBoundingClientRect();
-    const { k, cx, cy } = state.current.tf;
-    const x = (clientX - r.left - c.clientWidth / 2) / k + cx;
+    const { k, cx, cy, ox } = state.current.tf ?? {
+      k: 1,
+      cx: 0,
+      cy: 0,
+      ox: c.clientWidth / 2,
+    };
+    const x = (clientX - r.left - ox) / k + cx;
     const y = (clientY - r.top - c.clientHeight / 2) / k + cy;
     let best = -1;
     let bd = Infinity;
@@ -413,8 +503,8 @@ export function Graph() {
     return { best, x, y };
   };
 
-  const page = sel === null ? null : PAGES[sel];
-  const rel = sel === null ? [] : (neighbours.get(sel) ?? []);
+  const page = shown === null ? null : PAGES[shown];
+  const rel = shown === null ? [] : (neighbours.get(shown) ?? []);
 
   return (
     <div className="myc-graph" ref={wrap}>
@@ -432,9 +522,22 @@ export function Graph() {
           maxLength={40}
         />
         <span className="myc-graphCount" aria-live="polite">
-          {matches
-            ? `${matches.size} of ${PAGES.length} visible`
-            : `${PAGES.length} pages · ${edges.length} hyphae`}
+          {palette ? (
+            <>
+              {matches?.size} lit by the palette search “{palette.q}”
+              <button
+                type="button"
+                className="myc-graphClear"
+                onClick={() => setIgnored(palette)}
+              >
+                Clear
+              </button>
+            </>
+          ) : matches ? (
+            `${matches.size} of ${PAGES.length} visible`
+          ) : (
+            `${PAGES.length} pages · ${edges.length} hyphae`
+          )}
         </span>
       </div>
       <div className="myc-graphStage">
@@ -481,7 +584,10 @@ export function Graph() {
               <button
                 type="button"
                 className="myc-close"
-                onClick={() => setSel(null)}
+                onClick={() => {
+                  setSel(null);
+                  setDismissed(true);
+                }}
                 aria-label="Close inspector"
               >
                 ×

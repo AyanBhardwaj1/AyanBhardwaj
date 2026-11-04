@@ -11,6 +11,7 @@ import {
   vectorSearch,
   type Hit,
 } from "./search";
+import { publishFind } from "./link";
 import "./mycelium.css";
 
 const SUGGESTIONS = [
@@ -51,6 +52,8 @@ function Highlight({ text, q }: { text: string; q: string }) {
 export function Palette() {
   const [q, setQ] = useState("");
   const [hits, setHits] = useState<Hit[] | null>(null);
+  // The query that produced `hits`, which lags the input by the debounce.
+  const [hitQ, setHitQ] = useState("");
   const [source, setSource] = useState<Source>("LOCAL WASM");
   const [ms, setMs] = useState<number | null>(null);
   const [active, setActive] = useState(0);
@@ -62,6 +65,14 @@ export function Palette() {
   const optId = (i: number) => `${listId}-o${i}`;
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
+
+  // Tell the graph below which pages this search found.
+  useEffect(() => {
+    if (!q.trim()) publishFind(null);
+    else if (hits)
+      publishFind({ q: hitQ.trim(), ids: hits.map((h) => h.page.id) });
+  }, [q, hits, hitQ]);
+  useEffect(() => () => publishFind(null), []);
 
   function run(text: string) {
     timers.current.forEach(clearTimeout);
@@ -80,6 +91,7 @@ export function Palette() {
       const r = vectorSearch(text);
       const dt = performance.now() - t0;
       setHits(r);
+      setHitQ(text);
       setSource("LOCAL WASM");
       setMs(dt);
       setActive(0);
@@ -93,6 +105,7 @@ export function Palette() {
         const t0 = performance.now();
         const r = lexicalSearch(text);
         setHits(r);
+        setHitQ(text);
         setSource("LOCAL CACHE");
         setMs(performance.now() - t0);
         setActive(0);
@@ -194,6 +207,11 @@ export function Palette() {
 
         <p className="myc-listHead">
           {showRecent ? "Recently ingested" : `${count} results`}
+          {!showRecent && count > 0 && (
+            <a href="#myc-graph" className="myc-toGraph">
+              lit in the graph below<span aria-hidden="true"> ↓</span>
+            </a>
+          )}
         </p>
         <ul
           id={listId}

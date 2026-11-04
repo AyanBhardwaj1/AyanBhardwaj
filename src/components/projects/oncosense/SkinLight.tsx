@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { LED_COLOR, ledName, SourcePicker, useLight, type Src } from "./light";
 
 /**
  * Light in skin, as an illustrative Monte Carlo: photons leave the LED,
@@ -11,7 +12,6 @@ import { useEffect, useRef, useState } from "react";
  * Toy coefficients chosen to show the trend, not measured optical properties.
  */
 
-type Src = "850" | "660" | "white";
 const W = 800;
 const H = 460;
 const SURF = 92; // skin surface (px)
@@ -76,7 +76,7 @@ function layerAt(y: number) {
 
 export function SkinLight() {
   const canvas = useRef<HTMLCanvasElement>(null);
-  const [src, setSrc] = useState<Src>("850");
+  const [src, setSrc] = useLight("850");
   const [stats, setStats] = useState({ ret: 0, depth: 0 });
   const [motion, setMotion] = useState(true);
 
@@ -282,12 +282,7 @@ export function SkinLight() {
     };
   }, [src, motion]);
 
-  const label =
-    src === "850"
-      ? "850 nm near-infrared"
-      : src === "660"
-        ? "660 nm red"
-        : "white";
+  const label = ledName(src);
   const pxToMm = (px: number) =>
     px <= 56 ? (px / 56) * 0.12 : 0.12 + ((px - 56) / 274) * 1.9;
 
@@ -331,14 +326,7 @@ export function SkinLight() {
             rx="4"
             fill="var(--os-ink)"
           />
-          <circle
-            cx={LED_X}
-            cy={SURF - 6}
-            r="7"
-            fill={
-              src === "850" ? "#e0628a" : src === "660" ? "#ff5a48" : "#f4f4f4"
-            }
-          />
+          <circle cx={LED_X} cy={SURF - 6} r="7" fill={LED_COLOR[src]} />
           <rect
             x={SENSOR_X - SENSOR_W / 2}
             y={SURF - 28}
@@ -397,18 +385,7 @@ export function SkinLight() {
         />
       </div>
       <figcaption className="grid gap-4 p-4 sm:flex sm:items-center sm:justify-between">
-        <div className="os-seg" role="group" aria-label="Light source">
-          {(["850", "660", "white"] as Src[]).map((s) => (
-            <button
-              key={s}
-              type="button"
-              aria-pressed={src === s}
-              onClick={() => setSrc(s)}
-            >
-              {s === "white" ? "White" : `${s} nm`}
-            </button>
-          ))}
-        </div>
+        <SourcePicker value={src} onChange={setSrc} />
         <p className="os-readout" aria-live="polite">
           returned to sensor {(stats.ret * 100).toFixed(1)}% · mean depth
           reached ~{pxToMm(stats.depth).toFixed(2)} mm

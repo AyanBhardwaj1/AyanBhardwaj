@@ -1,4 +1,5 @@
 import { DEMO } from "@/app/projects/runway/data";
+import { DrawOnView } from "./DrawOnView";
 import { monthLabel } from "./math";
 import { s } from "./cls";
 
@@ -6,7 +7,9 @@ import { s } from "./cls";
  * The cash forecast drawn as an approach: the P10–P90 band is the glide
  * slope, the x-axis is the runway, touchdown is zero cash. Server-rendered
  * SVG built from the demo's published figures (an illustration of the
- * 1,000-path Monte Carlo, not a rerun of it). Lines draw in left to right.
+ * 1,000-path Monte Carlo, not a rerun of it). The first time it is on
+ * screen the band opens, the sample paths fan out one by one, then the three
+ * scenario lines land (see DrawOnView and runway.css).
  */
 
 const MAX_M = 14;
@@ -113,11 +116,24 @@ function Chart({ g, id, wide }: { g: Geo; id: string; wide: boolean }) {
 
       <g className={s.gsDraw}>
         {paths.map((d, i) => (
-          <path key={i} d={d} className={s.gsPath} />
+          <path
+            key={i}
+            d={d}
+            pathLength={1}
+            className={s.gsPath}
+            style={{ "--i": i } as React.CSSProperties}
+          />
         ))}
-        <path d={straight(DEMO.cash, DEMO.revenueDrop)} className={s.gsAmber} />
-        <path d={straight(DEMO.cash, MID)} className={s.gsMid} />
-        <path d={straight(DEMO.cash + 119.99, ACT)} className={s.gsAct} />
+        <path
+          d={straight(DEMO.cash, DEMO.revenueDrop)}
+          pathLength={1}
+          className={s.gsAmber}
+        />
+        <path d={straight(DEMO.cash, MID)} pathLength={1} className={s.gsMid} />
+        {/* dashed, so it wipes in rather than drawing its stroke */}
+        <g className={s.gsActDraw}>
+          <path d={straight(DEMO.cash + 119.99, ACT)} className={s.gsAct} />
+        </g>
       </g>
 
       {wide && (
@@ -171,7 +187,7 @@ function Chart({ g, id, wide }: { g: Geo; id: string; wide: boolean }) {
 
 export function GlideSlope() {
   return (
-    <figure className={s.glide}>
+    <DrawOnView className={s.glide}>
       <Chart g={WIDE} id="glide-wide" wide />
       <Chart g={NARROW} id="glide-narrow" wide={false} />
       <ul className={s.glideKey} aria-hidden="true">
@@ -193,6 +209,6 @@ export function GlideSlope() {
         last six months&apos; burn trend plus noise, summarised as P10 to P90.
         The thin lines are 36 illustrative paths, not the model&apos;s output.
       </figcaption>
-    </figure>
+    </DrawOnView>
   );
 }

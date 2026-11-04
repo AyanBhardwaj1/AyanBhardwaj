@@ -229,6 +229,15 @@
 .os-seg button:active {
   transform: scale(0.96);
 }
+.os-led {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  border-radius: 50%;
+  vertical-align: 1px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--os-ink) 25%, transparent);
+}
 
 /* range */
 .os-range {

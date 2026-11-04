@@ -826,6 +826,35 @@
   font-size: 12px;
   color: var(--mtx-3);
 }
+.myc-graphClear {
+  min-height: 32px;
+  margin-left: 10px;
+  padding: 0 12px;
+  border: 1px solid var(--mline);
+  border-radius: 999px;
+  background: none;
+  color: var(--mtx-2);
+  font: inherit;
+  cursor: pointer;
+}
+.myc-graphClear:hover {
+  color: var(--spore);
+  border-color: var(--violet);
+}
+.myc-graphClear:focus-visible,
+.myc-toGraph:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
+}
+.myc-toGraph {
+  margin-left: 8px;
+  color: var(--violet);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.myc-toGraph:hover {
+  color: var(--spore);
+}
 .myc-graphStage {
   position: relative;
 }

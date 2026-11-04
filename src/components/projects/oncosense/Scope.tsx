@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { SourcePicker, useLight, type Src } from "./light";
+import { baseReturn } from "./Spectrum";
 
 /**
  * Ambient-rejection scope. Firmware v2 reads each sample twice, LED off then
  * LED on, and keeps the difference, so room light cancels out. The scope
  * shows the off reading (ambient), the on reading, and the difference, and
  * lights the band's real quality flags. Illustrative numbers in sensor counts
- * (the AS7341 tops out at 65,535).
+ * (the AS7341 tops out at 65,535). The LED's return scales with the same
+ * toy reflectance the spectrum demo uses for the channel it lands in.
  */
 
 type Scene = "steady" | "flicker" | "lifted" | "bright";
@@ -19,7 +22,8 @@ const SCENES: { id: Scene; label: string }[] = [
 ];
 const N = 72;
 const FULL = 65535;
-const SIG = 16000;
+const SIG = 16000; // 850 nm into NIR
+const sigFor = (s: Src) => (SIG * baseReturn(s)) / baseReturn("850");
 
 type Sample = { off: number; on: number; gain: number };
 
@@ -33,7 +37,7 @@ function ambientAt(scene: Scene, t: number, r: () => number) {
     case "lifted":
       return 26000 + 3000 * Math.sin(t / 4) + n;
     case "bright":
-      return 52000 + n;
+      return 57000 + n;
   }
 }
 
@@ -49,6 +53,7 @@ export function Scope() {
   const [scene, setScene] = useState<Scene>("flicker");
   const [diff, setDiff] = useState(true);
   const [data, setData] = useState<Sample[]>([]);
+  const [src, setSrc] = useLight("850");
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -61,7 +66,8 @@ export function Scope() {
     let satRun = 0;
     const next = (buf: Sample[]) => {
       const amb = ambientAt(scene, t++, r);
-      const sig = (scene === "lifted" ? 2400 : SIG) * gain;
+      const full = sigFor(src);
+      const sig = (scene === "lifted" ? full * 0.15 : full) * gain;
       const off = Math.min(FULL, amb * gain);
       const on = Math.min(FULL, (amb + sig / gain) * gain);
       if (on >= FULL) satRun++;
@@ -94,7 +100,7 @@ export function Scope() {
       window.clearInterval(id);
       io.disconnect();
     };
-  }, [scene]);
+  }, [scene, src]);
 
   const W = 600;
   const H = 240;
@@ -115,7 +121,9 @@ export function Scope() {
   return (
     <div ref={ref} className="os-screen">
       <div className="os-screen-bar">
-        <span className="os-live">Scope · 850 nm · 50 ms integration</span>
+        <span className="os-live">
+          Scope · {src === "white" ? "white" : `${src} nm`} · 50 ms integration
+        </span>
         <span>gain {last ? `${last.gain}×` : "1×"}</span>
       </div>
       <div className="p-4 sm:p-6">
@@ -204,6 +212,14 @@ export function Scope() {
           </li>
         </ul>
 
+        <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <span className="os-readout">LED</span>
+          <SourcePicker
+            value={src}
+            onChange={setSrc}
+            label="LED for the scope"
+          />
+        </div>
         <div
           className="mt-5 flex flex-wrap items-center gap-2"
           role="group"

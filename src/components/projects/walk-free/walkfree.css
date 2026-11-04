@@ -367,6 +367,38 @@
     stroke-dashoffset: 0;
   }
 }
+/* Route duel: hold the draw until the plan is first on screen (JS only). */
+.js .wf-duel:not([data-seen]) .wf-route-draw {
+  animation: none;
+  stroke-dashoffset: var(--len);
+}
+.js .wf-duel:not([data-seen]) .wf-route-other {
+  opacity: 0;
+}
+.wf-route-other {
+  transition: opacity 500ms var(--wf-ease) 700ms;
+}
+.wf-duel-rule {
+  display: block;
+  height: 3px;
+  margin-top: 6px;
+  background: var(--c);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.wf-duel-rule[data-on] {
+  transform: none;
+  animation: wf-rule 1100ms var(--wf-ease) both;
+}
+.js .wf-duel:not([data-seen]) .wf-duel-rule[data-on] {
+  animation: none;
+  transform: scaleX(0);
+}
+@keyframes wf-rule {
+  from {
+    transform: scaleX(0);
+  }
+}
 
 /* legend swatches */
 .wf-swatch {
@@ -786,6 +818,15 @@
   .js .wf-trace .wf-chip {
     background: var(--wf-ink);
     color: var(--wf-paper);
+  }
+  .js .wf-duel:not([data-seen]) .wf-route-draw {
+    stroke-dashoffset: 0;
+  }
+  .js .wf-duel:not([data-seen]) .wf-route-other {
+    opacity: 1;
+  }
+  .js .wf-duel:not([data-seen]) .wf-duel-rule[data-on] {
+    transform: none;
   }
   .js .wf-day[data-pin="1"] {
     height: auto;

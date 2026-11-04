@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { onFirstView } from "./firstView";
 import { s } from "./styles";
 
 /**
@@ -105,21 +106,17 @@ export function StudioBuild() {
     const el = root.current;
     if (!el) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!("IntersectionObserver" in window)) return;
     // Hide the server-rendered finished model until the build starts on screen.
     el.dataset.pending = "";
-    const io = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting && !started.current) {
-          started.current = true;
-          run();
-          io.disconnect();
-        }
-      },
-      { threshold: 0.35 },
-    );
-    io.observe(el);
+    // First time it is on screen in a visible tab, the agent starts building.
+    const stop = onFirstView(el, () => {
+      if (started.current) return;
+      started.current = true;
+      run();
+    });
     return () => {
-      io.disconnect();
+      stop();
       clear();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

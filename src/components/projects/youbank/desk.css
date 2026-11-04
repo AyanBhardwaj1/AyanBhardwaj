@@ -159,9 +159,16 @@
   border: 1px solid var(--d-line-strong);
   border-radius: 4px;
 }
-.yb-cmdForm:focus-within {
+.yb-cmdForm:focus-within,
+.yb-cmdForm[data-demo] {
   border-color: var(--d-amber);
   box-shadow: 0 0 0 3px var(--d-amber-soft);
+}
+/* The first-view demo "presses" GO before it runs. */
+.yb-cmdForm[data-demo="go"] .yb-goKey {
+  transform: translateY(1px);
+  box-shadow: inset 0 0 0 2px rgb(10 12 15 / 0.35);
+  filter: brightness(1.15);
 }
 .yb-prompt {
   color: var(--d-amber);

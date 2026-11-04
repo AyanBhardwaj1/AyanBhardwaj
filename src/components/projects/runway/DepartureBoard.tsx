@@ -55,12 +55,17 @@ export function DepartureBoard() {
         <span>Departures</span>
       </div>
       <dl className={s.boardRows}>
-        {rows.map((row) => (
+        {rows.map((row, i) => (
           <div key={row.label} className={s.boardRow}>
             <dt className={s.boardLabel}>{row.label}</dt>
             <dd className="m-0">
               <span className="sr-only">{row.read}</span>
-              <FlapText text={row.value} cells={CELLS} tone={row.tone} />
+              <FlapText
+                text={row.value}
+                cells={CELLS}
+                tone={row.tone}
+                cascade={i}
+              />
             </dd>
           </div>
         ))}

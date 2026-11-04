@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ledName, SourcePicker, useLight, type Src } from "./light";
 
 /**
  * The 10-channel AS7341 readout under the band's white LED, like the
  * monitor's Spectrum view. A simplified illustrative skin model (not the
  * project's simulator): redness deepens the haemoglobin dip in green and
  * yellow, hydration lowers the return a little, most in the NIR. Each bar is
- * drawn in its filter's colour and labelled by wavelength.
+ * drawn in its filter's colour and labelled by wavelength. Under one of the
+ * narrow LEDs only the channel nearest its wavelength gets meaningful light
+ * (F8 for 660 nm, NIR for 850 nm); the full spectrum needs the white LED.
  */
 
 const BANDS = [
@@ -26,6 +29,10 @@ const BASE = [0.17, 0.19, 0.23, 0.26, 0.25, 0.35, 0.47, 0.53, 0.33, 0.57];
 const HB = [0.25, 0.12, 0.06, 0.22, 0.35, 0.3, 0.05, 0.02, 0.12, 0];
 const ROOM = [0.06, 0.12, 0.1, 0.16, 0.22, 0.26, 0.2, 0.12, 0.6, 0.05];
 const MAX = 0.7;
+/** The channel each narrow LED lands in, by index into BANDS. */
+const LIT: Record<Src, number | null> = { white: null, "660": 7, "850": 9 };
+export const channelFor = (s: Src) => (s === "850" ? 9 : s === "660" ? 7 : 8);
+export const baseReturn = (s: Src) => BASE[channelFor(s)];
 
 function model(hyd: number, red: number, contact: boolean) {
   if (!contact) return ROOM.slice();
@@ -40,6 +47,9 @@ export function Spectrum() {
   const [hyd, setHyd] = useState(55);
   const [red, setRed] = useState(20);
   const [contact, setContact] = useState(true);
+  const [src, setSrc] = useLight("white");
+  const lit = contact ? LIT[src] : null;
+  const shows = (i: number) => lit === null || lit === i;
   const [noise, setNoise] = useState<number[]>(() => BANDS.map(() => 0));
   const ref = useRef<HTMLDivElement>(null);
 
@@ -72,7 +82,8 @@ export function Spectrum() {
     <div ref={ref} className="os-screen">
       <div className="os-screen-bar">
         <span className="os-live">
-          Spectrum · white LED · illustrative model
+          Spectrum · {src === "white" ? "white" : `${src} nm`} LED ·
+          illustrative model
         </span>
         <span className={contact ? "" : "text-(--os-alert)"}>
           {contact ? "contact OK" : "NO_CONTACT"}
@@ -107,7 +118,8 @@ export function Spectrum() {
           ))}
           {BANDS.map((b, i) => {
             const x = 44 + i * 55.5;
-            const h = (Math.min(MAX, R[i]) / MAX) * 240;
+            const on = shows(i);
+            const h = on ? (Math.min(MAX, R[i]) / MAX) * 240 : 3;
             return (
               <g key={b.id}>
                 <rect
@@ -125,6 +137,7 @@ export function Spectrum() {
                   height="240"
                   rx="3"
                   fill={b.color}
+                  fillOpacity={on ? 1 : 0.35}
                   className="os-spec-bar"
                   style={{
                     transform: `scaleY(${h / 240})`,
@@ -149,14 +162,16 @@ export function Spectrum() {
                   className="os-mono"
                   fill="var(--os-ink)"
                 >
-                  {Math.round(exact[i] * 100)}
+                  {on ? Math.round(exact[i] * 100) : ""}
                 </text>
               </g>
             );
           })}
         </svg>
         <table className="sr-only">
-          <caption>Reflectance by AS7341 channel, percent</caption>
+          <caption>
+            Reflectance by AS7341 channel under the {ledName(src)} LED, percent
+          </caption>
           <thead>
             <tr>
               <th scope="col">Channel</th>
@@ -169,7 +184,9 @@ export function Spectrum() {
                 <th scope="row">
                   {b.nm === b.id ? b.id : `${b.id}, ${b.nm} nm`}
                 </th>
-                <td>{Math.round(exact[i] * 100)}%</td>
+                <td>
+                  {shows(i) ? `${Math.round(exact[i] * 100)}%` : "no light"}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -211,6 +228,14 @@ export function Spectrum() {
             />
           </div>
         </div>
+        <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <span className="os-readout">LED</span>
+          <SourcePicker
+            value={src}
+            onChange={setSrc}
+            label="LED for the spectrum"
+          />
+        </div>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
           <label className="inline-flex min-h-11 cursor-pointer items-center gap-3 text-[15px] font-semibold">
             <input
@@ -222,9 +247,11 @@ export function Spectrum() {
             Band touching skin
           </label>
           <p className="os-readout" aria-live="polite">
-            {contact
-              ? `melanin index ${mi.toFixed(0)} · erythema index ${ei.toFixed(0)}`
-              : "no contact: the sensor sees room light"}
+            {!contact
+              ? "no contact: the sensor sees room light"
+              : src === "white"
+                ? `melanin index ${mi.toFixed(0)} · erythema index ${ei.toFixed(0)}`
+                : `${src} nm lands in ${src === "850" ? "NIR" : "F8"} only · melanin and erythema need white`}
           </p>
         </div>
       </div>

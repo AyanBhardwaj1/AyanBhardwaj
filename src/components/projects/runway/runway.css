@@ -812,30 +812,77 @@
   transform-box: fill-box;
   transform-origin: 0 0;
 }
+/* First view (DrawOnView sets data-armed on mount, data-drawn in view): the
+   band opens, the 36 sample paths fan out one after another, then the three
+   scenario lines land. Without JS or with reduced motion it is all drawn. */
 @media (prefers-reduced-motion: no-preference) {
-  html.js .rw-gsDraw {
-    clip-path: inset(0 100% 0 0);
-    transition: clip-path 1800ms var(--rw-ease) 200ms;
+  .rw-glide[data-armed] .rw-gsPath,
+  .rw-glide[data-armed] .rw-gsMid,
+  .rw-glide[data-armed] .rw-gsAmber {
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 1.02; /* past 1 so round caps leave no dot */
   }
-  html.js .rw-gsBand {
+  .rw-glide[data-armed] .rw-gsActDraw {
+    clip-path: inset(0 100% 0 0);
+  }
+  .rw-glide[data-armed] .rw-gsBand {
     opacity: 0;
     transform: scaleX(0.2);
-    transition:
-      opacity 900ms ease,
-      transform 1400ms var(--rw-ease);
   }
-  html.js .rw-gsLabels {
+  .rw-glide[data-armed] .rw-gsLabels {
     opacity: 0;
-    transition: opacity 600ms ease 1600ms;
   }
-  html.js .is-in .rw-gsDraw {
+  .rw-glide[data-drawn] .rw-gsBand {
+    animation: rw-band 1200ms var(--rw-ease) both;
+  }
+  .rw-glide[data-drawn] .rw-gsPath {
+    animation: rw-draw 1100ms cubic-bezier(0.3, 0.6, 0.3, 1)
+      calc(150ms + var(--i, 0) * 24ms) both;
+  }
+  .rw-glide[data-drawn] .rw-gsMid {
+    animation: rw-draw 900ms var(--rw-ease) 1150ms both;
+  }
+  .rw-glide[data-drawn] .rw-gsAmber {
+    animation: rw-draw 900ms var(--rw-ease) 1350ms both;
+  }
+  .rw-glide[data-drawn] .rw-gsActDraw {
+    animation: rw-wipe 900ms var(--rw-ease) 1550ms both;
+  }
+  .rw-glide[data-drawn] .rw-gsLabels {
+    animation: rw-fade 500ms ease 2100ms both;
+  }
+}
+@keyframes rw-draw {
+  from {
+    stroke-dashoffset: 1.02;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes rw-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
     clip-path: inset(0 0 0 0);
   }
-  html.js .is-in .rw-gsBand {
+}
+@keyframes rw-band {
+  from {
+    opacity: 0;
+    transform: scaleX(0.2);
+  }
+  to {
     opacity: 1;
     transform: none;
   }
-  html.js .is-in .rw-gsLabels {
+}
+@keyframes rw-fade {
+  from {
+    opacity: 0;
+  }
+  to {
     opacity: 1;
   }
 }

@@ -2,10 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { s } from "./cls";
+import { onFirstView } from "./firstView";
 
 const CHARSET = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$.,/+-:";
 const STEP_MS = 55;
 const MAX_STEPS = 6;
+const INTRO_STEPS = 8;
+const ROW_TICKS = 4;
 
 const pad = (t: string, n: number) =>
   t.toUpperCase().padEnd(n, " ").slice(0, n);
@@ -22,6 +25,18 @@ function path(from: string, to: string): string[] {
   return out.slice(-MAX_STEPS);
 }
 
+/** The intro spin: the last few flaps before `to`, whatever is showing. */
+function spin(to: string): string[] {
+  if (to === " ") return [];
+  const b = Math.max(0, CHARSET.indexOf(to));
+  const out: string[] = [];
+  for (let k = INTRO_STEPS - 1; k >= 0; k--) {
+    const ch = CHARSET[(b - k + CHARSET.length * 2) % CHARSET.length];
+    if (ch !== " ") out.push(ch);
+  }
+  return out;
+}
+
 const reduced = () =>
   typeof window !== "undefined" &&
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -29,6 +44,8 @@ const reduced = () =>
 /**
  * Split-flap text. Server-renders the final characters; with JS and motion
  * allowed it flaps in from blank on mount and flaps to every new value.
+ * With `cascade` (a row number) it instead waits blank until it is first on
+ * screen, then spins in a beat after the row above: a board waking up.
  * Decorative: callers provide the readable text (this is aria-hidden).
  */
 export function FlapText({
@@ -36,43 +53,35 @@ export function FlapText({
   cells,
   className = "",
   tone = "ink",
+  cascade,
 }: {
   text: string;
   cells: number;
   className?: string;
   tone?: "ink" | "cleared" | "amber";
+  cascade?: number;
 }) {
   const target = pad(text, cells);
   const [chars, setChars] = useState<string[]>(() => target.split(""));
   const [ticks, setTicks] = useState<number[]>(() => Array(cells).fill(0));
   const [ready, setReady] = useState(false);
+  const el = useRef<HTMLSpanElement>(null);
   const shown = useRef<string[]>(target.split(""));
   const queues = useRef<string[][]>([]);
   const timer = useRef<number | null>(null);
   const mounted = useRef(false);
+  const introDone = useRef(cascade === undefined);
 
   useEffect(() => {
-    // Work starts on the next frame (never synchronously in the effect).
-    const raf = window.setTimeout(() => run(), 0);
-    const run = () => {
-      const goal = target.split("");
-      const startBlank = !mounted.current;
-      mounted.current = true;
-      setReady(true);
-      if (reduced()) {
-        shown.current = goal;
-        setChars(goal);
-        return;
-      }
-      if (startBlank) {
-        shown.current = goal.map(() => " ");
-        setChars(shown.current);
-      }
+    let cancelView = () => {};
+    const animate = (goal: string[], row?: number) => {
       queues.current = goal.map((ch, i) => {
-        const steps = path(shown.current[i], ch);
+        const steps = row === undefined ? path(shown.current[i], ch) : spin(ch);
         if (!steps.length) return [];
-        // Stagger left to right: idle ticks before this cell starts.
-        const wait = Array(Math.round(i * 0.6)).fill(shown.current[i]);
+        // Stagger left to right (and row by row in the intro).
+        const wait = Array(Math.round(i * 0.6) + (row ?? 0) * ROW_TICKS).fill(
+          shown.current[i],
+        );
         return [...wait, ...steps];
       });
       if (timer.current) window.clearInterval(timer.current);
@@ -97,15 +106,45 @@ export function FlapText({
         }
       }, STEP_MS);
     };
+    // Work starts on the next frame (never synchronously in the effect).
+    const raf = window.setTimeout(() => {
+      const goal = target.split("");
+      const startBlank = !mounted.current;
+      mounted.current = true;
+      setReady(true);
+      if (reduced()) {
+        shown.current = goal;
+        setChars(goal);
+        return;
+      }
+      if (startBlank) {
+        shown.current = goal.map(() => " ");
+        setChars(shown.current);
+      }
+      if (!introDone.current && el.current) {
+        cancelView = onFirstView(
+          el.current,
+          () => {
+            introDone.current = true;
+            animate(goal, cascade);
+          },
+          0.6,
+        );
+        return;
+      }
+      animate(goal);
+    }, 0);
     return () => {
       window.clearTimeout(raf);
+      cancelView();
       if (timer.current) window.clearInterval(timer.current);
       timer.current = null;
     };
-  }, [target]);
+  }, [target, cascade]);
 
   return (
     <span
+      ref={el}
       aria-hidden="true"
       data-ready={ready ? "" : undefined}
       data-tone={tone}
