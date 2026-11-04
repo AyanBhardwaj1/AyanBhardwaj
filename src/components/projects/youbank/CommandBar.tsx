@@ -119,7 +119,18 @@ export function CommandBar({
   useEffect(() => {
     let t = 0;
     const onKey = (e: KeyboardEvent) => {
-      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (
+        e.defaultPrevented ||
+        e.metaKey ||
+        e.ctrlKey ||
+        e.altKey ||
+        e.shiftKey
+      )
+        return;
+      // Typing somewhere (any field, the ayan-bot box): the browser keeps its keys.
+      const el = e.target as HTMLElement | null;
+      if (el?.closest?.("input, textarea, select, [contenteditable='true']"))
+        return;
       // Leave the keys alone while a dialog (the site's ⌘K palette) is open.
       if (document.querySelector("dialog[open], [aria-modal='true']")) return;
       const m = /^F([1-9])$/.exec(e.key);
