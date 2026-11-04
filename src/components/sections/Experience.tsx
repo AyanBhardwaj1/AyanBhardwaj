@@ -73,7 +73,9 @@ export function Experience() {
           title="Where I've worked"
         />
         <ExperienceRows rows={rows} badges={badges} />
-        <CareerChart />
+        <div data-print="hide">
+          <CareerChart />
+        </div>
       </div>
     </section>
   );

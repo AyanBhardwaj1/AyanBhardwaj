@@ -49,7 +49,7 @@
     --bg-card: #ffffff;
     --bg-card-hover: #f6f2ec;
     --fg: #111111;
-    --fg-muted: #6b675f;
+    --fg-muted: #5f5b54; /* 6.3:1 on bg */
     --fg-dim: #a39e95;
     --line: rgb(17 17 17 / 0.1);
     --line-strong: rgb(17 17 17 / 0.2);
@@ -84,7 +84,7 @@
   --bg-card: #ffffff;
   --bg-card-hover: #f6f2ec;
   --fg: #111111;
-  --fg-muted: #6b675f;
+  --fg-muted: #5f5b54;
   --fg-dim: #a39e95;
   --line: rgb(17 17 17 / 0.1);
   --line-strong: rgb(17 17 17 / 0.2);
@@ -141,7 +141,7 @@
   --r-lg: 16px;
   --r-xl: 24px;
   --gutter: clamp(16px, 4vw, 48px);
-  --section-y: clamp(96px, 14vw, 200px);
+  --section-y: clamp(88px, 11vw, 168px);
 }
 
 @theme inline {
@@ -180,6 +180,8 @@
 
   html {
     -webkit-text-size-adjust: 100%;
+    /* Focus and pressed states are drawn by the site itself. */
+    -webkit-tap-highlight-color: transparent;
     scroll-padding-top: 6.5rem;
     background: var(--bg);
   }
@@ -210,6 +212,14 @@
     outline: 2px solid var(--accent);
     outline-offset: 3px;
     border-radius: 4px;
+  }
+
+  a,
+  button,
+  summary,
+  label,
+  [role="tab"] {
+    touch-action: manipulation;
   }
 
   [tabindex="-1"]:focus {
@@ -488,7 +498,6 @@
 
 @keyframes hero-in {
   from {
-    filter: blur(18px);
     opacity: 0.2;
     transform: translateY(32px);
     letter-spacing: -0.02em;
@@ -496,11 +505,7 @@
 }
 @keyframes portrait-in {
   from {
-    transform: translateY(96px) scale(0.96);
-    clip-path: inset(100% 0 0 0 round 24px);
-  }
-  to {
-    clip-path: inset(0 round 24px);
+    transform: translateY(72px) scale(0.94);
   }
 }
 @keyframes fade-in {
@@ -656,7 +661,7 @@ dialog.palette[open] > * {
 }
 @keyframes scrub-word {
   from {
-    opacity: 0.15;
+    opacity: 0.38;
   }
   to {
     opacity: 1;
@@ -899,8 +904,20 @@ html:not(.js) .moss-bar {
 @keyframes letter-in {
   from {
     opacity: 0.15;
+    transform: translateY(0.35em) rotate(4deg);
+  }
+}
+/* The blur pass is a desktop-only flourish: on phones it costs main-thread time. */
+@keyframes letter-in-blur {
+  from {
+    opacity: 0.15;
     filter: blur(10px);
     transform: translateY(0.35em) rotate(4deg);
+  }
+}
+@media (min-width: 1024px) and (hover: hover) {
+  .hero-letter {
+    animation-name: letter-in-blur;
   }
 }
 
@@ -982,5 +999,94 @@ html:not(.js) .section-rule::after {
 @media (max-width: 767px) {
   body:has([data-nav-open="true"]) .bot-launcher {
     display: none;
+  }
+}
+
+/* 404: the quote draws in, then the last print pulses. */
+.nf-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: nf-draw 1800ms var(--ease-in-out) 200ms both;
+}
+.nf-dot {
+  animation: nf-pulse 1.6s ease-in-out 2s infinite;
+}
+@keyframes nf-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+@keyframes nf-pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nf-line,
+  .nf-dot {
+    animation: none !important;
+  }
+}
+
+/* Print: a clean, light, ink-friendly fallback résumé. */
+@media print {
+  :root,
+  [data-theme] {
+    --bg: #fff;
+    --bg-elev: #fff;
+    --bg-card: #fff;
+    --fg: #111;
+    --fg-muted: #444;
+    --line: #ddd;
+    --line-strong: #bbb;
+    --accent: #7a3d00;
+  }
+  html,
+  body {
+    background: #fff !important;
+    color: #111 !important;
+    font-size: 11pt;
+  }
+  .rails::before,
+  .rails::after,
+  .ticker,
+  .bob,
+  #activity,
+  [aria-label="Manifesto"],
+  [data-print="hide"] {
+    display: none !important;
+  }
+  .section-y {
+    padding-block: 18pt;
+  }
+  .js [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .card:not(:has(.card)),
+  figure {
+    break-inside: avoid;
+  }
+  /* Scoped dark slabs (trophies, footer) print on paper too. */
+  :root [data-theme="dark"] {
+    --bg: #fff;
+    --bg-elev: #fff;
+    --bg-card: #fff;
+    --bg-card-hover: #fff;
+    --fg: #111;
+    --fg-muted: #444;
+    --line: #ddd;
+    --line-strong: #bbb;
+    --accent: #7a3d00;
+    background: #fff !important;
+    color: #111 !important;
+  }
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+  .min-h-svh {
+    min-height: 0 !important;
   }
 }

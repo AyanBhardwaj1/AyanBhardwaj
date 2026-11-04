@@ -6,7 +6,10 @@ import { ThemeToggle } from "./ui/ThemeToggle";
 /** Fixed 32px terminal status bar (design §5.0). Server shell, tiny client islands. */
 export function StatusBar() {
   return (
-    <div className="no-print fade-in border-line bg-bg-elev/90 fixed inset-x-0 top-0 z-50 h-8 border-b backdrop-blur-md">
+    <aside
+      aria-label="Status bar"
+      className="no-print fade-in border-line bg-bg-elev/90 fixed inset-x-0 top-0 z-50 h-8 border-b backdrop-blur-md"
+    >
       <div className="container-page t-label text-muted flex h-full items-center justify-between gap-3 text-[11px] sm:text-[12px]">
         <div className="flex min-w-0 items-center gap-3">
           <span className="text-fg hidden sm:inline">{profile.name}</span>
@@ -25,6 +28,6 @@ export function StatusBar() {
           <PaletteTrigger className="border-line-strong hover:border-muted hover:text-fg inline-flex min-h-6 items-center gap-1.5 rounded-sm border px-2 transition-colors" />
         </div>
       </div>
-    </div>
+    </aside>
   );
 }

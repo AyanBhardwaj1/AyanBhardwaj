@@ -83,7 +83,18 @@ export function Ticker({ items }: { items: TickerItem[] }) {
         onClick={() => setPaused((p) => !p)}
         className="t-label border-line bg-bg text-muted hover:text-fg z-10 flex h-full shrink-0 items-center gap-1.5 border-l px-3 transition-colors motion-reduce:hidden"
       >
-        <span aria-hidden="true">{paused ? "▶" : "❚❚"}</span>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 12 12"
+          className="size-2.5"
+          fill="currentColor"
+        >
+          {paused ? (
+            <path d="M3 1.5v9l7.5-4.5z" />
+          ) : (
+            <path d="M2.5 1.5h2.5v9H2.5zM7 1.5h2.5v9H7z" />
+          )}
+        </svg>
         <span className="sr-only sm:not-sr-only">
           {paused ? "Play" : "Pause"}
         </span>

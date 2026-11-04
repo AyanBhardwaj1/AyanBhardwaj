@@ -94,7 +94,16 @@ function ProjectLinks({ p, big }: { p: Project; big?: boolean }) {
  * whole card (stretched link), so there are no nested links and the accessible
  * name stays the project name.
  */
-function CardTitle({ p, className }: { p: Project; className: string }) {
+function CardTitle({
+  p,
+  className,
+  level = 4,
+}: {
+  p: Project;
+  className: string;
+  level?: 3 | 4;
+}) {
+  const H = level === 3 ? "h3" : "h4";
   const href = projectHref(p.id);
   const inner = (
     <Link
@@ -106,7 +115,7 @@ function CardTitle({ p, className }: { p: Project; className: string }) {
     </Link>
   );
   return (
-    <h4 className={className}>
+    <H className={className}>
       {hasProjectPage(p.id) ? (
         <ViewTransition
           name={`project-name-${p.id}`}
@@ -118,7 +127,7 @@ function CardTitle({ p, className }: { p: Project; className: string }) {
       ) : (
         inner
       )}
-    </h4>
+    </H>
   );
 }
 
@@ -414,7 +423,7 @@ export function Projects() {
                 </span>
               </div>
               <div>
-                <CardTitle p={youbank} className="t-h2" />
+                <CardTitle p={youbank} className="t-h2" level={3} />
                 <p className="t-lead mt-3 max-w-[28ch]">{youbank.tagline}</p>
               </div>
               <p className="text-muted max-w-[56ch]">{youbank.description}</p>
@@ -438,7 +447,7 @@ export function Projects() {
                 </span>
               </div>
             </div>
-            <div className="min-h-[340px] lg:min-h-[460px]">
+            <div data-print="hide" className="min-h-[340px] lg:min-h-[460px]">
               <MiniTerminal />
             </div>
           </div>
@@ -521,7 +530,7 @@ export function Projects() {
         </div>
 
         {/* Constellation */}
-        <div id="constellation" className="mt-24 md:mt-32">
+        <div id="constellation" data-print="hide" className="mt-24 md:mt-32">
           <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
             <h3 className="t-h3">Every project, as a knowledge graph</h3>
             <p className="t-data text-muted">

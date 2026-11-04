@@ -152,13 +152,13 @@ function Chart({ row }: { row: Row }) {
           />
         </svg>
         <span
-          className="absolute right-0 -translate-y-1/2 rounded-sm px-1 text-[10px] text-black"
+          className="absolute right-0 -translate-y-1/2 rounded-sm px-1 text-[11px] text-black"
           style={{ top: `${(lastY / H) * 100}%`, background: color }}
         >
           {row.px.toFixed(2)}
         </span>
       </div>
-      <div className="text-muted mt-1 flex justify-between text-[10px]">
+      <div className="text-muted mt-1 flex justify-between text-[11px]">
         <span>09:30</span>
         <span>
           H <span className="text-fg">{hi.toFixed(2)}</span> · L{" "}
@@ -254,7 +254,7 @@ export function MiniTerminal() {
           aria-hidden="true"
           className="term-cursor bg-accent inline-block h-3 w-1.5"
         />
-        <span className="ml-auto shrink-0 rounded-sm bg-[var(--accent)] px-1.5 text-[10px] text-black">
+        <span className="ml-auto shrink-0 rounded-sm bg-[var(--accent)] px-1.5 text-[11px] text-black">
           &lt;GO&gt;
         </span>
       </div>
@@ -278,7 +278,7 @@ export function MiniTerminal() {
             {t}
           </button>
         ))}
-        <span className="text-muted ml-auto hidden items-center pr-3 text-[10px] sm:flex">
+        <span className="text-muted ml-auto hidden items-center pr-3 text-[11px] sm:flex">
           DEMO DATA
         </span>
       </div>
@@ -409,7 +409,7 @@ export function MiniTerminal() {
           </div>
         )}
       </div>
-      <div className="border-line text-muted flex items-center gap-3 border-t px-3 py-1.5 text-[10px] tracking-wider uppercase">
+      <div className="border-line text-muted flex items-center gap-3 border-t px-3 py-1.5 text-[11px] tracking-wider uppercase">
         <span className="flex items-center gap-1.5">
           <span
             aria-hidden="true"
