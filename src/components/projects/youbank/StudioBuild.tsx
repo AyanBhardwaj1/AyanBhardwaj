@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { onFirstView } from "./firstView";
+import { onFirstView } from "@/components/motion/firstView";
 import { s } from "./styles";
 
 /**

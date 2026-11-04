@@ -31,7 +31,8 @@ const ROOM = [0.06, 0.12, 0.1, 0.16, 0.22, 0.26, 0.2, 0.12, 0.6, 0.05];
 const MAX = 0.7;
 /** The channel each narrow LED lands in, by index into BANDS. */
 const LIT: Record<Src, number | null> = { white: null, "660": 7, "850": 9 };
-export const channelFor = (s: Src) => (s === "850" ? 9 : s === "660" ? 7 : 8);
+/** White light is read off the Clear channel (index 8). */
+export const channelFor = (s: Src) => LIT[s] ?? 8;
 export const baseReturn = (s: Src) => BASE[channelFor(s)];
 
 function model(hyd: number, red: number, contact: boolean) {

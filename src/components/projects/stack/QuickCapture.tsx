@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
-import { onFirstView, prefersReducedMotion } from "./firstView";
+import {
+  onFirstView,
+  prefersReducedMotion,
+} from "@/components/motion/firstView";
 import { capture, EXAMPLES, type Captured } from "./parse";
 import { s } from "./styles";
 
@@ -40,9 +43,15 @@ export function QuickCapture() {
   const flyFrom = useRef<DOMRect | null>(null);
   const touched = useRef(false);
 
-  const file = (line: string, opts: { animate?: boolean } = {}) => {
+  // Only filings the visitor made are announced to screen readers.
+  const [announce, setAnnounce] = useState(false);
+  const file = (
+    line: string,
+    opts: { animate?: boolean; auto?: boolean } = {},
+  ) => {
     const c = capture(line);
     if (!c) return;
+    setAnnounce(!opts.auto);
     const list = listOf(c.filed);
     const rest = c.filed.split(" › ").slice(1).join(" › ");
     flyFrom.current =
@@ -93,7 +102,7 @@ export function QuickCapture() {
     if (prefersReducedMotion()) {
       // End state, no motion: the prefilled example is already filed.
       const t = window.setTimeout(
-        () => file(EXAMPLES[0], { animate: false }),
+        () => file(EXAMPLES[0], { animate: false, auto: true }),
         0,
       );
       return () => window.clearTimeout(t);
@@ -138,7 +147,7 @@ export function QuickCapture() {
             later(() => {
               running = false;
               setDemo(null);
-              file(line);
+              file(line, { auto: true });
             }, 180);
           };
           // On phones the workspace sits below the parse: file it once the
@@ -300,7 +309,7 @@ export function QuickCapture() {
             })}
           </ul>
           <p className="sr-only" aria-live="polite">
-            {latest
+            {latest && announce
               ? `Filed ${latest.title} to ${[latest.list, latest.where].filter(Boolean).join(" › ")}.`
               : ""}
           </p>

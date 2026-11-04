@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { onFirstView, prefersReducedMotion } from "./firstView";
+import { onFirstView, prefersReducedMotion } from "@/components/motion/firstView";
 
 /**
  * A <figure> whose server-rendered drawing is complete without JS. With JS and

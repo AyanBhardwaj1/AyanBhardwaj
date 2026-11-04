@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { onFirstView, prefersReducedMotion } from "./firstView";
+import {
+  onFirstView,
+  prefersReducedMotion,
+} from "@/components/motion/firstView";
 import { s } from "./styles";
 
 /**
@@ -36,6 +39,8 @@ export function CommandBar({
   const input = useRef<HTMLInputElement>(null);
   const root = useRef<HTMLDivElement>(null);
   const [demo, setDemo] = useState<"typing" | "go" | null>(null);
+  // The first-view demo's result isn't announced; visitors' own runs are.
+  const [quiet, setQuiet] = useState(false);
   const touched = useRef(false);
 
   const words = q.trim().toUpperCase().split(/\s+/).filter(Boolean);
@@ -48,6 +53,7 @@ export function CommandBar({
     : [];
 
   const go = (raw: string, opts: { demo?: boolean } = {}) => {
+    setQuiet(!!opts.demo);
     const ws = raw.trim().toUpperCase().split(/\s+/).filter(Boolean);
     if (!ws.length) return;
     if (ws[0] === "?" || ws[0] === "HELP") {
@@ -113,6 +119,7 @@ export function CommandBar({
     const onTouch = () => {
       touched.current = true;
       cancelView();
+      setQuiet(false);
       if (running) {
         running = false;
         cancel();
@@ -245,7 +252,11 @@ export function CommandBar({
             </li>
           ))}
         </ul>
-        <p id={`${listId}-msg`} className={s.cmdMsg} aria-live="polite">
+        <p
+          id={`${listId}-msg`}
+          className={s.cmdMsg}
+          aria-live={quiet ? "off" : "polite"}
+        >
           {msg}
         </p>
       </div>

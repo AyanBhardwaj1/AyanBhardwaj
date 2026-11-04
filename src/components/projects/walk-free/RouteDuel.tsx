@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Plan } from "./Plan";
+import { onFirstView } from "@/components/motion/firstView";
 import {
   allExposure,
   feelsLike,
@@ -33,16 +34,12 @@ export function RouteDuel() {
   useEffect(() => {
     const el = plan.current;
     if (!el) return;
-    const io = new IntersectionObserver(
-      ([e]) => {
-        if (!e.isIntersecting) return;
-        setSeen(true);
-        io.disconnect();
-      },
-      { threshold: 0.4 },
-    );
-    io.observe(el);
-    return () => io.disconnect();
+    // No observer: show the finished routes rather than hiding them.
+    if (typeof IntersectionObserver === "undefined") {
+      const t = window.setTimeout(() => setSeen(true), 0);
+      return () => window.clearTimeout(t);
+    }
+    return onFirstView(el, () => setSeen(true), 0.4);
   }, []);
 
   const base = useMemo(() => {

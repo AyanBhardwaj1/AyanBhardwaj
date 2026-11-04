@@ -1,7 +1,8 @@
 /**
  * Calls `cb` once, the first time `el` is at least `threshold` visible while
  * the tab is showing. Returns a cancel function (safe to call any time).
- * Without IntersectionObserver it never fires: the static end state stands.
+ * Without IntersectionObserver it never fires: callers must leave their
+ * static end state in place until `cb` runs.
  */
 export function onFirstView(
   el: Element,
@@ -30,7 +31,9 @@ export function onFirstView(
           e.intersectionRect.height >= window.innerHeight * threshold);
       fire();
     },
-    { threshold: [0, threshold / 4, threshold / 2, threshold] },
+    // Dense steps so the height test above is re-checked as a tall element
+    // scrolls (ratio alone can stall below `threshold` for it).
+    { threshold: Array.from({ length: 21 }, (_, i) => i / 20) },
   );
   io.observe(el);
   document.addEventListener("visibilitychange", fire);

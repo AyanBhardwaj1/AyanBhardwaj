@@ -127,13 +127,24 @@ function step(nodes: N[], edges: E[], alpha: number, sx = 1) {
   }
 }
 
-const useMedia = (query: string) =>
-  useSyncExternalStore(
-    (cb) => {
+// One stable subscribe function per query, so re-renders (hover) don't
+// tear down and re-attach matchMedia listeners.
+const mediaSubs = new Map<string, (cb: () => void) => () => void>();
+const subscribeMedia = (query: string) => {
+  let sub = mediaSubs.get(query);
+  if (!sub) {
+    sub = (cb) => {
       const m = window.matchMedia(query);
       m.addEventListener("change", cb);
       return () => m.removeEventListener("change", cb);
-    },
+    };
+    mediaSubs.set(query, sub);
+  }
+  return sub;
+};
+const useMedia = (query: string) =>
+  useSyncExternalStore(
+    subscribeMedia(query),
     () => window.matchMedia(query).matches,
     () => false,
   );

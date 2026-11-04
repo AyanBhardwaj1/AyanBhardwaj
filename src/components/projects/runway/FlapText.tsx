@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { s } from "./cls";
-import { onFirstView } from "./firstView";
+import { onFirstView } from "@/components/motion/firstView";
 
 const CHARSET = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$.,/+-:";
 const STEP_MS = 55;
@@ -117,21 +117,25 @@ export function FlapText({
         setChars(goal);
         return;
       }
-      if (startBlank) {
+      const blank = () => {
         shown.current = goal.map(() => " ");
         setChars(shown.current);
-      }
+      };
       if (!introDone.current && el.current) {
+        // Keep the real (server-rendered) text until the intro actually
+        // starts, so a board that is never "seen" never sits blank.
         cancelView = onFirstView(
           el.current,
           () => {
             introDone.current = true;
+            if (startBlank) blank();
             animate(goal, cascade);
           },
           0.6,
         );
         return;
       }
+      if (startBlank) blank();
       animate(goal);
     }, 0);
     return () => {
