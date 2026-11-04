@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Fails if private or internal text reaches the source or the built output:
-// editorial "confirm" notes, graduation year, GPA, phone number.
+// editorial "confirm" notes, graduation year, GPA, phone number, API keys.
 // Runs automatically after `npm run build` (postbuild) and in CI.
 import { readdir, readFile, stat } from "node:fs/promises";
 import { join, relative } from "node:path";
@@ -22,6 +22,7 @@ const RULES = [
   [/\bGPA\b/i, "GPA"],
   [/\(945\)|945[-.\s]?527/, "phone number"],
   [/class of '?\d{2,4}/i, "class year"],
+  [/\bsk-(proj-)?[A-Za-z0-9_-]{20,}/, "OpenAI-style secret key"],
 ];
 const SELF = "scripts/check-leaks.mjs";
 // Owner-approved resume, published as-is at Ayan's request.
