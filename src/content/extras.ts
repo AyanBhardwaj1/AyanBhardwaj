@@ -120,6 +120,10 @@ export const projectRepo: Record<string, string> = {
   clef: "Clef",
   "emotion-classifier": "EmotionClassifier",
   "low-resource-research": "LowResourceResearch",
+  "walk-free": "Walk-Free",
+  runway: "AITX-MLOps-Hack",
+  oncosense: "OncoSense-MIT-LL",
+  stack: "stack",
 };
 
 /** Palette mnemonics for projects (Bloomberg-style, 2 to 5 letters). */
@@ -146,18 +150,24 @@ export const projectMnemonic: Record<string, string> = {
   clef: "CLEF",
   "emotion-classifier": "EMOT",
   "low-resource-research": "LRES",
+  "walk-free": "WALK",
+  runway: "RNWY",
+  oncosense: "ONCO",
+  stack: "STCK",
 };
 
 // ---------- Constellation ----------
 
-export type ClusterId = "moss" | "quant" | "sports" | "agents" | "research";
+export type ClusterId =
+  "moss" | "quant" | "sports" | "agents" | "research" | "hack";
 
 export const clusters: {
   id: ClusterId;
   label: string;
   anchor: [number, number];
 }[] = [
-  { id: "moss", label: "Moss Apps", anchor: [420, 330] },
+  { id: "moss", label: "Moss Apps", anchor: [430, 370] },
+  { id: "hack", label: "Hackathons & Research", anchor: [470, 90] },
   { id: "quant", label: "Quant Desk", anchor: [820, 170] },
   { id: "agents", label: "Agent Infra", anchor: [820, 500] },
   { id: "sports", label: "Sports Sims", anchor: [120, 510] },
@@ -191,6 +201,10 @@ export const constellation: Record<
   clef: { clusters: ["research"], significance: 2 },
   "emotion-classifier": { clusters: ["research"], significance: 2 },
   "low-resource-research": { clusters: ["research"], significance: 2 },
+  "walk-free": { clusters: ["hack"], significance: 4 },
+  runway: { clusters: ["hack", "quant", "agents"], significance: 4 },
+  oncosense: { clusters: ["hack", "research"], significance: 4 },
+  stack: { clusters: ["hack", "agents"], significance: 3 },
 };
 
 // ---------- Career chart (GP <GO>) ----------

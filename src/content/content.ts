@@ -77,7 +77,15 @@ export interface Experience {
   relatedProjectIds?: string[];
 }
 
-export type ProjectTier = "featured" | "moss" | "more";
+/**
+ * featured: the lead card (YouBank).
+ * moss: the two Moss builds shown as cards on the home page.
+ * moss-sdk: the other Moss SDK apps, shown in "More work" with their own treatment.
+ * hackathon: hackathon builds and research projects.
+ * more: everything else in "More work".
+ */
+export type ProjectTier =
+  "featured" | "moss" | "moss-sdk" | "hackathon" | "more";
 
 export interface Project {
   id: string;
@@ -92,8 +100,19 @@ export interface Project {
   /** Snapshot 2026-10-15. Replace with live data if available. */
   stars?: number;
   builtAt?: string; // e.g. "Moss"
+  /** Where/why it was built, e.g. a hackathon name or research program. */
+  context?: string;
   category:
-    "AI" | "Search" | "Finance" | "Dev Tools" | "Sports" | "Research" | "Media";
+    | "AI"
+    | "Search"
+    | "Finance"
+    | "Dev Tools"
+    | "Sports"
+    | "Research"
+    | "Media"
+    | "Health"
+    | "Climate"
+    | "Productivity";
 }
 
 export interface Award {
@@ -393,13 +412,13 @@ export const projects: Project[] = [
       "90%+ drafts unedited",
       "1,000+ tests",
     ],
-    links: { code: gh("YouBank"), live: "https://youbank-nu.vercel.app/" },
+    links: { code: gh("YouBank"), live: "https://youbank.dev/" },
     stars: 0,
   },
   {
     id: "mycelium",
     name: "Mycelium",
-    tier: "featured",
+    tier: "moss",
     category: "Search",
     builtAt: "Moss",
     tagline: "Your browser history, but it remembers ideas instead of URLs.",
@@ -453,7 +472,7 @@ export const projects: Project[] = [
   {
     id: "thread",
     name: "Thread",
-    tier: "moss",
+    tier: "moss-sdk",
     category: "Dev Tools",
     builtAt: "Moss",
     tagline: "Memory for coding agents, so they stop re-reading the same file.",
@@ -472,7 +491,7 @@ export const projects: Project[] = [
   {
     id: "sentry",
     name: "Sentry",
-    tier: "moss",
+    tier: "moss-sdk",
     category: "Dev Tools",
     builtAt: "Moss",
     tagline: "A collision warning for parallel AI coding agents.",
@@ -491,7 +510,7 @@ export const projects: Project[] = [
   {
     id: "studyoverlay",
     name: "StudyOverlay",
-    tier: "moss",
+    tier: "moss-sdk",
     category: "AI",
     builtAt: "Moss",
     tagline: "A tutor that floats over whatever you're studying.",
@@ -512,7 +531,7 @@ export const projects: Project[] = [
   {
     id: "convos-ai",
     name: "Convos.AI",
-    tier: "moss",
+    tier: "moss-sdk",
     category: "AI",
     builtAt: "Moss",
     tagline: "Debate practice with an opponent that did the reading.",
@@ -532,7 +551,7 @@ export const projects: Project[] = [
   {
     id: "champions-wc-26",
     name: "Champions WC 26",
-    tier: "moss",
+    tier: "moss-sdk",
     category: "Sports",
     builtAt: "Moss",
     tagline: "Draft an XI. Find its historical twin. Win the World Cup.",
@@ -545,7 +564,7 @@ export const projects: Project[] = [
   {
     id: "syllabus",
     name: "Syllabus",
-    tier: "moss",
+    tier: "moss-sdk",
     category: "Search",
     builtAt: "Moss",
     tagline: "A study knowledge base built only from your own files.",
@@ -558,7 +577,7 @@ export const projects: Project[] = [
   {
     id: "duet",
     name: "Duet",
-    tier: "moss",
+    tier: "moss-sdk",
     category: "Dev Tools",
     builtAt: "Moss",
     tagline: "Shared context for pair programming.",
@@ -571,7 +590,7 @@ export const projects: Project[] = [
   {
     id: "dejavu",
     name: "DejaVu",
-    tier: "moss",
+    tier: "moss-sdk",
     category: "Search",
     builtAt: "Moss",
     tagline: "A journal that remembers what you wrote last time.",
@@ -586,6 +605,109 @@ export const projects: Project[] = [
     ],
     links: { code: gh("DejaVu") },
     stars: 6,
+  },
+
+  // Hackathons and research
+  {
+    id: "walk-free",
+    name: "Walk-Free",
+    tier: "hackathon",
+    category: "Climate",
+    context: "Meta Global AI Developer Hackathon · Indie track",
+    tagline: "See how hot every street feels before you walk it.",
+    description:
+      "Heat-aware walking for campuses and cities. Every path is colored by modeled feels-like temperature for the hour you walk it, with shade ray-traced against OpenStreetMap buildings and tree crowns. Six route types pick the way, and Meta's Muse Spark plans the walk in your own language.",
+    howItWorks: [
+      "Live weather and sunlight from Open-Meteo with an NWS fallback, plus US AQI, NWS heat alerts and the HeatRisk outlook.",
+      "Routes: quickest, more shade, scenic, cool stops through air-conditioned buildings, step-free, and lit at night.",
+      "A design tool lines a street with trees and shows shade and feels-like before and after.",
+      "Pre-built campus areas (UT Austin, UC Berkeley, Michigan, UCLA, Stanford, ASU); anywhere else builds from OpenStreetMap.",
+    ],
+    stack: [
+      "React",
+      "TypeScript",
+      "Three.js",
+      "Express",
+      "Capacitor",
+      "OpenStreetMap",
+      "Open-Meteo",
+      "Meta Muse Spark",
+    ],
+    links: {
+      code: gh("Walk-Free"),
+      live: "https://walk-free.vercel.app/home",
+    },
+  },
+  {
+    id: "runway",
+    name: "Runway",
+    tier: "hackathon",
+    category: "Finance",
+    context: "AITX & MLOps World Community Hackathon · Austin Tech Week",
+    tagline: "Know the day your startup's cash runs out.",
+    description:
+      "Reads a company's bank feed read-only and works out burn, runway and the zero-cash date with plain, tested arithmetic: the LLM never does the math. It finds wasted spend (overlapping tools, quiet price increases, subscriptions on idle cards, double charges) and posts what changed to Slack every Monday. Agents draft the fixes; a person approves every one.",
+    howItWorks: [
+      "Deterministic TypeScript for cash, gross and net burn, runway and zero-cash date.",
+      "A 1,000-path Monte Carlo gives a P10 to P90 runway range instead of a single guess.",
+      "Copilot plans with tools over the same math; Autopilot runs the monthly review end to end. Nothing sends without approval.",
+    ],
+    stack: [
+      "Next.js",
+      "TypeScript",
+      "Tailwind",
+      "Vercel AI SDK",
+      "Supabase Postgres",
+      "Recharts",
+      "zod",
+      "vitest",
+    ],
+    links: {
+      code: gh("AITX-MLOps-Hack"),
+      live: "https://runway-for-rho.vercel.app/",
+    },
+  },
+  {
+    id: "oncosense",
+    name: "OncoSense",
+    tier: "hackathon",
+    category: "Health",
+    context: "Summer research · MIT Lincoln Laboratory",
+    tagline:
+      "A wearable that shines light into skin and reads what comes back.",
+    description:
+      "A low-cost optical band: 850 nm near-infrared and 660 nm red LEDs and a 10-channel spectral sensor held against the arm, measuring how skin scatters and returns light. It started from nonlinear optics, pivoted to diffuse reflectance that LEDs can drive, and targets skin hydration first as a step toward screening. A browser monitor reads a real band over Web Serial or runs a virtual one. Research prototype, not a medical device.",
+    howItWorks: [
+      "Each sample is read with the LED off, then on, and subtracted to remove room light, with auto-ranging gain.",
+      "Firmware v2 is modular C++ with a host-tested skin model, compiled in CI.",
+      "A Python logger and analyzer stream sessions as CSV.",
+    ],
+    stack: [
+      "C++",
+      "Arduino (SAMD21)",
+      "AS7341 spectral sensor",
+      "Python",
+      "Web Serial",
+      "TypeScript",
+    ],
+    links: {
+      code: gh("OncoSense-MIT-LL"),
+      live: "https://oncosense-monitor.vercel.app/",
+    },
+  },
+  {
+    id: "stack",
+    name: "Stack",
+    tier: "hackathon",
+    category: "Productivity",
+    tagline: "A workspace that adapts to what you do.",
+    description:
+      "Notes, deadlines and databases in one workspace, plus an AI tutor that quizzes you on your own notes.",
+    stack: ["Vite", "PWA"],
+    links: {
+      code: gh("stack"),
+      live: "https://stack-workspace.vercel.app/",
+    },
   },
 
   // More

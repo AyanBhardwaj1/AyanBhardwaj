@@ -7,6 +7,7 @@ import {
   ui,
 } from "@/content/content";
 import { projectMnemonic } from "@/content/extras";
+import { hasProjectPage, projectHref } from "./projects";
 
 /**
  * One command registry feeds the ⌘K palette and the static /functions page.
@@ -82,7 +83,7 @@ export const commands: Command[] = [
     "timeline",
     "graph",
   ]),
-  go("PROJ", "projects", "Projects", "Featured work and the ten Moss apps", [
+  go("PROJ", "projects", "Projects", "YouBank, Moss builds, hackathons", [
     "projects",
     "work",
     "portfolio",
@@ -232,8 +233,10 @@ export const commands: Command[] = [
       ...p.stack.map((s) => s.toLowerCase()),
       ...(p.builtAt ? ["moss"] : []),
     ],
-    action: { type: "scroll", id: `project-${p.id}` },
-    href: `/#project-${p.id}`,
+    action: hasProjectPage(p.id)
+      ? { type: "route", href: projectHref(p.id) }
+      : { type: "scroll", id: `project-${p.id}` },
+    href: projectHref(p.id),
   })),
 ];
 
