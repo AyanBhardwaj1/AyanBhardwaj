@@ -528,9 +528,14 @@ html:not(.js) .lw-bar {
   }
   .lw-peek {
     transform: none;
-    translate: none;
     left: auto;
     right: 32px;
+  }
+  /* Own rule: next to transform, the minifier folds translate: none into
+     transform: translate(0, 0) and the base translate survives, pushing the
+     peek past the viewport (horizontal scroll). */
+  .lw-row .lw-peek {
+    translate: none;
   }
   .lw-row:is(:hover, :focus-within) .lw-name {
     transform: none;

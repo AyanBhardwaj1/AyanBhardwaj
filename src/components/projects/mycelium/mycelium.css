@@ -1353,9 +1353,13 @@
     gap: 8px;
     background: none;
   }
+  /* translate gets its own rule: beside transform, the minifier folds it into
+     transform and the base translate (0 -50%) would survive. */
+  .myc-packetTrack > span {
+    translate: none;
+  }
   .myc-packetTrack span {
     position: static;
-    translate: none;
     transform: none;
     align-self: flex-start;
     animation: none;
