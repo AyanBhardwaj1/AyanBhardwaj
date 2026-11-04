@@ -1,0 +1,439 @@
+/*
+ * OncoSense page: "spectral bench". A bedside vitals monitor crossed with an
+ * optics bench: phosphor-teal traces on near-black green in dark, the
+ * monitor app's own clinical paper in light. Each chapter of the research is
+ * a flat field (colour chapters). Tokens use light-dark() and are redeclared
+ * on chapters so a chapter can carry its own scheme.
+ */
+
+.os {
+  color-scheme: dark;
+}
+:root[data-theme="light"] .os {
+  color-scheme: light;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .os {
+    color-scheme: light;
+  }
+}
+
+.os,
+.os .os-ch {
+  --os-ground: light-dark(#f3f5f4, #0f1312);
+  --os-panel: light-dark(#fbfcfc, #161c1b);
+  --os-sunken: light-dark(#e6ebe9, #1f2725);
+  --os-grid: light-dark(#d5dddb, #26302e);
+  --os-ink: light-dark(#121816, #e8eeec);
+  --os-ink-soft: light-dark(#4a5551, #9aa6a1);
+  --os-teal: light-dark(#0e6f68, #5cc2b6);
+  --os-teal-strong: light-dark(#0a5651, #7fd6cb);
+  --os-on-teal: light-dark(#ffffff, #0f1312);
+  --os-wash: light-dark(#d9ece9, #12302c);
+  --os-warn: light-dark(#8a5300, #f0b45c);
+  --os-alert: light-dark(#b42318, #ff8a7a);
+  --os-c0: light-dark(#b88a4a, #c79a5a);
+  --os-c1: light-dark(#cfae74, #d9bd88);
+  --os-c2: light-dark(#7fa99b, #8fbcad);
+  --os-c3: light-dark(#2f8a80, #4fb3a6);
+  --os-c4: light-dark(#5d6b78, #8796a3);
+  --os-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --os-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", monospace;
+  --os-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --os-note: var(--font-instrument), Georgia, serif;
+  --os-gut: clamp(16px, 4vw, 56px);
+}
+.os {
+  background: var(--os-ground);
+  color: var(--os-ink);
+  font-family: var(--os-sans);
+}
+.os .os-ch {
+  background: var(--os-ground);
+  color: var(--os-ink);
+}
+.os .os-ch-panel {
+  background: var(--os-panel);
+}
+.os .os-ch-wash {
+  background: var(--os-wash);
+}
+/* the closing chapter is always the instrument screen */
+.os .os-ch-dark {
+  color-scheme: dark;
+}
+.os ::selection {
+  background: var(--os-teal);
+  color: var(--os-on-teal);
+}
+.os :focus-visible {
+  outline: 3px solid var(--os-teal);
+  outline-offset: 3px;
+}
+
+.os-wrap {
+  margin-inline: auto;
+  max-width: 1440px;
+  padding-inline: var(--os-gut);
+}
+.os-section {
+  padding-block: clamp(96px, 12vw, 176px);
+}
+.os-h1 {
+  font-family: var(--os-sans);
+  font-weight: 800;
+  font-variation-settings: "wdth" 112;
+  font-size: clamp(52px, 6vw, 96px);
+  line-height: 0.9;
+  letter-spacing: -0.035em;
+}
+.os-h2 {
+  font-weight: 750;
+  font-variation-settings: "wdth" 112;
+  font-size: clamp(38px, 4.8vw, 74px);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+.os-h3 {
+  font-weight: 700;
+  font-variation-settings: "wdth" 105;
+  font-size: clamp(22px, 2vw, 28px);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+.os-statement {
+  font-size: clamp(21px, 2vw, 28px);
+  line-height: 1.32;
+  max-width: 32ch;
+  text-wrap: pretty;
+}
+.os-body {
+  font-size: 18px;
+  line-height: 1.58;
+  max-width: 62ch;
+  text-wrap: pretty;
+}
+.os-small {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--os-ink-soft);
+}
+.os-mono {
+  font-family: var(--os-mono);
+  font-variant-numeric: tabular-nums;
+}
+.os-readout {
+  font-family: var(--os-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+  color: var(--os-ink-soft);
+}
+.os-note {
+  font-family: var(--os-note);
+  font-style: italic;
+  font-size: 24px;
+  line-height: 1.2;
+  color: var(--os-teal);
+}
+
+/* warning label: real text, styled like an instrument plate */
+.os-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--os-warn);
+  color: light-dark(#ffffff, #0f1312);
+  font-weight: 700;
+  font-size: 15px;
+}
+.os-label svg {
+  flex: none;
+}
+
+/* buttons */
+.os-btn {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 22px;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 6px;
+  background: var(--os-teal);
+  color: var(--os-on-teal);
+  transition:
+    transform 160ms var(--os-ease),
+    background-color 160ms var(--os-ease);
+  touch-action: manipulation;
+}
+.os-btn:hover {
+  background: var(--os-teal-strong);
+}
+.os-btn:active {
+  transform: scale(0.97);
+}
+.os-btn-ghost {
+  background: var(--os-sunken);
+  color: var(--os-ink);
+}
+.os-btn-ghost:hover {
+  background: var(--os-grid);
+}
+.os-btn .os-arrow {
+  transition: transform 200ms var(--os-ease);
+}
+.os-btn:hover .os-arrow {
+  transform: translate(2px, -2px);
+}
+.os-link {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+.os-link:hover {
+  color: var(--os-teal);
+}
+
+/* segmented control */
+.os-seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 10px;
+  background: var(--os-sunken);
+}
+.os-seg button {
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 6px;
+  font-family: var(--os-mono);
+  font-size: 14px;
+  color: var(--os-ink);
+  transition:
+    background-color 180ms var(--os-ease),
+    color 180ms var(--os-ease),
+    transform 120ms var(--os-ease);
+  touch-action: manipulation;
+}
+.os-seg button:hover {
+  background: var(--os-grid);
+}
+.os-seg button[aria-pressed="true"] {
+  background: var(--os-teal);
+  color: var(--os-on-teal);
+}
+.os-seg button:active {
+  transform: scale(0.96);
+}
+
+/* range */
+.os-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 40px;
+  background: transparent;
+  cursor: pointer;
+  touch-action: pan-y;
+}
+.os-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--os-grid);
+}
+.os-range::-moz-range-track {
+  height: 4px;
+  background: var(--os-grid);
+}
+.os-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -9px;
+  border-radius: 50%;
+  background: var(--os-teal);
+  border: 3px solid var(--os-panel);
+}
+.os-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--os-teal);
+  border: 3px solid var(--os-panel);
+}
+
+/* instrument screens */
+.os-screen {
+  background: var(--os-panel);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.os-ch-panel .os-screen {
+  background: var(--os-ground);
+}
+.os-screen-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--os-sunken);
+  font-family: var(--os-mono);
+  font-size: 13px;
+  color: var(--os-ink-soft);
+}
+.os-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.os-live::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--os-teal);
+  animation: os-blink 1.6s steps(2) infinite;
+}
+@keyframes os-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* status lamps */
+.os-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 6px;
+  background: var(--os-sunken);
+  font-family: var(--os-mono);
+  font-size: 13px;
+  color: var(--os-ink-soft);
+  transition:
+    background-color 200ms var(--os-ease),
+    color 200ms var(--os-ease);
+}
+.os-flag::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--os-grid);
+}
+.os-flag[data-on="true"] {
+  color: var(--os-ink);
+  background: color-mix(in oklab, var(--os-alert) 22%, var(--os-sunken));
+}
+.os-flag[data-on="true"]::before {
+  background: var(--os-alert);
+}
+
+/* bars + meters */
+.os-meter {
+  position: relative;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--os-sunken);
+  overflow: hidden;
+}
+.os-meter > i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 100%;
+  border-radius: 5px;
+  background: var(--os-teal);
+  transform-origin: left;
+  transition: transform 700ms var(--os-ease);
+}
+.os-meter > b {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  background: var(--os-ink);
+}
+
+.os-spec-bar {
+  transform-origin: bottom;
+  transition: transform 260ms var(--os-ease);
+}
+
+/* net probe */
+.os-net .edge {
+  stroke: var(--os-teal);
+  transition: stroke-opacity 500ms var(--os-ease);
+}
+.os-net .node {
+  transition:
+    fill-opacity 500ms var(--os-ease),
+    r 500ms var(--os-ease);
+}
+
+/* fault -> fix table */
+.os-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 16px;
+}
+.os-table th,
+.os-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 16px 14px;
+  border-top: 1px solid var(--os-grid);
+}
+.os-table thead th {
+  font-family: var(--os-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--os-ink-soft);
+  border-top: 0;
+}
+@media (max-width: 640px) {
+  .os-table thead {
+    display: none;
+  }
+  .os-table tr {
+    display: block;
+    padding: 6px 0;
+    border-top: 1px solid var(--os-grid);
+  }
+  .os-table td {
+    display: block;
+    border-top: 0;
+    padding: 8px 14px;
+  }
+}
+.os-lamp {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 10px;
+  vertical-align: 1px;
+}
+
+/* photos */
+.os-photo img {
+  transition: transform 900ms var(--os-ease);
+}
+.os-photo:hover img {
+  transform: scale(1.03);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .os *,
+  .os *::before,
+  .os *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
