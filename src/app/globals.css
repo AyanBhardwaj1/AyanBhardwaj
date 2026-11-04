@@ -682,9 +682,21 @@ dialog.palette[open] > * {
     }
   }
 }
+/* The amber word is lower-contrast to begin with, so it starts brighter. */
+.scrub > .text-accent {
+  animation-name: scrub-word-accent;
+}
+@keyframes scrub-word-accent {
+  from {
+    opacity: 0.85;
+  }
+  to {
+    opacity: 1;
+  }
+}
 @keyframes scrub-word {
   from {
-    opacity: 0.38;
+    opacity: 0.62;
   }
   to {
     opacity: 1;
