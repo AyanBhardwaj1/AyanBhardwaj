@@ -325,18 +325,11 @@ export const media = {
       height: 900,
     },
   ],
-  phones: [
-    {
-      src: "/media/youbank/mobile-terminal.jpg",
-      alt: "The signed-in terminal on a phone, listing function codes",
-      width: 820,
-      height: 940,
-    },
-    {
-      src: "/media/youbank/mobile-studio.jpg",
-      alt: "The signed-in Studio on a phone",
-      width: 820,
-      height: 940,
-    },
-  ],
+  /** Cropped from a QA capture to the phone screen alone. */
+  phone: {
+    src: "/media/youbank/mobile-studio-phone.jpg",
+    alt: "The signed-in Studio on a phone: an illustrative leveraged buyout model in a spreadsheet, with a formatting toolbar, sheet tabs and the agent bar below",
+    width: 390,
+    height: 787,
+  },
 };

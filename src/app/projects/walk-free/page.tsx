@@ -268,7 +268,7 @@ export default function Page() {
                   <h3 className="text-[16px] font-bold">{g.stage}</h3>
                   <dl className="mt-1">
                     {g.rows.map(([k, v]) => (
-                      <div key={k} className="wf-leader">
+                      <div key={k} className="wf-leader wf-leader-stack">
                         <dt>{k}</dt>
                         <dd className="shrink-0 text-(--wf-ink-soft)">{v}</dd>
                       </div>

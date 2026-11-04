@@ -107,16 +107,16 @@ export const projectMedia: Record<string, Media> = {
 
 export const youbankGallery: Media[] = [
   {
-    src: "/media/youbank/mobile-terminal.jpg",
-    alt: "YouBank terminal on a phone, listing function codes",
-    width: 820,
-    height: 940,
+    src: "/media/projects/youbank/mobile-hero-390.jpg",
+    alt: "YouBank's landing page on a phone: The AI deal desk that does the work, and learns how you do it",
+    width: 390,
+    height: 844,
   },
   {
-    src: "/media/youbank/mobile-studio.jpg",
-    alt: "YouBank modeling studio on a phone",
-    width: 820,
-    height: 940,
+    src: "/media/youbank/mobile-studio-phone.jpg",
+    alt: "YouBank Studio on a phone, building an illustrative LBO model cell by cell",
+    width: 390,
+    height: 787,
   },
 ];
 

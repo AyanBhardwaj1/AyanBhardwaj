@@ -84,8 +84,9 @@
 }
 .yb-h1 {
   margin-top: 20px;
-  font-size: clamp(52px, 6.6vw, 100px);
-  overflow-wrap: anywhere;
+  /* Sized from its column (the hero column is an inline-size container) so
+     the one-word name never breaks: the word is about 4.9em wide. */
+  font-size: clamp(40px, 19cqi, 92px);
   font-weight: 800;
   font-stretch: 118%;
   letter-spacing: -0.045em;
@@ -461,10 +462,26 @@
   stroke: var(--d-line);
   stroke-width: 1;
 }
-.yb-axisText {
-  fill: var(--d-muted);
-  font-size: 15px;
+.yb-axis {
+  position: relative;
+  height: 18px;
+  margin-top: 6px;
   font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--d-muted);
+}
+.yb-axis span {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.yb-axis span[data-edge="start"] {
+  transform: none;
+}
+.yb-axis span[data-edge="end"] {
+  transform: translateX(-100%);
 }
 .yb-band {
   fill: rgb(88 166 255 / 0.08);
@@ -501,10 +518,19 @@
   stroke-width: 1.5;
   stroke-dasharray: 4 4;
 }
-.yb-barText {
-  fill: var(--d-fg);
-  font-size: 15px;
+.yb-autopilotLabel {
+  position: absolute;
+  top: 6px;
   font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1;
+  color: var(--d-fg);
+  white-space: nowrap;
+  pointer-events: none;
+  /* a backing chip, so the curve can pass behind the words */
+  padding: 2px 4px;
+  border-radius: 2px;
+  background: var(--d-panel);
 }
 .yb-floorOn,
 .yb-floorOff {
@@ -657,6 +683,69 @@
 }
 .yb-fnTable code {
   color: var(--d-blue);
+}
+/* Phones: each row becomes a card. The runnable code sits on the first line
+   beside the function code; the column headings stay for screen readers. */
+@media (max-width: 639.98px) {
+  .yb-fnTable {
+    min-width: 0;
+  }
+  .yb-fnTable thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .yb-fnTable,
+  .yb-fnTable tbody {
+    display: block;
+  }
+  .yb-fnTable tbody tr {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+    gap: 6px 12px;
+    padding: 14px 16px;
+  }
+  .yb-fnTable tbody tr:first-child {
+    border-top: 0;
+  }
+  .yb-fnTable tbody th,
+  .yb-fnTable td {
+    display: block;
+    width: auto;
+    padding: 0;
+  }
+  .yb-fnTable tbody th {
+    grid-row: 1;
+    font-size: 15px;
+  }
+  .yb-fnTable td:nth-of-type(3) {
+    grid-row: 1;
+    grid-column: 2;
+    overflow-wrap: anywhere;
+  }
+  .yb-fnTable td:nth-of-type(3)::before {
+    content: "> ";
+    content: "> " / "";
+    color: var(--d-muted);
+  }
+  .yb-fnTable td:nth-of-type(1),
+  .yb-fnTable td:nth-of-type(2) {
+    grid-column: 1 / -1;
+  }
+  .yb-fnTable td:nth-of-type(1) {
+    margin-top: 2px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.45;
+  }
+  .yb-fnTable td:nth-of-type(2) {
+    font-size: 12px;
+    line-height: 1.5;
+  }
 }
 
 /* ---------- studio ---------- */

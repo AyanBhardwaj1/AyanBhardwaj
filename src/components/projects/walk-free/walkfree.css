@@ -318,6 +318,14 @@
   stroke-width: 5px;
   stroke-linejoin: round;
 }
+/* The plan is 1000 units wide, so 15 units is about 5px on a phone: draw
+   the street names larger there (about 11px on screen at 390px). */
+@media (max-width: 639.98px) {
+  .wf-plan .p-label {
+    font-size: 32px;
+    stroke-width: 8px;
+  }
+}
 .wf-plan .p-pin {
   fill: var(--wf-ink);
 }
@@ -456,6 +464,18 @@
   background-repeat: repeat-x;
   opacity: 0.55;
   align-self: center;
+}
+/* Phones: no room for a leader, so the value sits under its term. */
+@media (max-width: 639.98px) {
+  .wf-leader-stack {
+    flex-direction: column;
+    gap: 0;
+    line-height: 1.45;
+    padding-block: 5px;
+  }
+  .wf-leader-stack dt::after {
+    display: none;
+  }
 }
 
 /* bars */

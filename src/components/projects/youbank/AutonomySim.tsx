@@ -43,6 +43,7 @@ const H = 200;
 const X0 = 0.5; // the plot shows the part of [0, 1] that matters
 const px = (x: number) => ((x - X0) / (1 - X0)) * W;
 const pct = (x: number) => `${Math.round(x * 100)}%`;
+const TICKS = [0.5, 0.6, 0.7, 0.8, 0.9, 1];
 
 function curvePath(a: number, b: number) {
   const pts: [number, number][] = [];
@@ -165,67 +166,84 @@ export function AutonomySim() {
       <div className="grid gap-0 lg:grid-cols-[1fr_260px]">
         <div className="p-4 md:p-5">
           <figure className="m-0">
-            <svg
-              viewBox={`0 0 ${W} ${H + 24}`}
-              className="block h-auto w-full"
-              role="img"
-              aria-label={`Belief about the share of drafts sent unchanged: estimate ${pct(st.mean)}, 90% interval ${pct(st.lo)} to ${pct(st.hi)}. Autopilot bar at 90%.`}
-            >
-              {[0.5, 0.6, 0.7, 0.8, 0.9, 1].map((t) => (
-                <g key={t}>
+            {/* Labels are HTML over the SVG so they keep a readable size at
+                every width; the SVG itself scales with its viewBox. */}
+            <div className="relative">
+              <svg
+                viewBox={`0 0 ${W} ${H}`}
+                className="block h-auto w-full"
+                role="img"
+                aria-label={`Belief about the share of drafts sent unchanged: estimate ${pct(st.mean)}, 90% interval ${pct(st.lo)} to ${pct(st.hi)}. Autopilot bar at 90%.`}
+              >
+                {TICKS.map((t) => (
                   <line
+                    key={t}
                     x1={px(t)}
                     x2={px(t)}
                     y1={0}
                     y2={H}
                     className={s.gridLine}
                   />
-                  <text
-                    x={Math.min(Math.max(px(t), 12), W - 14)}
-                    y={H + 18}
-                    textAnchor="middle"
-                    className={s.axisText}
-                  >
-                    {pct(t)}
-                  </text>
-                </g>
-              ))}
-              <rect
-                x={px(Math.max(st.lo, X0))}
-                width={Math.max(0, px(st.hi) - px(Math.max(st.lo, X0)))}
-                y={0}
-                height={H}
-                className={s.band}
-              />
-              <path d={curve.area} className={s.curveArea} />
-              <path d={curve.line} className={s.curveLine} />
-              <line x1={px(0.9)} x2={px(0.9)} y1={0} y2={H} className={s.bar} />
-              <text
-                x={px(0.9) - 6}
-                y={16}
-                textAnchor="end"
-                className={s.barText}
+                ))}
+                <rect
+                  x={px(Math.max(st.lo, X0))}
+                  width={Math.max(0, px(st.hi) - px(Math.max(st.lo, X0)))}
+                  y={0}
+                  height={H}
+                  className={s.band}
+                />
+                <path d={curve.area} className={s.curveArea} />
+                <path d={curve.line} className={s.curveLine} />
+                <line
+                  x1={px(0.9)}
+                  x2={px(0.9)}
+                  y1={0}
+                  y2={H}
+                  className={s.bar}
+                />
+                {st.n > 0 && st.floor > X0 && (
+                  <g>
+                    <line
+                      x1={px(st.floor)}
+                      x2={px(st.floor)}
+                      y1={22}
+                      y2={H}
+                      className={st.earned ? s.floorOn : s.floorOff}
+                    />
+                    <circle
+                      cx={px(st.floor)}
+                      cy={22}
+                      r={4}
+                      className={st.earned ? s.dotOn : s.dotOff}
+                    />
+                  </g>
+                )}
+              </svg>
+              <span
+                className={s.autopilotLabel}
+                style={{ right: `calc(${100 - (px(0.9) / W) * 100}% + 6px)` }}
+                aria-hidden="true"
               >
                 autopilot bar
-              </text>
-              {st.n > 0 && st.floor > X0 && (
-                <g>
-                  <line
-                    x1={px(st.floor)}
-                    x2={px(st.floor)}
-                    y1={22}
-                    y2={H}
-                    className={st.earned ? s.floorOn : s.floorOff}
-                  />
-                  <circle
-                    cx={px(st.floor)}
-                    cy={22}
-                    r={4}
-                    className={st.earned ? s.dotOn : s.dotOff}
-                  />
-                </g>
-              )}
-            </svg>
+              </span>
+            </div>
+            <div className={s.axis} aria-hidden="true">
+              {TICKS.map((t, i) => (
+                <span
+                  key={t}
+                  style={{ left: `${(px(t) / W) * 100}%` }}
+                  data-edge={
+                    i === 0
+                      ? "start"
+                      : i === TICKS.length - 1
+                        ? "end"
+                        : undefined
+                  }
+                >
+                  {pct(t)}
+                </span>
+              ))}
+            </div>
             <figcaption className={s.caption}>
               Curve: the engine&apos;s belief about how often this kind of draft
               goes out unchanged (Beta posterior, uniform prior). Shaded: 90%

@@ -112,7 +112,7 @@ export default function Page() {
           aria-labelledby="project-title"
           className={`${s.section} container-page grid gap-12 pt-12 md:pt-20 lg:grid-cols-12 lg:items-center lg:gap-10`}
         >
-          <div className="lg:col-span-5">
+          <div className="@container lg:col-span-5">
             <p className={s.code}>
               DES <span className={s.goTag}>&lt;GO&gt;</span>
               <span className={s.muted}> · Independent build · Finance</span>
@@ -397,8 +397,8 @@ export default function Page() {
         >
           <Head code="SCRN" id="screens" title="Screens.">
             <p>
-              From the public site, plus two signed-in views on a phone that a
-              visitor can&apos;t reach without an account.
+              From the public site, plus the signed-in Studio on a phone, which
+              a visitor can&apos;t reach without an account.
             </p>
           </Head>
           <div className="grid gap-4 md:grid-cols-2">
@@ -409,20 +409,30 @@ export default function Page() {
                 sizes="(max-width: 768px) 100vw, 1200px"
               />
             </Reveal>
-            {media.screens.map((m, i) => (
+            {media.screens.slice(0, 2).map((m, i) => (
+              <Reveal key={m.src} delay={i * 0.06}>
+                <Shot img={m} sizes="(max-width: 768px) 100vw, 600px" />
+              </Reveal>
+            ))}
+            {/* The gallery and the phone share a row at equal heights:
+                1440x900 beside 390x787 is a width ratio of about 3.23 : 1. */}
+            <div className="grid gap-4 md:col-span-2 md:grid-cols-[minmax(0,3.23fr)_minmax(0,1fr)]">
+              <Reveal>
+                <Shot
+                  img={media.screens[2]}
+                  sizes="(max-width: 768px) 100vw, 920px"
+                />
+              </Reveal>
               <Reveal
-                key={m.src}
-                delay={(i % 2) * 0.06}
-                className={i === 2 ? "md:col-span-2" : undefined}
+                delay={0.06}
+                className="mx-auto w-full max-w-[320px] md:max-w-none"
               >
-                <Shot img={m} sizes="(max-width: 768px) 100vw, 600px" />
+                <Shot
+                  img={media.phone}
+                  sizes="(max-width: 768px) 320px, 290px"
+                />
               </Reveal>
-            ))}
-            {media.phones.map((m, i) => (
-              <Reveal key={m.src} delay={(i % 2) * 0.06}>
-                <Shot img={m} sizes="(max-width: 768px) 100vw, 600px" />
-              </Reveal>
-            ))}
+            </div>
           </div>
         </section>
       </div>

@@ -233,7 +233,7 @@ function RouteCard({
 
 function Row({ k, v }: { k: string; v: string }) {
   return (
-    <div className="wf-leader text-[15px]!">
+    <div className="wf-leader wf-leader-stack text-[15px]!">
       <dt>{k}</dt>
       <dd>{v}</dd>
     </div>

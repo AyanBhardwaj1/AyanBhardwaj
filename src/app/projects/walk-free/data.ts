@@ -25,7 +25,7 @@ export const FACTS: [string, string][] = [
 export const ROUTE_TYPES: [string, string][] = [
   ["Quickest", "The shortest walk, whatever the sun."],
   ["More shade", "Weighted by the sun-aversion slider."],
-  ["Scenic", ""],
+  ["Scenic", "Trades a little distance for a nicer walk."],
   ["Cool stops", "Through air-conditioned libraries and unions."],
   ["Step-free", "Never takes mapped stairs or slopes over 8%."],
   ["Lit at night", "Keeps to lit streets after dark."],

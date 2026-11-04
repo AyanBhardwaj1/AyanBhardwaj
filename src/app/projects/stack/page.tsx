@@ -40,10 +40,21 @@ function Head({
   );
 }
 
+const HALF = "(max-width: 768px) 100vw, 600px";
+const FULL = "(max-width: 768px) 100vw, 1200px";
+/* The landing-page captures end mid-way through the next section's first
+   line, so they are cropped to the empty band above it. */
+const LANDING_CROP = "aspect-[1440/780]";
+
 function Shot({
   img,
+  sizes = HALF,
+  crop,
 }: {
   img: { src: string; alt: string; width: number; height: number };
+  sizes?: string;
+  /** Tailwind aspect class to crop the bottom of the capture to. */
+  crop?: string;
 }) {
   return (
     <figure className={s.shot}>
@@ -52,8 +63,10 @@ function Shot({
         alt={img.alt}
         width={img.width}
         height={img.height}
-        sizes="(max-width: 768px) 100vw, 600px"
-        className="h-auto w-full"
+        sizes={sizes}
+        className={
+          crop ? `w-full object-cover object-top ${crop}` : "h-auto w-full"
+        }
       />
     </figure>
   );
@@ -316,7 +329,7 @@ export default function Page() {
           </Head>
           <div className="grid gap-4 md:grid-cols-2">
             <Reveal className="md:col-span-2">
-              <Shot img={media.lead} />
+              <Shot img={media.lead} sizes={FULL} crop={LANDING_CROP} />
             </Reveal>
             {[...media.styles, ...media.screens].map((m, i) => (
               <Reveal
@@ -324,7 +337,11 @@ export default function Page() {
                 delay={(i % 2) * 0.05}
                 className={i === 2 ? "md:col-span-2" : undefined}
               >
-                <Shot img={m} />
+                <Shot
+                  img={m}
+                  sizes={i === 2 ? FULL : HALF}
+                  crop={i < media.styles.length ? LANDING_CROP : undefined}
+                />
               </Reveal>
             ))}
           </div>
