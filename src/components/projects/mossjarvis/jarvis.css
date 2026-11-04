@@ -1197,6 +1197,7 @@ html[data-jarvis-boot] .jv-boot {
   gap: 10px;
   align-items: center;
   min-height: 48px;
+  padding: 6px 0;
   border-bottom: 1px solid var(--line-soft);
 }
 .jv-tasks li:last-child {
@@ -1213,10 +1214,14 @@ html[data-jarvis-boot] .jv-boot {
   }
 }
 .jv-tasks strong {
-  display: block;
+  /* Up to two lines, then clip: the rail is narrow on desktop. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
   font-size: 13px;
   font-weight: 500;
   color: var(--tx);
@@ -1365,8 +1370,11 @@ html[data-jarvis-boot] .jv-boot {
 .jv-command input:focus-visible {
   outline: none;
 }
+/* The input's own outline is off, so the whole field row carries the ring. */
 .jv-command:focus-within {
   border-bottom-color: var(--cyan);
+  outline: 2px solid var(--cyan-hot);
+  outline-offset: 6px;
 }
 .jv-transmit {
   flex: none;
@@ -1383,6 +1391,25 @@ html[data-jarvis-boot] .jv-boot {
 .jv-transmit:hover:not(:disabled) {
   background: var(--cyan);
   color: var(--ink);
+}
+@media (max-width: 479px) {
+  /* Keep the terminal ">" but give the field the width: the word stays in
+     the label's accessible name, clipped from view. */
+  .jv-promptWord {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .jv-command {
+    gap: 8px;
+  }
+  .jv-transmit {
+    padding: 0 10px;
+    letter-spacing: 0.08em;
+  }
 }
 .jv-presets {
   display: flex;
@@ -1665,6 +1692,18 @@ html[data-jarvis-boot] .jv-boot {
 }
 .jv-brainCanvas:active {
   cursor: grabbing;
+}
+/* Desktop: the frame stretches to the sources column, so the canvas fills
+   the frame instead of leaving a dead band under a fixed-height canvas. */
+@media (min-width: 1024px) {
+  .jv-brainCanvasWrap {
+    min-height: 480px;
+  }
+  .jv-brainCanvas {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+  }
 }
 .jv-zoomBtns {
   position: absolute;

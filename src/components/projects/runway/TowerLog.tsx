@@ -72,7 +72,7 @@ export function TowerLog() {
                 data-hidden={i >= shown ? "" : undefined}
               >
                 <span className={s.logStep}>
-                  {l.step.toUpperCase().padEnd(11)}
+                  {l.step.toUpperCase().padEnd(12)}
                 </span>
                 <span className={s.logOk}>ok</span> {l.note}
                 {l.ms ? <span className={s.logMs}> {l.ms}</span> : null}
@@ -80,7 +80,7 @@ export function TowerLog() {
               </span>
             ))}
             <span className={s.logLine} data-hidden={done ? undefined : ""}>
-              <span className={s.logStep}>{"HOLD".padEnd(11)}</span>
+              <span className={s.logStep}>{"HOLD".padEnd(12)}</span>
               awaiting a person for every draft{"\n"}
             </span>
           </code>

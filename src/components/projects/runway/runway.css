@@ -882,6 +882,9 @@
 }
 .rw-logLine {
   display: block;
+  /* Wrapped notes hang under the "ok" column, not under the step label. */
+  padding-left: 12ch;
+  text-indent: -12ch;
   transition:
     opacity 260ms ease,
     transform 260ms var(--rw-ease);

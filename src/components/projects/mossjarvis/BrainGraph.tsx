@@ -198,22 +198,52 @@ function build() {
       n.y += n.vy *= 0.6;
     }
   }
-  // Centre and fit into a 360-unit box so labels stay inside the canvas.
-  const cx = nodes.reduce((a, n) => a + n.x, 0) / nodes.length;
-  const cy = nodes.reduce((a, n) => a + n.y, 0) / nodes.length;
-  const ext =
-    Math.max(...nodes.map((n) => Math.hypot(n.x - cx, n.y - cy))) || 1;
+  // Centre on the bounding box and normalise to [-1, 1] on both axes; the
+  // draw pass scales that to whatever frame the canvas has.
+  const xs = nodes.map((n) => n.x);
+  const ys = nodes.map((n) => n.y);
+  const [x0, x1, y0, y1] = [
+    Math.min(...xs),
+    Math.max(...xs),
+    Math.min(...ys),
+    Math.max(...ys),
+  ];
   for (const n of nodes) {
-    n.x = ((n.x - cx) / ext) * 170;
-    n.y = ((n.y - cy) / ext) * 150;
+    n.x = ((n.x - x0) / (x1 - x0 || 1)) * 2 - 1;
+    n.y = ((n.y - y0) / (y1 - y0 || 1)) * 2 - 1;
   }
   return { nodes, edges };
 }
 
+type View = { x: number; y: number; k: number };
+type Box = { x0: number; y0: number; x1: number; y1: number };
+
+/** Screen-space projection for a w×h canvas: fill the frame, centred. */
+function projector(w: number, h: number, view: View) {
+  const padX = w < 520 ? 34 : 70;
+  const padY = w < 520 ? 30 : 44;
+  const hx = Math.max(40, w / 2 - padX);
+  const hy = Math.max(40, h / 2 - padY);
+  // Allow some stretch towards the frame's aspect, not a full squash.
+  const base = Math.min(hx, hy);
+  const sx = Math.min(hx, base * 1.6) * view.k;
+  const sy = Math.min(hy, base * 1.6) * view.k;
+  const scale = Math.min(1.25, Math.max(0.7, base / 190)) * Math.sqrt(view.k);
+  return {
+    x: (n: Node) => w / 2 + view.x + n.x * sx,
+    y: (n: Node) => h / 2 + view.y + n.y * sy,
+    r: (n: Node) => (4 + n.deg * 0.75) * scale,
+  };
+}
+
+const hit = (a: Box, b: Box) =>
+  a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
+
 export function BrainGraph() {
   const { nodes, edges } = useMemo(() => build(), []);
   const [sel, setSel] = useState(0);
-  const [view, setView] = useState({ x: 0, y: 0, k: 1 });
+  const [hover, setHover] = useState<number | null>(null);
+  const [view, setView] = useState<View>({ x: 0, y: 0, k: 1 });
   const canvas = useRef<HTMLCanvasElement>(null);
   const drag = useRef<{ x: number; y: number; moved: boolean } | null>(null);
 
@@ -239,9 +269,7 @@ export function BrainGraph() {
       c.height = h * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
-      const fit = Math.min(w, h) / 420;
-      ctx.translate(w / 2 + view.x, h / 2 + view.y);
-      ctx.scale(fit * view.k, fit * view.k);
+      const P = projector(w, h, view);
       const linked = new Set(neighbours.map((x) => x.n.id));
       for (const e of edges) {
         const on = e.a === sel || e.b === sel;
@@ -250,43 +278,105 @@ export function BrainGraph() {
           : `rgba(45,223,255,${0.04 + e.w * 0.18})`;
         ctx.lineWidth = on ? 1.6 : 1;
         ctx.beginPath();
-        ctx.moveTo(nodes[e.a].x, nodes[e.a].y);
-        ctx.lineTo(nodes[e.b].x, nodes[e.b].y);
+        ctx.moveTo(P.x(nodes[e.a]), P.y(nodes[e.a]));
+        ctx.lineTo(P.x(nodes[e.b]), P.y(nodes[e.b]));
         ctx.stroke();
       }
+      // Nodes are obstacles for labels, as are the zoom buttons.
+      const taken: Box[] = [{ x0: w - 60, y0: 0, x1: w, y1: 150 }];
       nodes.forEach((n, i) => {
-        const r = 5 + n.deg * 0.9;
+        const r = P.r(n);
+        const x = P.x(n);
+        const y = P.y(n);
         const isSel = i === sel;
         const near = linked.has(n.id);
         ctx.shadowColor = "#2ddfff";
-        ctx.shadowBlur = isSel ? 18 : near ? 8 : 0;
+        ctx.shadowBlur = isSel ? 18 : near || i === hover ? 8 : 0;
         ctx.fillStyle = isSel ? "#9af5ff" : near ? "#2ddfff" : "#0b4c63";
         ctx.strokeStyle = "#2ddfff";
-        ctx.lineWidth = 1;
+        ctx.lineWidth = i === hover && !isSel ? 2 : 1;
         ctx.beginPath();
-        ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+        ctx.arc(x, y, r, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
         ctx.shadowBlur = 0;
-        ctx.fillStyle = isSel || near ? "#c9faff" : "#62cadd";
-        ctx.font = "11px ui-monospace, SFMono-Regular, Menlo, monospace";
-        ctx.textAlign = "center";
-        ctx.fillText(n.id, n.x, n.y + r + 13);
+        taken.push({ x0: x - r, y0: y - r, x1: x + r, y1: y + r });
       });
+      // Labels, greedily: selected and hovered first, then the selected
+      // node's neighbours by weight, then the best-connected rest. A label
+      // that cannot find a free slot is left out (its node still shows).
+      const neighbourRank = new Map(neighbours.map((x, i) => [x.n.id, i]));
+      const order = nodes
+        .map((n, i) => ({
+          i,
+          rank:
+            i === sel
+              ? -2
+              : i === hover
+                ? -1
+                : neighbourRank.has(n.id)
+                  ? neighbourRank.get(n.id)!
+                  : 100 - n.deg,
+        }))
+        .sort((a, b) => a.rank - b.rank);
+      ctx.font = "11px ui-monospace, SFMono-Regular, Menlo, monospace";
+      ctx.textBaseline = "alphabetic";
+      for (const { i, rank } of order) {
+        const n = nodes[i];
+        const r = P.r(n);
+        const x = P.x(n);
+        const y = P.y(n);
+        const tw = ctx.measureText(n.id).width;
+        const slots: { tx: number; ty: number; box: Box }[] = [
+          [x - tw / 2, y + r + 4],
+          [x - tw / 2, y - r - 17],
+          [x + r + 6, y - 7],
+          [x - r - 6 - tw, y - 7],
+        ].map(([bx, by]) => ({
+          tx: bx,
+          ty: by + 10,
+          box: { x0: bx - 2, y0: by, x1: bx + tw + 2, y1: by + 13 },
+        }));
+        const inFrame = (b: Box) =>
+          b.x0 >= 2 && b.x1 <= w - 2 && b.y0 >= 2 && b.y1 <= h - 2;
+        let slot = slots.find(
+          (s) => inFrame(s.box) && !taken.some((t) => hit(s.box, t)),
+        );
+        if (!slot && rank < 0)
+          slot = slots.find((s) => inFrame(s.box)) ?? slots[0];
+        if (!slot) continue;
+        taken.push(slot.box);
+        const isSel = i === sel;
+        ctx.fillStyle =
+          isSel || i === hover
+            ? "#e6fdff"
+            : linked.has(n.id)
+              ? "#c9faff"
+              : "#62cadd";
+        ctx.textAlign = "left";
+        ctx.fillText(n.id, slot.tx, slot.ty);
+      }
     };
     draw();
     const ro = new ResizeObserver(draw);
     ro.observe(c);
     return () => ro.disconnect();
-  }, [nodes, edges, sel, view, neighbours]);
+  }, [nodes, edges, sel, hover, view, neighbours]);
 
-  const toWorld = (cx: number, cy: number) => {
+  /** Nearest node under a canvas-relative point, or -1. */
+  const pick = (px: number, py: number) => {
     const c = canvas.current!;
-    const fit = Math.min(c.clientWidth, c.clientHeight) / 420;
-    return {
-      x: (cx - c.clientWidth / 2 - view.x) / (fit * view.k),
-      y: (cy - c.clientHeight / 2 - view.y) / (fit * view.k),
-    };
+    const P = projector(c.clientWidth, c.clientHeight, view);
+    let best = -1;
+    let bd = Infinity;
+    nodes.forEach((n, i) => {
+      const d = Math.hypot(P.x(n) - px, P.y(n) - py);
+      if (d < Math.max(P.r(n) + 6, 20) && d < bd) {
+        bd = d;
+        best = i;
+      }
+    });
+    return best;
   };
 
   const zoom = (f: number) =>
@@ -307,7 +397,14 @@ export function BrainGraph() {
           }}
           onPointerMove={(e) => {
             const d = drag.current;
-            if (!d) return;
+            if (!d) {
+              if (e.pointerType !== "mouse") return;
+              const r = e.currentTarget.getBoundingClientRect();
+              const best = pick(e.clientX - r.left, e.clientY - r.top);
+              setHover(best >= 0 ? best : null);
+              e.currentTarget.style.cursor = best >= 0 ? "pointer" : "";
+              return;
+            }
             const dx = e.clientX - d.x;
             const dy = e.clientY - d.y;
             if (Math.abs(dx) + Math.abs(dy) > 3) d.moved = true;
@@ -322,18 +419,10 @@ export function BrainGraph() {
             drag.current = null;
             if (d?.moved) return;
             const r = e.currentTarget.getBoundingClientRect();
-            const p = toWorld(e.clientX - r.left, e.clientY - r.top);
-            let best = -1;
-            let bd = 26 * 26;
-            nodes.forEach((n, i) => {
-              const dd = (n.x - p.x) ** 2 + (n.y - p.y) ** 2;
-              if (dd < bd) {
-                bd = dd;
-                best = i;
-              }
-            });
+            const best = pick(e.clientX - r.left, e.clientY - r.top);
             if (best >= 0) setSel(best);
           }}
+          onPointerLeave={() => setHover(null)}
           onWheel={(e) => {
             if (!e.ctrlKey) return;
             e.preventDefault();

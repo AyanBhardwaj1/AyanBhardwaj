@@ -52,24 +52,29 @@ function seed(): N[] {
       ...p,
       c,
       r: 4 + Math.sqrt(p.revisits + p.matches) * 2,
-      x: Math.cos(t) * 180 + ((i * 37) % 40) - 20,
-      y: Math.sin(t) * 140 + ((i * 53) % 40) - 20,
+      x: Math.cos(t) * 150 + ((i * 37) % 40) - 20,
+      y: Math.sin(t) * 150 + ((i * 53) % 40) - 20,
       vx: 0,
       vy: 0,
     };
   });
 }
 
-/** One simulation step, loosely following Mycelium's d3-force settings. */
-function step(nodes: N[], edges: E[], alpha: number) {
+/**
+ * One simulation step, loosely following Mycelium's d3-force settings.
+ * `sx` stretches the layout towards the canvas aspect (sx > 1 is wider).
+ * There are no hard walls: a weak centring pull plus a soft elliptical
+ * spring keep loners in view without lining nodes up along an edge.
+ */
+function step(nodes: N[], edges: E[], alpha: number, sx = 1) {
   for (const e of edges) {
     const A = nodes[e.a];
     const B = nodes[e.b];
     const dx = B.x - A.x;
     const dy = B.y - A.y;
     const d = Math.hypot(dx, dy) || 1;
-    const target = 90 + (1 - e.w) * 130;
-    const k = ((d - target) / d) * (0.035 + e.w * 0.08) * alpha;
+    const target = 70 + (1 - e.w) * 90;
+    const k = ((d - target) / d) * (0.03 + e.w * 0.06) * alpha;
     A.vx += dx * k;
     A.vy += dy * k;
     B.vx -= dx * k;
@@ -82,10 +87,8 @@ function step(nodes: N[], edges: E[], alpha: number) {
       const dx = B.x - A.x;
       const dy = B.y - A.y;
       const d2 = dx * dx + dy * dy || 1;
-      if (d2 > 520 * 520) continue;
       const d = Math.sqrt(d2);
-      const charge = (80 + A.r * 7) * alpha;
-      const f = charge / d2;
+      const f = ((80 + A.r * 4) * alpha) / (d2 + 400);
       A.vx -= dx * f;
       A.vy -= dy * f;
       B.vx += dx * f;
@@ -99,19 +102,27 @@ function step(nodes: N[], edges: E[], alpha: number) {
         B.y += dy * push;
       }
     }
+  const RX = 300 * sx;
+  const RY = 300 / sx;
   for (const n of nodes) {
+    // Loose pull towards the page's domain, so sources cluster.
     const t = (n.c / DOMAINS.length) * Math.PI * 2;
-    n.vx += (Math.cos(t) * 170 - n.x) * 0.05 * alpha * 0.2;
-    n.vy += (Math.sin(t) * 120 - n.y) * 0.05 * alpha * 0.2;
-    n.vx -= n.x * 0.012 * alpha;
-    n.vy -= n.y * 0.012 * alpha;
+    n.vx += (Math.cos(t) * RX * 0.55 - n.x) * 0.008 * alpha;
+    n.vy += (Math.sin(t) * RY * 0.55 - n.y) * 0.008 * alpha;
+    // Centring, weaker along the long axis.
+    n.vx -= (n.x / sx) * 0.06 * alpha;
+    n.vy -= n.y * sx * 0.06 * alpha;
+    // Soft elliptical bound: a spring that only acts outside it.
+    const e = Math.hypot(n.x / RX, n.y / RY);
+    if (e > 1) {
+      const k = ((e - 1) / e) * 0.12;
+      n.vx -= n.x * k;
+      n.vy -= n.y * k;
+    }
     n.vx *= 0.6;
     n.vy *= 0.6;
     n.x += n.vx;
     n.y += n.vy;
-    // Soft walls keep loners in view.
-    n.x = Math.max(-300, Math.min(300, n.x));
-    n.y = Math.max(-220, Math.min(220, n.y));
   }
 }
 
@@ -144,6 +155,7 @@ export function Graph() {
     hover,
     query,
     drag: -1 as number,
+    sx: 0,
     tf: { k: 1, cx: 0, cy: 0 },
   });
 
@@ -177,8 +189,18 @@ export function Graph() {
     if (!c || !ctx) return;
     const ns = nodes.current;
     const st = state.current;
+    if (!st.sx) {
+      // Shape the layout to the canvas once, before the first step.
+      const aspect = c.clientWidth / Math.max(1, c.clientHeight) || 1.6;
+      st.sx = Math.pow(Math.min(2.2, Math.max(0.6, aspect)), 0.8);
+      for (const n of ns) {
+        n.x *= st.sx;
+        n.y /= st.sx;
+      }
+    }
+    const sx = st.sx;
     if (reduce) {
-      for (let i = 0; i < 300; i++) step(ns, edges, 1 - i / 300);
+      for (let i = 0; i < 300; i++) step(ns, edges, 1 - i / 300, sx);
       st.alpha = 0;
       st.grow = 1;
     }
@@ -201,7 +223,9 @@ export function Graph() {
         y0 = Math.min(y0, n.y - n.r);
         y1 = Math.max(y1, n.y + n.r);
       }
-      const k = Math.min(w / (x1 - x0 + 120), h / (y1 - y0 + 90), 1.6);
+      // Screen-space margins leave room for labels without starving phones.
+      const px = Math.min(120, Math.max(28, w * 0.1));
+      const k = Math.min((w - px) / (x1 - x0), (h - 64) / (y1 - y0), 1.6);
       const tf = { k, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 };
       st.tf = tf;
       return { w, h, ...tf };
@@ -256,6 +280,7 @@ export function Graph() {
         ctx.stroke();
       });
       // spores
+      const labelled: number[] = [];
       ns.forEach((n, i) => {
         const on = lit(i);
         const col = domainColor(n.domain);
@@ -272,16 +297,47 @@ export function Graph() {
           ctx.lineWidth = 1.5;
           ctx.stroke();
         }
-        if (on && (focus !== null || m) && (near.has(i) || m?.has(i))) {
-          ctx.fillStyle = "#f2edf8";
-          ctx.font = "11px ui-monospace, SFMono-Regular, Menlo, monospace";
-          ctx.textAlign = "center";
-          const label =
-            n.title.length > 34 ? `${n.title.slice(0, 32)}…` : n.title;
-          ctx.fillText(label, n.x, n.y - n.r - 7);
-        }
+        if (on && (focus !== null || m) && (near.has(i) || m?.has(i)))
+          labelled.push(i);
       });
       ctx.globalAlpha = 1;
+      // Labels at a constant 11px on screen, kept in frame. Placed greedily
+      // (focused node first, then bigger spores); one that would overlap a
+      // placed label is skipped; the list and inspector still name it.
+      ctx.fillStyle = "#f2edf8";
+      ctx.font = `${11 / k}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+      ctx.textAlign = "center";
+      const edge = w / 2 / k;
+      const lh = 14 / k;
+      const placed: [number, number, number, number][] = [];
+      labelled
+        .sort((a, b) =>
+          a === focus ? -1 : b === focus ? 1 : ns[b].r - ns[a].r,
+        )
+        .forEach((i) => {
+          const n = ns[i];
+          const label =
+            n.title.length > 34 ? `${n.title.slice(0, 32)}…` : n.title;
+          const half = ctx.measureText(label).width / 2 + 6 / k;
+          const lx =
+            half >= edge
+              ? cx
+              : Math.max(cx - edge + half, Math.min(cx + edge - half, n.x));
+          const ly = n.y - n.r - 7 / k;
+          const box: [number, number, number, number] = [
+            lx - half,
+            ly - lh + 3 / k,
+            lx + half,
+            ly + 3 / k,
+          ];
+          const clash = placed.some(
+            (p) =>
+              box[0] < p[2] && p[0] < box[2] && box[1] < p[3] && p[1] < box[3],
+          );
+          if (clash && i !== focus) return;
+          placed.push(box);
+          ctx.fillText(label, lx, ly);
+        });
     };
 
     let last = 0;
@@ -295,7 +351,7 @@ export function Graph() {
         return;
       }
       if (st.alpha > 0.02) {
-        step(ns, edges, st.alpha);
+        step(ns, edges, st.alpha, sx);
         st.alpha *= Math.pow(0.985, dt / 16);
         dirty = true;
       }

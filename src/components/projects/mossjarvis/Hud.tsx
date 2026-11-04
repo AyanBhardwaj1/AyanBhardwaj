@@ -150,14 +150,51 @@ export function Hud() {
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
+  // On first view, play one example directive so the HUD isn't idle. Once
+  // only, never under reduced motion, and never over the visitor's own input
+  // or focus (presets disable while busy, which would drop their focus).
+  const hudRef = useRef<HTMLDivElement>(null);
+  const [demoRun, setDemoRun] = useState(false);
+  const demo = useRef({ done: false, run: () => {} });
+  useEffect(() => {
+    demo.current.run = () => {
+      const el = hudRef.current;
+      const active = document.activeElement;
+      if (!el || (active && active !== document.body && el.contains(active)))
+        return;
+      if (input.trim() || busy || offline || reply) return;
+      transmit(PRESETS[0].prompt, true);
+    };
+  });
+  useEffect(() => {
+    const el = hudRef.current;
+    if (!el || reduce || demo.current.done) return;
+    let t = 0;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting || demo.current.done) return;
+        demo.current.done = true;
+        io.disconnect();
+        t = window.setTimeout(() => demo.current.run(), 900);
+      },
+      { rootMargin: "0px 0px -40% 0px" },
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      window.clearTimeout(t);
+    };
+  }, [reduce]);
+
   const later = (ms: number, fn: () => void) => {
     if (reduce) fn();
     else timers.current.push(window.setTimeout(fn, ms));
   };
 
-  function transmit(text: string) {
+  function transmit(text: string, auto = false) {
     const q = text.trim();
     if (!q || busy || offline) return;
+    setDemoRun(auto);
     timers.current.forEach(clearTimeout);
     timers.current = [];
     const preset = PRESETS.find(
@@ -268,6 +305,7 @@ export function Hud() {
 
   function briefing() {
     if (busy || offline) return;
+    setDemoRun(false);
     const open = [...tasks].sort(
       (a, b) =>
         ["high", "medium", "low"].indexOf(a.priority) -
@@ -293,6 +331,7 @@ export function Hud() {
 
   return (
     <div
+      ref={hudRef}
       className="jv-hud"
       data-state={state}
       data-offline={offline || alert ? "" : undefined}
@@ -573,7 +612,7 @@ export function Hud() {
             }}
           >
             <label htmlFor={inputId} className="jv-prompt">
-              DIRECTIVE &gt;
+              <span className="jv-promptWord">DIRECTIVE </span>&gt;
             </label>
             <input
               id={inputId}
@@ -619,7 +658,7 @@ export function Hud() {
               {typed || (reply ? "" : "Awaiting directive.")}
             </span>
             <span className="sr-only" aria-live="polite">
-              {typed === reply ? reply : ""}
+              {typed === reply && !demoRun ? reply : ""}
             </span>
           </div>
 

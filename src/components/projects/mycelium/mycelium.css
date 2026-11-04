@@ -574,6 +574,11 @@
 }
 .myc-searchRow:focus-within {
   border-bottom-color: var(--violet);
+  /* The input's own outline is off; ring the field row instead (inset, and
+     rounded to the palette's top corners). */
+  outline: 2px solid var(--violet);
+  outline-offset: -3px;
+  border-radius: 15px 15px 0 0;
 }
 .myc-glass {
   width: 20px;

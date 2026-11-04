@@ -152,13 +152,22 @@ export default function Page() {
           </div>
           <div className="mt-14 grid gap-4 md:grid-cols-12">
             <Reveal className="md:col-span-4">
-              <Photo p={PHOTOS.sketch} sizes="(min-width: 768px) 30vw, 100vw" />
+              <Photo
+                p={PHOTOS.sketch}
+                sizes="(min-width: 1440px) 432px, (min-width: 768px) 30vw, calc(100vw - 32px)"
+              />
             </Reveal>
             <Reveal delay={0.08} className="md:col-span-8">
-              <Photo p={PHOTOS.worn} sizes="(min-width: 768px) 62vw, 100vw" />
+              <Photo
+                p={PHOTOS.worn}
+                sizes="(min-width: 1440px) 880px, (min-width: 768px) 62vw, calc(100vw - 32px)"
+              />
             </Reveal>
             <Reveal className="md:col-span-7">
-              <Photo p={PHOTOS.head} sizes="(min-width: 768px) 55vw, 100vw" />
+              <Photo
+                p={PHOTOS.head}
+                sizes="(min-width: 1440px) 768px, (min-width: 768px) 54vw, calc(100vw - 32px)"
+              />
             </Reveal>
             <Reveal delay={0.08} className="md:col-span-5">
               <dl className="grid gap-5 rounded-[10px] bg-(--os-ground) p-6">
@@ -189,7 +198,7 @@ export default function Page() {
             <Reveal delay={0.1}>
               <Photo
                 p={PHOTOS.inside}
-                sizes="(min-width: 1024px) 30vw, 100vw"
+                sizes="(min-width: 392px) 360px, calc(100vw - 32px)"
                 className="mt-10 max-w-[360px]"
               />
             </Reveal>
