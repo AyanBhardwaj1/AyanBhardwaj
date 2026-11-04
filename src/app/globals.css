@@ -560,11 +560,29 @@ dialog.palette[open] > * {
   }
 }
 
-/* Theme switch: circular reveal (view transitions), instant under reduced motion. */
+/* Root view transitions. Page navigations get a quick crossfade (the new page
+   fades in over the held old one); a theme switch (html[data-vt="theme"])
+   turns it off for the circular reveal ThemeToggle drives with WAAPI. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
+  mix-blend-mode: normal; /* UA plus-lighter would flash bright mid-fade */
+}
+::view-transition-old(root) {
+  animation: none;
+}
+::view-transition-new(root) {
+  /* New page fades in over the held old one: no see-through dip. */
+  animation: vt-root-in 240ms var(--ease-out) both;
+}
+html[data-vt="theme"]::view-transition-old(root),
+html[data-vt="theme"]::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
+}
+@keyframes vt-root-in {
+  from {
+    opacity: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

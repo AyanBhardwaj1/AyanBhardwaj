@@ -76,6 +76,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       className={`${archivo.variable} ${plexMono.variable} ${instrument.variable} antialiased`}
+      // Lets Next turn smooth scrolling off while it resets scroll on route
+      // changes (in-page anchors still glide).
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <head>
