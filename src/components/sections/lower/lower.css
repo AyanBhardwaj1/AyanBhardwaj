@@ -304,7 +304,8 @@
 .js .lw-row.lw-self.is-in {
   opacity: 1;
   transform: none;
-  clip-path: inset(0 0 0 0);
+  /* Extends above the row so the hover peek is never clipped. */
+  clip-path: inset(-280px 0 0 0);
 }
 /* Once revealed, hovers respond instantly (no leftover stagger delay). */
 .js .lw-reveal.is-in .lw-row:hover,

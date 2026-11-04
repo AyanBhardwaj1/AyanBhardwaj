@@ -42,7 +42,7 @@ function Stars({ id }: { id: string }) {
   const n = starsFor(projectRepo[id]);
   if (!n) return null;
   return (
-    <span className="t-data text-muted">
+    <span className="t-data text-muted ml-3 whitespace-nowrap">
       <span aria-hidden="true">★</span> {n}
       <span className="sr-only"> GitHub stars</span>
     </span>
