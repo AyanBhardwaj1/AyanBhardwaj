@@ -12,6 +12,8 @@ Post-launch ideas, roughly ordered by value for effort. None of this blocks laun
 
 ## 2. Structured data: JSON-LD `Person`
 
+> **Done.** `src/lib/jsonld.tsx` renders Person, WebSite and ProfilePage on the home page and SoftwareSourceCode + BreadcrumbList on every project page. Validate the live URLs with the tools below after deploying.
+
 Helps Google connect the site, GitHub and LinkedIn as the same person (knowledge panel, rich results). Render it in `src/app/page.tsx` as the Next 16 docs recommend, escaping `<`:
 
 ```tsx
@@ -55,6 +57,8 @@ const jsonLd = {
 
 ## 5. Keep GitHub data fresh
 
+> **Done (PR-based).** `.github/workflows/refresh-data.yml` runs weekly, re-fetches `src/data/*.json` with the Actions token and opens a PR when real data changed. Turn on **Settings > Actions > General > Allow GitHub Actions to create and approve pull requests** once. The options below remain if you would rather revalidate at runtime.
+
 If the site shows repos, stars or recent activity from the GitHub API:
 
 **Preferred: let Next revalidate on its own.** With `cacheComponents` on, wrap the fetch in a `"use cache"` function with `cacheLife("hours")` (or `"days"`). Vercel serves the cached result and refreshes it in the background, with no rebuilds and no workflow. Read `node_modules/next/dist/docs/01-app/03-api-reference/01-directives/use-cache.md` before writing it.
@@ -93,6 +97,8 @@ Notes:
 
 ## 6. Dynamic OG images
 
+> **Done.** The home card and a branded card per project page (name, tagline, stack and screenshot, in Archivo and Plex Mono) are generated at build time by `src/lib/og.tsx`. Re-check them in the LinkedIn Post Inspector after deploying.
+
 Replace a static `opengraph-image.png` with `src/app/opengraph-image.tsx` using `ImageResponse` from `next/og`. That gives a generated 1200x630 card with your name, role and a short tagline in the site's fonts and colors. Per-route versions (for example `/projects/[slug]/opengraph-image.tsx`) give each project page its own card. Check the result in the LinkedIn Post Inspector and <https://www.opengraph.xyz>.
 
 ## 7. Custom domain ideas (no rush)
@@ -128,9 +134,9 @@ Also pin this repo and add a description and website link to its About box.
 
 - **Lighthouse budgets**: once scores are stable at 0.9 or higher, make the Lighthouse job blocking (remove `continue-on-error` in `.github/workflows/ci.yml`) and add more URLs to `lighthouserc.json`.
 - **Broken-link check** in CI: run `linkinator` against the Vercel preview (via the `deployment_status` event) or on a weekly schedule.
-- **`security.txt`** at `public/.well-known/security.txt` with a contact email.
+- ~~**`security.txt`**~~ Done: `public/.well-known/security.txt` (expires 2027-11-01; bump it yearly).
 - **View Transitions** between pages (Next 16 supports the View Transitions API; see `node_modules/next/dist/docs/01-app/02-guides/view-transitions.md`).
 - **`/uses` or `/now` page**: popular on dev portfolios and an easy reason to revisit the site.
-- **Print stylesheet** so the site prints cleanly as a fallback resume.
+- ~~**Print stylesheet**~~ Done: the home page prints light, without the interactive visuals.
 - **Pin the Node version** for Vercel: change `"engines"` in `package.json` to `"node": "22.x"`.
 - **Stricter CSP later**: try `experimental.sri` (hash-based) to drop `'unsafe-inline'` from `script-src` without giving up static rendering.
