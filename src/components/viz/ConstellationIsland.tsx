@@ -78,6 +78,26 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
     () => new Map(data.nodes.map((n) => [n.id, n])),
     [data.nodes],
   );
+  // Labels sit under their star; when two would collide, the later one
+  // moves above its star. Approximate text width: ~6.2px per character.
+  const above = useMemo(() => {
+    const out = new Set<string>();
+    const placed: { x: number; y: number; w: number }[] = [];
+    for (const n of data.nodes) {
+      const w = n.name.length * 6.2;
+      let y = n.y + n.r + 15;
+      const hit = placed.some(
+        (p) =>
+          Math.abs(p.y - y) < 14 && Math.abs(p.x - n.x) < (p.w + w) / 2 + 6,
+      );
+      if (hit) {
+        out.add(n.id);
+        y = n.y - n.r - 9;
+      }
+      placed.push({ x: n.x, y, w });
+    }
+    return out;
+  }, [data.nodes]);
   const neighbors = useMemo(() => {
     const m = new Map<string, Set<string>>(
       data.nodes.map((n) => [n.id, new Set()]),
@@ -555,7 +575,7 @@ export function ConstellationIsland({ data }: { data: ConstellationData }) {
                       />
                       <text
                         x={0}
-                        y={n.r + 15}
+                        y={above.has(n.id) ? -n.r - 9 : n.r + 15}
                         textAnchor="middle"
                         className={`lw-star-label pointer-events-none font-sans font-medium ${n.significance >= 3 || active || near ? "text-[12px]" : "text-[11px] opacity-70"} ${active ? "fill-[var(--accent)]" : "fill-[var(--fg)]"}`}
                       >

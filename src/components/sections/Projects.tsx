@@ -137,7 +137,7 @@ function TypeCard({ p }: { p: Project }) {
       <span className="lw-media-img text-[clamp(36px,5vw,64px)] leading-[0.9] font-extrabold tracking-[-0.04em] uppercase [font-stretch:118%]">
         {p.name}
       </span>
-      <span className="t-data text-accent">
+      <span className="t-data text-accent pr-40">
         {p.stack.slice(0, 3).join(" · ")}
       </span>
     </div>
