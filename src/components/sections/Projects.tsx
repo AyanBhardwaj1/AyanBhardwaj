@@ -17,6 +17,7 @@ import { SectionHeader } from "../ui/SectionHeader";
 import { ConstellationIsland } from "../viz/ConstellationIsland";
 import { CountUp } from "../motion/CountUp";
 import { MiniTerminal } from "../viz/MiniTerminal";
+import "./lower/lower.css";
 
 const host = (url: string) =>
   url.replace(/^https?:\/\//, "").replace(/\/$/, "");
@@ -133,13 +134,25 @@ function TypeCard({ p }: { p: Project }) {
         {p.category} ·{" "}
         {p.builtAt ? `Built at ${p.builtAt}` : (p.context ?? "Independent")}
       </span>
-      <span className="tilt-layer text-[clamp(36px,5vw,64px)] leading-[0.9] font-extrabold tracking-[-0.04em] uppercase [font-stretch:118%]">
+      <span className="lw-media-img text-[clamp(36px,5vw,64px)] leading-[0.9] font-extrabold tracking-[-0.04em] uppercase [font-stretch:118%]">
         {p.name}
       </span>
       <span className="t-data text-accent">
         {p.stack.slice(0, 3).join(" · ")}
       </span>
     </div>
+  );
+}
+
+/** The unfolding "Open project" chip in a card's media corner. */
+function OpenCta() {
+  return (
+    <span aria-hidden="true" className="lw-cta t-label">
+      <span className="lw-cta-label">Open project</span>
+      <span className="lw-cta-arrow">
+        <span>→</span>
+      </span>
+    </span>
   );
 }
 
@@ -153,24 +166,18 @@ function ProjectCard({
   compact?: boolean;
 }) {
   const media = cardMedia(p);
+  const page = hasProjectPage(p.id);
   return (
-    <Reveal
-      as="article"
-      id={`project-${p.id}`}
-      delay={(index % 2) * 0.08}
-      className="project-card card group relative p-2"
-    >
-      <div
+    <Reveal delay={(index % 2) * 0.08} className="h-full">
+      <article
+        id={`project-${p.id}`}
         data-glow=""
         data-tilt=""
-        className="relative flex h-full flex-col rounded-[inherit]"
+        className="lw-card card group relative flex h-full flex-col p-2"
       >
+        <span aria-hidden="true" className="lw-edge" />
         <div
-          aria-hidden="true"
-          className="card-glow pointer-events-none absolute -inset-2 rounded-[16px]"
-        />
-        <div
-          className={`border-line bg-bg relative overflow-hidden rounded-md border ${compact ? "aspect-[16/9]" : "aspect-[16/10]"}`}
+          className={`lw-media border-line relative overflow-hidden rounded-md border ${compact ? "aspect-[16/9]" : "aspect-[16/10]"}`}
         >
           {media ? (
             <Image
@@ -178,20 +185,14 @@ function ProjectCard({
               alt={media.alt}
               width={media.width}
               height={media.height}
-              sizes="(max-width: 768px) 100vw, 600px"
-              className="tilt-layer size-full object-cover"
+              sizes="(max-width: 768px) calc(100vw - 48px), 600px"
+              className="lw-media-img size-full object-cover"
             />
           ) : (
             <TypeCard p={p} />
           )}
-          {hasProjectPage(p.id) && (
-            <span
-              aria-hidden="true"
-              className="card-cta t-label bg-bg/85 text-fg border-line-strong absolute right-3 bottom-3 rounded-full border px-3 py-1.5 backdrop-blur"
-            >
-              Open project <span className="text-accent">→</span>
-            </span>
-          )}
+          <span aria-hidden="true" className="lw-sheen" />
+          {page && <OpenCta />}
         </div>
         <div className="flex flex-1 flex-col gap-3 px-3 pt-5 pb-3">
           <div className="flex items-baseline justify-between gap-4">
@@ -215,7 +216,7 @@ function ProjectCard({
             <ProjectLinks p={p} />
           </div>
         </div>
-      </div>
+      </article>
     </Reveal>
   );
 }
@@ -240,19 +241,16 @@ function GroupHeader({
   );
 }
 
-/** "Built on the Moss SDK": the rest of the Moss apps, with an index-scan treatment. */
+/** "Built on the Moss SDK": the rest of the Moss apps, as an index that builds itself. */
 function MossSdkGroup({ apps }: { apps: Project[] }) {
   const stars = totalStars(apps.map((p) => projectRepo[p.id]));
   return (
     <section
       aria-labelledby="moss-sdk-title"
-      className="moss-sdk border-line-strong bg-card relative mb-16 rounded-lg border"
-      data-reveal=""
+      className="lw-sdk lw-reveal border-line-strong bg-card relative mb-16 rounded-lg border"
+      data-inview=""
     >
-      <div
-        aria-hidden="true"
-        className="moss-scan pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]"
-      />
+      <div aria-hidden="true" className="lw-scan" />
       <header className="border-line relative flex flex-wrap items-end justify-between gap-4 border-b px-5 py-5 md:px-8">
         <div className="flex items-center gap-4">
           <MossMark />
@@ -278,26 +276,17 @@ function MossSdkGroup({ apps }: { apps: Project[] }) {
             <li
               key={p.id}
               id={`project-${p.id}`}
+              data-glow=""
               style={{ "--i": i } as React.CSSProperties}
-              className="moss-row group border-line relative grid gap-2 border-b px-5 py-5 last:border-b-0 md:grid-cols-12 md:items-baseline md:gap-6 md:px-8"
+              className="lw-row border-line grid gap-2 border-b px-5 py-5 last:border-b-0 md:grid-cols-12 md:items-baseline md:gap-6 md:px-8"
             >
-              <span aria-hidden="true" className="moss-bar" />
+              <span aria-hidden="true" className="lw-wash" />
+              <span aria-hidden="true" className="lw-bar" />
               <span className="flex items-baseline gap-3 md:col-span-3">
-                <span className="t-data text-accent w-6 shrink-0">
+                <span className="lw-idx t-data text-accent w-6 shrink-0">
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <a
-                  href={p.links.code}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="link moss-name t-h3"
-                >
-                  {p.name}
-                  <span className="sr-only">
-                    {" "}
-                    on GitHub (opens in a new tab)
-                  </span>
-                </a>
+                <RowLink href={p.links.code} name={p.name} />
               </span>
               <span className="text-muted md:col-span-6">
                 <span className="text-fg">{p.tagline}</span>{" "}
@@ -314,7 +303,7 @@ function MossSdkGroup({ apps }: { apps: Project[] }) {
                   width={media.width}
                   height={media.height}
                   sizes="220px"
-                  className="moss-peek border-line-strong pointer-events-none absolute right-8 bottom-[calc(100%-14px)] z-20 hidden w-[220px] rounded-md border object-cover lg:block"
+                  className="lw-peek border-line-strong hidden rounded-md border object-cover lg:block"
                 />
               )}
             </li>
@@ -325,12 +314,31 @@ function MossSdkGroup({ apps }: { apps: Project[] }) {
   );
 }
 
+/** A list row's name. Its ::after stretches over the row, so the whole row clicks. */
+function RowLink({ href, name }: { href?: string; name: string }) {
+  if (!href) return <span className="lw-name t-h3">{name}</span>;
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="lw-link lw-name t-h3 after:absolute after:inset-0 after:content-['']"
+    >
+      {name}
+      <span aria-hidden="true" className="lw-go">
+        ↗
+      </span>
+      <span className="sr-only"> on GitHub (opens in a new tab)</span>
+    </a>
+  );
+}
+
 function MossMark() {
   return (
     <svg
       viewBox="0 0 40 40"
       aria-hidden="true"
-      className="moss-mark text-accent size-10 shrink-0"
+      className="text-accent size-10 shrink-0"
     >
       <rect
         x="1"
@@ -352,7 +360,7 @@ function MossMark() {
             height="4"
             rx="1"
             fill="currentColor"
-            className="moss-cell"
+            className="lw-mark-cell"
             style={{ "--d": `${(r + c) * 90}ms` } as React.CSSProperties}
           />
         )),
@@ -393,99 +401,96 @@ export function Projects() {
         />
 
         {/* Featured: YouBank */}
-        <Reveal
-          as="article"
-          id="project-youbank"
-          className="card overflow-hidden p-2"
-        >
-          <div className="grid gap-2 lg:grid-cols-[5fr_6fr]">
-            <div
-              data-glow=""
-              className="project-card group relative flex flex-col gap-6 rounded-md p-5 md:p-8"
-            >
-              <div
-                aria-hidden="true"
-                className="card-glow pointer-events-none absolute inset-0 rounded-[inherit]"
-              />
-              <div className="flex flex-wrap items-center gap-3">
-                <StatusDot live />
-                <span className="t-label text-muted">
-                  Featured · {youbank.category}
-                </span>
+        <Reveal>
+          <article
+            id="project-youbank"
+            data-glow=""
+            className="lw-card card relative overflow-hidden p-2"
+          >
+            <span aria-hidden="true" className="lw-edge" />
+            <div className="grid gap-2 lg:grid-cols-[5fr_6fr]">
+              <div className="group relative flex flex-col gap-6 rounded-md p-5 md:p-8">
+                <span aria-hidden="true" className="lw-spot" />
+                <div className="flex flex-wrap items-center gap-3">
+                  <StatusDot live />
+                  <span className="t-label text-muted">
+                    Featured · {youbank.category}
+                  </span>
+                </div>
+                <div>
+                  <CardTitle p={youbank} className="t-h2" />
+                  <p className="t-lead mt-3 max-w-[28ch]">{youbank.tagline}</p>
+                </div>
+                <p className="text-muted max-w-[56ch]">{youbank.description}</p>
+                <ul className="t-data border-line grid grid-cols-2 gap-x-6 gap-y-3 border-t pt-5">
+                  {(youbank.metrics ?? []).slice(0, 4).map((m) => (
+                    <li key={m} className="flex gap-2">
+                      <span aria-hidden="true" className="text-accent">
+                        ▲
+                      </span>
+                      <CountUp value={m} />
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-auto flex flex-wrap items-center gap-3">
+                  <ProjectLinks p={youbank} big />
+                  <span
+                    aria-hidden="true"
+                    className="lw-case t-label text-muted ml-1"
+                  >
+                    Case study <span className="text-accent">→</span>
+                  </span>
+                </div>
               </div>
-              <div>
-                <CardTitle p={youbank} className="t-h2" />
-                <p className="t-lead mt-3 max-w-[28ch]">{youbank.tagline}</p>
+              <div className="min-h-[340px] lg:min-h-[460px]">
+                <MiniTerminal />
               </div>
-              <p className="text-muted max-w-[56ch]">{youbank.description}</p>
-              <ul className="t-data border-line grid grid-cols-2 gap-x-6 gap-y-3 border-t pt-5">
-                {(youbank.metrics ?? []).slice(0, 4).map((m) => (
-                  <li key={m} className="flex gap-2">
-                    <span aria-hidden="true" className="text-accent">
-                      ▲
-                    </span>
-                    <CountUp value={m} />
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-auto flex flex-wrap items-center gap-3">
-                <ProjectLinks p={youbank} big />
+            </div>
+            <details className="group/how border-line border-t px-5 py-4 md:px-8">
+              <summary className="t-label text-muted hover:text-fg flex min-h-10 cursor-pointer list-none items-center justify-between marker:hidden">
+                How it works
                 <span
                   aria-hidden="true"
-                  className="card-cta t-label text-muted"
+                  className="text-lg transition-transform group-open/how:rotate-45"
                 >
-                  Case study <span className="text-accent">→</span>
+                  +
                 </span>
-              </div>
-            </div>
-            <div className="min-h-[340px] lg:min-h-[460px]">
-              <MiniTerminal />
-            </div>
-          </div>
-          <details className="group/how border-line border-t px-5 py-4 md:px-8">
-            <summary className="t-label text-muted hover:text-fg flex min-h-10 cursor-pointer list-none items-center justify-between marker:hidden">
-              How it works
-              <span
-                aria-hidden="true"
-                className="text-lg transition-transform group-open/how:rotate-45"
-              >
-                +
-              </span>
-            </summary>
-            <div className="grid gap-8 pt-4 pb-4 lg:grid-cols-[5fr_6fr]">
-              <ul className="space-y-3">
-                {(youbank.howItWorks ?? []).map((h) => (
-                  <li key={h} className="text-muted flex gap-3 text-[16px]">
-                    <span aria-hidden="true" className="text-accent">
-                      ›
-                    </span>
-                    {h}
-                  </li>
-                ))}
-              </ul>
-              <div className="grid grid-cols-[2fr_1fr_1fr] gap-2">
-                <Image
-                  src={projectMedia.youbank.src}
-                  alt={projectMedia.youbank.alt}
-                  width={projectMedia.youbank.width}
-                  height={projectMedia.youbank.height}
-                  sizes="(max-width: 1024px) 50vw, 360px"
-                  className="border-line h-full rounded-md border object-cover"
-                />
-                {youbankGallery.map((g) => (
+              </summary>
+              <div className="grid gap-8 pt-4 pb-4 lg:grid-cols-[5fr_6fr]">
+                <ul className="space-y-3">
+                  {(youbank.howItWorks ?? []).map((h) => (
+                    <li key={h} className="text-muted flex gap-3 text-[16px]">
+                      <span aria-hidden="true" className="text-accent">
+                        ›
+                      </span>
+                      {h}
+                    </li>
+                  ))}
+                </ul>
+                <div className="grid grid-cols-[2fr_1fr_1fr] gap-2">
                   <Image
-                    key={g.src}
-                    src={g.src}
-                    alt={g.alt}
-                    width={g.width}
-                    height={g.height}
-                    sizes="(max-width: 1024px) 25vw, 180px"
+                    src={projectMedia.youbank.src}
+                    alt={projectMedia.youbank.alt}
+                    width={projectMedia.youbank.width}
+                    height={projectMedia.youbank.height}
+                    sizes="(max-width: 1024px) 50vw, 360px"
                     className="border-line h-full rounded-md border object-cover"
                   />
-                ))}
+                  {youbankGallery.map((g) => (
+                    <Image
+                      key={g.src}
+                      src={g.src}
+                      alt={g.alt}
+                      width={g.width}
+                      height={g.height}
+                      sizes="(max-width: 1024px) 25vw, 180px"
+                      className="border-line h-full rounded-md border object-cover"
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          </details>
+            </details>
+          </article>
         </Reveal>
 
         {/* Built at Moss */}
@@ -541,21 +546,12 @@ export function Projects() {
               <li
                 key={p.id}
                 id={`project-${p.id}`}
-                className="more-row border-line grid gap-2 border-b py-5 md:grid-cols-12 md:items-baseline md:gap-6"
+                data-inview=""
+                className="lw-row lw-self border-line grid gap-2 border-b py-5 md:grid-cols-12 md:items-baseline md:gap-6 md:px-3"
               >
+                <span aria-hidden="true" className="lw-wash" />
                 <span className="md:col-span-3">
-                  <a
-                    href={p.links.code}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="link t-h3"
-                  >
-                    {p.name}
-                    <span className="sr-only">
-                      {" "}
-                      on GitHub (opens in a new tab)
-                    </span>
-                  </a>
+                  <RowLink href={p.links.code} name={p.name} />
                 </span>
                 <span className="text-muted md:col-span-5">
                   {p.tagline}{" "}

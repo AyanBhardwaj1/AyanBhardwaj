@@ -13,7 +13,7 @@ import {
   parseChatBody,
   type ChatMessage,
 } from "@/lib/ayan-bot/guard";
-import { mockChunks, mockReply } from "@/lib/ayan-bot/mock";
+import { brief, mockChunks, mockReply } from "@/lib/ayan-bot/mock";
 import { SYSTEM_PROMPT } from "@/lib/ayan-bot/prompt";
 
 /**
@@ -244,10 +244,18 @@ export async function POST(request: Request) {
       { headers: streamHeaders(m) },
     );
 
-  if (m === "offline")
+  if (m === "offline") {
+    // The common questions still get a canned, factual brief (no model call,
+    // still rate limited above); anything else gets the offline note.
     // 200 (not 503) so an unconfigured key doesn't spam visitor consoles;
     // the widget reads X-Ayan-Bot-Mode to show the offline state.
+    const saved = brief(question);
+    if (saved)
+      return new Response(textStream(mockChunks(saved), request.signal, 22), {
+        headers: streamHeaders(m),
+      });
     return json(200, { error: "offline", message: OFFLINE_MESSAGE }, m);
+  }
 
   if (m === "mock")
     return new Response(

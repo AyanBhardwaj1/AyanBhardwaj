@@ -1,0 +1,128 @@
+/* Project constellation (ConstellationIsland). Prefix: lw-. The sim writes
+   positions into the outer <g transform>; these rules only touch the inner
+   .lw-star group and the edge paths, so CSS never fights the physics. */
+
+.lw-graph {
+  --lw-ease: cubic-bezier(0.23, 1, 0.32, 1);
+}
+.lw-edge-line {
+  stroke: var(--fg);
+  stroke-opacity: 0.16;
+  stroke-width: 1;
+  transition:
+    stroke-opacity 240ms var(--lw-ease),
+    stroke 240ms var(--lw-ease);
+}
+.lw-edge-cluster {
+  stroke-dasharray: 1 5;
+  stroke-linecap: round;
+  stroke-width: 1.4;
+  stroke-opacity: 0.22;
+}
+.lw-graph.is-lit .lw-edge-line {
+  stroke-opacity: 0.05;
+}
+.lw-graph.is-lit .lw-edge-line.is-on {
+  stroke: var(--accent);
+  stroke-opacity: 0.9;
+  stroke-width: 1.4;
+}
+
+/* Labels get a halo in the card colour so they stay legible over links. */
+.lw-star-label {
+  paint-order: stroke;
+  stroke: var(--bg-card);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+.lw-star {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 260ms var(--lw-ease);
+}
+.lw-star.is-held {
+  transform: scale(1.2);
+}
+.lw-graph:has(.is-held) {
+  cursor: grabbing;
+}
+.lw-star-core {
+  transition: fill 200ms var(--lw-ease);
+}
+.lw-star-pulse {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Draw-in, once, the first time the map is on screen. */
+  .js .lw-graph:not(.is-in) .lw-star {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  .js .lw-graph:not(.is-in) .lw-edge-line {
+    opacity: 0;
+  }
+  .lw-graph.is-in:not(.is-settled) .lw-star {
+    animation: lw-star-in 700ms var(--lw-ease) var(--d, 0ms) both;
+  }
+  .lw-graph.is-in:not(.is-settled) .lw-edge-line:not(.lw-edge-cluster) {
+    stroke-dasharray: 1;
+    animation:
+      lw-edge-draw 1100ms cubic-bezier(0.65, 0, 0.35, 1) var(--d, 0ms) both,
+      lw-fade-in 300ms ease var(--d, 0ms) both;
+  }
+  .lw-graph.is-in:not(.is-settled) .lw-edge-cluster {
+    animation: lw-fade-in 900ms ease var(--d, 0ms) both;
+  }
+  /* A lit link carries a slow current toward its neighbour. */
+  .lw-graph.is-lit .lw-edge-line.is-on:not(.lw-edge-cluster) {
+    stroke-dasharray: 0.03 0.02;
+    animation: lw-flow 1.6s linear infinite;
+  }
+  .lw-star.is-active .lw-star-pulse {
+    animation: lw-pulse-ring 1.6s var(--lw-ease) infinite;
+  }
+  .lw-star.is-near .lw-star-core {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+}
+@keyframes lw-star-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+@keyframes lw-edge-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes lw-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes lw-flow {
+  to {
+    stroke-dashoffset: -0.05;
+  }
+}
+@keyframes lw-pulse-ring {
+  0% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+}
+.lw-star.is-near .lw-star-core {
+  fill: color-mix(in oklab, var(--accent) 55%, var(--fg));
+}
