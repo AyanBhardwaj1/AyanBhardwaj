@@ -206,10 +206,13 @@
     color: var(--fg);
   }
 
+  /* Outlines follow each element's own radius (pills stay pills). */
   :focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 3px;
-    border-radius: 4px;
+  }
+  :where(a, button, summary):not([class]):focus-visible {
+    border-radius: 2px;
   }
 
   [tabindex="-1"]:focus {
@@ -488,15 +491,14 @@
 
 @keyframes hero-in {
   from {
-    filter: blur(18px);
+    filter: blur(12px);
     opacity: 0.2;
-    transform: translateY(32px);
-    letter-spacing: -0.02em;
+    transform: translateY(24px);
   }
 }
 @keyframes portrait-in {
   from {
-    transform: translateY(96px) scale(0.96);
+    transform: translateY(32px) scale(0.98);
     clip-path: inset(100% 0 0 0 round 24px);
   }
   to {
@@ -890,20 +892,6 @@ html:not(.js) .moss-bar {
   }
 }
 
-/* Hero name: letters rise in a stagger (CSS only, runs before hydration). */
-.hero-letter {
-  display: inline-block;
-  animation: letter-in 900ms var(--ease-expo) both;
-  animation-delay: calc(var(--i, 0) * 38ms + var(--line-delay, 0ms));
-}
-@keyframes letter-in {
-  from {
-    opacity: 0.15;
-    filter: blur(10px);
-    transform: translateY(0.35em) rotate(4deg);
-  }
-}
-
 /* Section header rule draws in when the header arrives. */
 .section-rule {
   position: relative;
@@ -967,12 +955,443 @@ html:not(.js) .section-rule::after {
     animation: none !important;
   }
   .moss-cell,
-  .live-dot,
-  .hero-letter {
+  .live-dot {
     animation: none !important;
   }
   .moss-bar,
   .section-rule::after {
+    transform: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Motion layer v3: one system for the chrome, hero, reveals, footer.  */
+/* Signature curve: --ease-expo. Durations: 160 (press), 240 (UI),     */
+/* 600-900 (entrances). Transform / opacity / clip-path only.          */
+/* ------------------------------------------------------------------ */
+
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --dur-quick: 160ms;
+  --dur-ui: 240ms;
+  --dur-enter: 700ms;
+}
+
+/* ---------- Scroll progress hairline (under the status bar) --------- */
+.scroll-progress {
+  position: absolute;
+  inset-inline: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--accent);
+  transform-origin: left;
+  transform: scaleX(0);
+  opacity: 0;
+  pointer-events: none;
+}
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .scroll-progress {
+      opacity: 1;
+      animation: progress-grow linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+@keyframes progress-grow {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ---------- Nav pill: steps aside on scroll down, back on scroll up -- */
+.nav-dock {
+  transition:
+    transform 420ms var(--ease-expo),
+    opacity 240ms var(--ease-out);
+}
+.nav-dock[data-hidden="true"]:not(:focus-within) {
+  opacity: 0;
+  transform: translateY(calc(100% + 24px));
+}
+@media (min-width: 768px) {
+  .nav-dock[data-hidden="true"]:not(:focus-within) {
+    transform: translateY(calc(-100% - 56px));
+  }
+}
+.nav-dock[data-hidden="true"]:not(:focus-within) .nav-pill {
+  pointer-events: none;
+}
+.nav-pill {
+  transition: width 360ms var(--ease-expo);
+}
+.nav-seg {
+  display: inline-block;
+  animation: nav-seg-in 320ms var(--ease-out) both;
+}
+@keyframes nav-seg-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+.nav-btn:active {
+  transform: scale(0.94);
+}
+.nav-btn {
+  transition:
+    background-color var(--dur-ui) var(--ease-out),
+    transform var(--dur-quick) var(--ease-out);
+}
+/* Status LED on each section chip; amber for the section you are in. */
+.nav-led {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--line-strong);
+  transition:
+    background-color var(--dur-ui) var(--ease-out),
+    box-shadow var(--dur-ui) var(--ease-out);
+}
+[aria-current="true"] > .nav-led {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+/* Chips settle in one after another when the menu opens. */
+.nav-chip {
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 200ms var(--ease-out),
+    transform 200ms var(--ease-out);
+}
+[data-open="true"] .nav-chip {
+  opacity: 1;
+  transform: none;
+  transition-duration: 360ms;
+  transition-delay: calc(var(--i, 0) * 28ms + 60ms);
+}
+
+/* ---------- Hero entrance (CSS only; runs before hydration, no JS) --- */
+/* Total choreography lands in about 1.1s. The name is the hero moment;
+   everything else follows it, one direction of travel (up).           */
+.hx-line {
+  /* Mask only the bottom edge, so glyph tops and sides never clip. */
+  clip-path: inset(-0.5em -0.5em 0 -0.5em);
+}
+.hx-letter {
+  display: inline-block;
+  animation: hx-letter 760ms var(--ease-expo) both;
+  animation-delay: calc(var(--i, 0) * 34ms + var(--line-delay, 0ms));
+}
+@keyframes hx-letter {
+  from {
+    transform: translateY(72%);
+    opacity: 0.25;
+  }
+}
+.hx-rise {
+  animation: hx-rise 640ms var(--ease-expo) both;
+  animation-delay: var(--d, 0ms);
+}
+@keyframes hx-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+.hx-portrait {
+  animation: hx-portrait 820ms var(--ease-expo) 300ms both;
+}
+.hx-portrait-img {
+  animation: hx-portrait-img 1100ms var(--ease-expo) 300ms both;
+}
+@keyframes hx-portrait {
+  from {
+    transform: translateY(20px);
+    clip-path: inset(100% 0 0 0 round 12px);
+  }
+  to {
+    clip-path: inset(0 round 12px);
+  }
+}
+@keyframes hx-portrait-img {
+  from {
+    scale: 1.14;
+  }
+}
+.hx-chip {
+  animation: hx-chip 560ms var(--ease-expo) 720ms both;
+}
+.hx-chip-l {
+  --hx-dx: 10px;
+  animation-delay: 800ms;
+}
+.hx-chip-r {
+  --hx-dx: -10px;
+}
+@keyframes hx-chip {
+  from {
+    opacity: 0;
+    translate: var(--hx-dx, 0) 0;
+  }
+}
+.hx-glyph {
+  animation:
+    hx-glyph 700ms var(--ease-expo) 760ms both,
+    bob 6s var(--ease-in-out) 760ms infinite alternate;
+}
+.hx-glyph-b {
+  animation-delay:
+    860ms,
+    -3s;
+}
+@keyframes hx-glyph {
+  from {
+    opacity: 0;
+    scale: 0.85;
+    rotate: -12deg;
+  }
+}
+.hx-spark-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: hx-draw 900ms var(--ease-in-out) 820ms both;
+}
+@keyframes hx-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+.hx-ticker {
+  animation: fade-in-plain 600ms var(--ease-out) 860ms both;
+}
+@keyframes fade-in-plain {
+  from {
+    opacity: 0;
+  }
+}
+[data-offscreen="true"] .hx-glyph {
+  animation-play-state: paused;
+}
+
+/* ---------- Reveal variants (data-reveal="up|fade|blur|mask|scale") -- */
+.js [data-reveal="fade"] {
+  transform: none;
+}
+.js [data-reveal="scale"] {
+  transform: scale(0.96);
+}
+.js [data-reveal="blur"] {
+  filter: blur(8px);
+  transform: translateY(12px);
+  transition:
+    opacity 700ms var(--ease-expo) var(--reveal-delay, 0s),
+    transform 700ms var(--ease-expo) var(--reveal-delay, 0s),
+    filter 700ms var(--ease-expo) var(--reveal-delay, 0s);
+}
+.js [data-reveal="mask"] {
+  opacity: 1;
+  transform: translateY(16px);
+  clip-path: inset(100% 0 0 0);
+  transition:
+    clip-path 900ms var(--ease-expo) var(--reveal-delay, 0s),
+    transform 900ms var(--ease-expo) var(--reveal-delay, 0s);
+}
+.js [data-reveal].is-in {
+  filter: none;
+  clip-path: inset(0);
+}
+/* Stagger: the wrapper is observed; its direct children arrive in turn. */
+.js [data-reveal-stagger] > * {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 600ms var(--ease-expo),
+    transform 600ms var(--ease-expo);
+  transition-delay: calc(
+    var(--reveal-delay, 0s) + min(var(--si, 0), 10) * var(--stagger, 60ms)
+  );
+}
+.js [data-reveal-stagger].is-in > * {
+  opacity: 1;
+  transform: none;
+}
+[data-reveal-stagger] > :nth-child(2) {
+  --si: 1;
+}
+[data-reveal-stagger] > :nth-child(3) {
+  --si: 2;
+}
+[data-reveal-stagger] > :nth-child(4) {
+  --si: 3;
+}
+[data-reveal-stagger] > :nth-child(5) {
+  --si: 4;
+}
+[data-reveal-stagger] > :nth-child(6) {
+  --si: 5;
+}
+[data-reveal-stagger] > :nth-child(7) {
+  --si: 6;
+}
+[data-reveal-stagger] > :nth-child(8) {
+  --si: 7;
+}
+[data-reveal-stagger] > :nth-child(9) {
+  --si: 8;
+}
+[data-reveal-stagger] > :nth-child(10) {
+  --si: 9;
+}
+[data-reveal-stagger] > :nth-child(n + 11) {
+  --si: 10;
+}
+
+/* ---------- Footer wordmark: letters rise as the page ends ---------- */
+.wm {
+  font-size: 15.5vw;
+  font-weight: 800;
+  font-stretch: 118%;
+  letter-spacing: -0.045em;
+  line-height: 0.8;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.wm-word {
+  display: block;
+  clip-path: inset(-0.5em -0.5em 0 -0.5em);
+}
+@media (min-width: 640px) {
+  .wm {
+    font-size: clamp(40px, 7.4vw, 104px);
+  }
+  .wm-word {
+    display: inline-block;
+  }
+  .wm-word + .wm-word {
+    margin-left: 0.3em;
+  }
+}
+.wm-l {
+  display: inline-block;
+  color: transparent;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--fg) 22%, transparent) 10%,
+    color-mix(in oklab, var(--fg) 4%, transparent) 95%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+@media (hover: hover) and (pointer: fine) {
+  .wm-l {
+    transition: color 500ms var(--ease-out);
+  }
+  .wm-l:hover {
+    color: var(--accent);
+    transition-duration: 120ms;
+  }
+}
+/* Fallback (no scroll timelines): rise once, on arrival. */
+.js .wm-l {
+  transform: translateY(70%);
+  transition:
+    transform 900ms var(--ease-expo),
+    color 500ms var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 30ms), 0s;
+}
+.js .wm.is-in .wm-l {
+  transform: none;
+}
+@supports (animation-timeline: view()) {
+  .js .wm-l {
+    transform: none;
+    transition: color 500ms var(--ease-out);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .wm {
+      view-timeline-name: --wm;
+    }
+    .wm-l {
+      animation: wm-rise linear both;
+      animation-timeline: --wm;
+      animation-range: entry calc(var(--i, 0) * 3%) entry
+        calc(55% + var(--i, 0) * 3%);
+    }
+  }
+}
+@keyframes wm-rise {
+  from {
+    transform: translateY(80%);
+  }
+}
+
+/* ---------- 404 ---------- */
+.nf-code {
+  font-size: clamp(120px, 34vw, 420px);
+  font-weight: 800;
+  font-stretch: 118%;
+  letter-spacing: -0.06em;
+  line-height: 0.78;
+}
+.nf-digit {
+  display: inline-block;
+  animation: hx-letter 820ms var(--ease-expo) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+.nf-dip {
+  animation: nf-dip 1400ms var(--ease-in-out) 500ms both;
+}
+@keyframes nf-dip {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ---------- Pressable feedback, shared ---------- */
+@media (hover: hover) and (pointer: fine) {
+  .pill-solid:hover {
+    box-shadow: 0 8px 24px -10px var(--accent-glow);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hx-letter,
+  .hx-rise,
+  .hx-portrait,
+  .hx-portrait-img,
+  .hx-chip,
+  .hx-glyph,
+  .hx-spark-line,
+  .hx-ticker,
+  .nf-digit,
+  .nf-dip,
+  .nav-seg {
+    animation: none !important;
+  }
+  .nav-dock[data-hidden="true"]:not(:focus-within) {
+    transform: none;
+  }
+  .js [data-reveal="blur"],
+  .js [data-reveal="scale"],
+  .js [data-reveal="mask"],
+  .js [data-reveal-stagger] > * {
+    transform: none;
+    filter: none;
+  }
+  .js [data-reveal="mask"] {
+    clip-path: none;
+    opacity: 0;
+    transition: opacity 600ms var(--ease-out);
+  }
+  .js [data-reveal="mask"].is-in {
+    opacity: 1;
+  }
+  .js .wm-l {
     transform: none;
   }
 }

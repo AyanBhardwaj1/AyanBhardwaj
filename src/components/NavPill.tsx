@@ -9,32 +9,77 @@ export type NavItem = {
   external: boolean;
 };
 
+/** Below this scroll depth the pill always shows (the hero has room for it). */
+const PINNED_ZONE = 160;
+/** Scroll distance in one direction before the pill hides or returns. */
+const INTENT = 12;
+
 /**
  * Floating pill nav (design §5.1): top-center on desktop, docked bottom-center
- * on mobile. The ··· button expands the pill in place into chip links (CSS
- * grid-rows transition, no animation library). Scroll-spy marks the active
- * section with an amber dot. Esc and outside clicks close it (a non-modal disclosure).
+ * on mobile. It steps out of the way while you read (hides on scroll down,
+ * returns on scroll up, near the top, on focus, or while open), so it never
+ * sits on body text. The collapsed pill names the section you are in
+ * ("ayan://bhardwaj/projects"); the ··· button expands it in place into chip
+ * links (CSS grid-rows transition). Esc and outside clicks close it.
+ *
+ * The scroll handler only reads window.scrollY (no layout reads) and writes one
+ * data attribute per direction change; motion is a CSS transform transition.
  */
 export function NavPill({ items }: { items: NavItem[] }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<string | null>(null);
+  const [hidden, setHidden] = useState(false);
   const menuId = useId();
   const ref = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
+  // Scroll-spy: the section crossing the middle band of the viewport.
   useEffect(() => {
     const els = items
       .map((s) => document.getElementById(s.id))
       .filter(Boolean) as HTMLElement[];
+    const top = document.getElementById("top");
     const io = new IntersectionObserver(
       (entries) => {
-        for (const e of entries) if (e.isIntersecting) setActive(e.target.id);
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          setActive(e.target.id === "top" ? null : e.target.id);
+        }
       },
       { rootMargin: "-45% 0px -50% 0px" },
     );
     els.forEach((el) => io.observe(el));
+    if (top) io.observe(top);
     return () => io.disconnect();
   }, [items]);
+
+  // Hide on scroll down, reveal on scroll up.
+  useEffect(() => {
+    let lastY = window.scrollY;
+    let anchorY = lastY;
+    let dir = 0;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const y = window.scrollY;
+      const d = Math.sign(y - lastY);
+      if (d !== 0 && d !== dir) {
+        dir = d;
+        anchorY = lastY;
+      }
+      lastY = y;
+      if (y < PINNED_ZONE) setHidden(false);
+      else if (Math.abs(y - anchorY) > INTENT) setHidden(dir > 0);
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -56,21 +101,36 @@ export function NavPill({ items }: { items: NavItem[] }) {
     };
   }, [open]);
 
+  const current = items.find((i) => i.id === active);
+
   return (
-    <div className="no-print pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-4 md:top-14 md:bottom-auto">
+    <div
+      className="nav-dock no-print pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-4 md:top-12 md:bottom-auto"
+      data-hidden={hidden && !open ? "true" : "false"}
+    >
       <div
         ref={ref}
-        className={`border-line bg-bg-elev/85 pointer-events-auto rounded-[26px] border p-1.5 shadow-[var(--shadow-float)] backdrop-blur-[12px] transition-[width] duration-300 ${
-          open ? "w-[min(100%,34rem)]" : "w-[15rem]"
+        className={`nav-pill border-line bg-bg-elev/90 pointer-events-auto rounded-[26px] border p-1.5 shadow-[var(--shadow-float)] backdrop-blur-[14px] backdrop-saturate-150 ${
+          open ? "w-[min(100%,34rem)]" : "w-[17.5rem]"
         }`}
       >
         <nav aria-label="Primary">
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3">
             <a
               href="#top"
-              className="rounded-full pl-3 font-mono text-[13px] font-medium tracking-tight"
+              className="flex min-h-9 min-w-0 items-center rounded-full pl-3 font-mono text-[13px] font-medium tracking-tight"
             >
-              ayan<span className="text-accent">://</span>bhardwaj
+              <span className="shrink-0">
+                ayan<span className="text-accent">://</span>bhardwaj
+              </span>
+              <span
+                key={current?.id ?? "home"}
+                aria-hidden="true"
+                className="nav-seg text-muted truncate"
+              >
+                {current ? `/${current.id}` : ""}
+              </span>
+              <span className="sr-only">(back to top)</span>
             </a>
             <button
               ref={buttonRef}
@@ -78,7 +138,7 @@ export function NavPill({ items }: { items: NavItem[] }) {
               aria-expanded={open}
               aria-controls={menuId}
               onClick={() => setOpen((v) => !v)}
-              className="bg-card text-fg hover:bg-card-hover ml-auto inline-flex size-9 items-center justify-center rounded-[10px] transition-colors"
+              className="nav-btn bg-card text-fg hover:bg-card-hover ml-auto inline-flex size-9 shrink-0 items-center justify-center rounded-[10px] transition-colors"
             >
               <span className="sr-only">
                 {open ? "Close menu" : "Open menu"}
@@ -103,9 +163,13 @@ export function NavPill({ items }: { items: NavItem[] }) {
           </div>
           <div id={menuId} className="collapsible" data-open={open}>
             <div>
-              <ul className="flex flex-wrap gap-1.5 px-1 pt-3 pb-1">
-                {items.map((l) => (
-                  <li key={l.id}>
+              <ul className="nav-chips flex flex-wrap gap-1.5 px-1 pt-3 pb-1">
+                {items.map((l, i) => (
+                  <li
+                    key={l.id}
+                    style={{ "--i": i } as React.CSSProperties}
+                    className="nav-chip"
+                  >
                     <a
                       href={l.href}
                       onClick={() => setOpen(false)}
@@ -113,16 +177,18 @@ export function NavPill({ items }: { items: NavItem[] }) {
                       {...(l.external
                         ? { target: "_blank", rel: "noopener noreferrer" }
                         : {})}
-                      className="border-line bg-card hover:border-line-strong hover:bg-card-hover inline-flex min-h-10 items-center gap-2 rounded-full border px-4 text-sm transition-colors"
+                      className="border-line bg-card hover:border-line-strong hover:bg-card-hover aria-[current]:border-line-strong inline-flex min-h-10 items-center gap-2 rounded-full border px-4 text-sm transition-colors"
                     >
-                      {active === l.id && (
-                        <span
-                          aria-hidden="true"
-                          className="bg-accent size-1.5 rounded-full"
-                        />
+                      {!l.external && (
+                        <span aria-hidden="true" className="nav-led" />
                       )}
                       {l.label}
-                      {l.external && <span aria-hidden="true">↗</span>}
+                      {l.external && (
+                        <>
+                          <span aria-hidden="true">↗</span>
+                          <span className="sr-only">(opens in a new tab)</span>
+                        </>
+                      )}
                     </a>
                   </li>
                 ))}

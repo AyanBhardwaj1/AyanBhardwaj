@@ -3,7 +3,10 @@ import { PaletteTrigger } from "./palette/PaletteTrigger";
 import { AustinClock, MarketStatus } from "./ui/MarketStatus";
 import { ThemeToggle } from "./ui/ThemeToggle";
 
-/** Fixed 32px terminal status bar (design §5.0). Server shell, tiny client islands. */
+/**
+ * Fixed 32px terminal status bar (design §5.0). Server shell, tiny client
+ * islands, plus an amber reading-progress hairline along its bottom edge.
+ */
 export function StatusBar() {
   return (
     <div className="no-print fade-in border-line bg-bg-elev/90 fixed inset-x-0 top-0 z-50 h-8 border-b backdrop-blur-md">
@@ -25,6 +28,8 @@ export function StatusBar() {
           <PaletteTrigger className="border-line-strong hover:border-muted hover:text-fg inline-flex min-h-6 items-center gap-1.5 rounded-sm border px-2 transition-colors" />
         </div>
       </div>
+      {/* Reading progress: a CSS scroll-driven hairline, no JS. */}
+      <span aria-hidden="true" className="scroll-progress" />
     </div>
   );
 }

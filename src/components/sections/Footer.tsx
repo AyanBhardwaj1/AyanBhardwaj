@@ -3,7 +3,11 @@ import { sections } from "@/content/extras";
 import { formatDay, dataAsOf } from "@/lib/github";
 import { AustinClock } from "../ui/MarketStatus";
 
-/** Inverted full-bleed slab with a giant cropped wordmark (design §5.10). */
+/**
+ * Inverted full-bleed slab that ends on a giant wordmark (design §5.10). The
+ * letters rise into place as the last of the page scrolls in (CSS scroll
+ * timeline; an IntersectionObserver fallback elsewhere).
+ */
 export function Footer({ hasResume }: { hasResume: boolean }) {
   return (
     <footer
@@ -58,14 +62,22 @@ export function Footer({ hasResume }: { hasResume: boolean }) {
           Press ⌘K · type HELP &lt;GO&gt;
         </p>
       </div>
-      <div aria-hidden="true" className="relative -mb-[0.18em] select-none">
-        <p className="container-page t-display text-center text-[clamp(28px,7.4vw,106px)] leading-[0.8] whitespace-nowrap">
-          {"Ayan Bhardwaj".split("").map((ch, i) => (
-            <span
-              key={i}
-              className="text-fg/[0.06] hover:text-fg transition-colors duration-500"
-            >
-              {ch === " " ? " " : ch}
+      <div
+        aria-hidden="true"
+        className="container-page overflow-hidden pt-8 pb-[max(env(safe-area-inset-bottom),1.25rem)] select-none"
+      >
+        <p data-inview="" className="wm text-center">
+          {["Ayan", "Bhardwaj"].map((word, w) => (
+            <span key={word} className="wm-word">
+              {[...word].map((ch, i) => (
+                <span
+                  key={i}
+                  className="wm-l"
+                  style={{ "--i": w * 5 + i } as React.CSSProperties}
+                >
+                  {ch}
+                </span>
+              ))}
             </span>
           ))}
         </p>
