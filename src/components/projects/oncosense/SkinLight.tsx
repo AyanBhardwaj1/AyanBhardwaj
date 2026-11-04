@@ -247,14 +247,17 @@ export function SkinLight() {
       staticPaths();
       return;
     }
+    let seen = false;
+    const sync = () => (seen && !document.hidden ? start() : stop());
     const io = new IntersectionObserver(
-      ([e]) => (e.isIntersecting ? start() : stop()),
-      {
-        rootMargin: "100px",
+      ([e]) => {
+        seen = e.isIntersecting;
+        sync();
       },
+      { rootMargin: "100px" },
     );
     io.observe(cv);
-    const onVis = () => (document.hidden ? stop() : null);
+    const onVis = sync;
     document.addEventListener("visibilitychange", onVis);
     return () => {
       stop();
@@ -390,7 +393,7 @@ export function SkinLight() {
             </button>
           ))}
         </div>
-        <p className="os-readout" aria-live="polite">
+        <p className="os-readout">
           returned to sensor {(stats.ret * 100).toFixed(1)}% · mean depth
           reached ~{pxToMm(stats.depth).toFixed(2)} mm
         </p>

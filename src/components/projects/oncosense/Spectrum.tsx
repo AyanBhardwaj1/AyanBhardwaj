@@ -108,6 +108,8 @@ export function Spectrum() {
           {BANDS.map((b, i) => {
             const x = 44 + i * 55.5;
             const h = (Math.min(MAX, R[i]) / MAX) * 240;
+            // the number follows the noise-free value, so it never jitters
+            const hx = (Math.min(MAX, exact[i]) / MAX) * 240;
             return (
               <g key={b.id}>
                 <rect
@@ -143,10 +145,11 @@ export function Spectrum() {
                 </text>
                 <text
                   x={x + 20}
-                  y={Math.max(36, 254 - h)}
+                  y={254}
                   textAnchor="middle"
+                  className="os-mono os-spec-num"
+                  style={{ transform: `translateY(${-Math.min(hx, 218)}px)` }}
                   fontSize="15"
-                  className="os-mono"
                   fill="var(--os-ink)"
                 >
                   {Math.round(exact[i] * 100)}
