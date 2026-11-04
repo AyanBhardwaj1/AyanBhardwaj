@@ -18,6 +18,12 @@ import { ConstellationIsland } from "../viz/ConstellationIsland";
 import { CountUp } from "../motion/CountUp";
 import { MiniTerminal } from "../viz/MiniTerminal";
 import { StarIcon } from "../ui/StarIcon";
+import { HoverVideo } from "../ui/HoverVideo";
+
+/** Cards with a real screen recording play it on hover. */
+const CARD_VIDEO: Record<string, string> = {
+  runway: "/media/projects/runway/waste-demo.mp4",
+};
 
 const host = (url: string) =>
   url.replace(/^https?:\/\//, "").replace(/\/$/, "");
@@ -233,6 +239,7 @@ function ProjectCard({
           ) : (
             <TypeCard p={p} />
           )}
+          {CARD_VIDEO[p.id] && <HoverVideo src={CARD_VIDEO[p.id]} />}
           {hasProjectPage(p.id) && (
             <span
               aria-hidden="true"
