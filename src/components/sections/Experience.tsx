@@ -63,7 +63,7 @@ export function Experience() {
     <section
       id="experience"
       aria-labelledby="experience-title"
-      className="section-y"
+      className="section-y pt-[clamp(64px,8vw,120px)]"
     >
       <div className="container-page">
         <SectionHeader

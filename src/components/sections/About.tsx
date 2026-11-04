@@ -1,9 +1,13 @@
+import { Fragment, type CSSProperties } from "react";
 import { interests, organizations, profile, skills } from "@/content/content";
 import { Reveal } from "../motion/Reveal";
-import { ScrubText } from "../motion/ScrubText";
 import { BioToggle } from "../ui/BioToggle";
 import { Emph } from "../ui/Emph";
 import { SectionHeader } from "../ui/SectionHeader";
+import { Manifesto } from "./mid/Manifesto";
+import "./mid/mid.css";
+
+export { Manifesto };
 
 const facts: [string, React.ReactNode][] = [
   ["Ticker", "AYAN"],
@@ -23,7 +27,11 @@ const facts: [string, React.ReactNode][] = [
 export function About() {
   const { csb } = profile.education;
   return (
-    <section id="about" aria-labelledby="about-title" className="section-y">
+    <section
+      id="about"
+      aria-labelledby="about-title"
+      className="section-y pb-[clamp(56px,8vw,112px)]"
+    >
       <div className="container-page">
         <SectionHeader
           index={1}
@@ -107,22 +115,41 @@ export function About() {
             </div>
             <div className="md:col-span-7">
               <p className="text-muted max-w-[62ch]">{csb.paragraph}</p>
-              <dl className="border-line mt-8 grid grid-cols-3 gap-4 border-t pt-6">
-                {[
-                  ["2", "degrees, one program"],
-                  ["Honors", "coursework in both"],
-                  ["20–30", "students per cohort"],
-                ].map(([v, l]) => (
-                  <div key={l}>
-                    <dt className="sr-only">{l}</dt>
-                    <dd>
-                      <span className="block text-[clamp(32px,4vw,48px)] leading-none font-semibold tracking-[-0.04em] [font-stretch:112%]">
-                        {v}
+              <dl className="md-csb border-line mt-8 border-t" data-inview="">
+                <div
+                  className="md-csb-cell"
+                  style={{ "--i": 0 } as CSSProperties}
+                >
+                  <dt className="t-label text-muted">degrees, one program</dt>
+                  <dd className="md-csb-v">
+                    <span className="md-csb-rise">2</span>
+                  </dd>
+                </div>
+                <div
+                  className="md-csb-cell"
+                  style={{ "--i": 1 } as CSSProperties}
+                >
+                  <dt className="t-label text-muted">coursework in both</dt>
+                  <dd className="md-csb-v">
+                    <span className="md-csb-rise">Honors</span>
+                  </dd>
+                </div>
+                <div
+                  className="md-csb-cell"
+                  style={{ "--i": 2 } as CSSProperties}
+                >
+                  <dt className="t-label text-muted">students per cohort</dt>
+                  <dd className="md-csb-v">
+                    <span className="md-csb-rise">
+                      <span className="sr-only">20 to 30</span>
+                      <span aria-hidden="true" className="md-csb-range">
+                        <span className="md-csb-num md-csb-a" />
+                        –
+                        <span className="md-csb-num md-csb-b" />
                       </span>
-                      <span className="t-label text-muted mt-2 block">{l}</span>
-                    </dd>
-                  </div>
-                ))}
+                    </span>
+                  </dd>
+                </div>
               </dl>
               <p className="t-label text-muted mt-6">
                 Source:{" "}
@@ -142,15 +169,32 @@ export function About() {
         {/* Toolbox: Majd's hairline rows, title left, dot-separated tags right */}
         <div className="mt-20 md:mt-28">
           <h3 className="t-label text-muted mb-4">/Toolbox</h3>
-          <ul className="border-line border-t">
-            {skills.map((g) => (
+          <ul className="md-tools border-line border-t" data-inview="">
+            {skills.map((g, i) => (
               <li
                 key={g.id}
-                className="border-line grid gap-2 border-b py-5 md:grid-cols-12 md:items-baseline md:gap-6"
+                className="md-tools-row border-line grid gap-2 border-b py-5 md:grid-cols-12 md:items-baseline md:gap-6"
+                style={{ "--i": i } as CSSProperties}
               >
-                <span className="t-h3 md:col-span-4">{g.label}</span>
+                <span className="md-tools-label t-h3 md:col-span-4">
+                  {g.label}
+                </span>
                 <span className="t-data text-muted md:col-span-8">
-                  {g.items.join("  ·  ")}
+                  {g.items.map((t, j) => (
+                    <Fragment key={t}>
+                      {j > 0 && (
+                        <span aria-hidden="true" className="md-tools-sep">
+                          {" · "}
+                        </span>
+                      )}
+                      <span
+                        className="md-tool"
+                        style={{ "--j": Math.min(j, 10) } as CSSProperties}
+                      >
+                        {t}
+                      </span>
+                    </Fragment>
+                  ))}
                 </span>
               </li>
             ))}
@@ -160,22 +204,30 @@ export function About() {
         <div className="mt-16 grid gap-10 md:grid-cols-12">
           <div className="md:col-span-7">
             <h3 className="t-label text-muted mb-4">/Off the clock</h3>
-            <ul className="space-y-3">
-              {interests.map((i) => (
-                <li key={i.id} className="flex gap-4">
+            <ul className="md-stagger space-y-3" data-inview="">
+              {interests.map((it, i) => (
+                <li
+                  key={it.id}
+                  className="flex gap-4"
+                  style={{ "--i": i } as CSSProperties}
+                >
                   <span className="t-data text-fg w-36 shrink-0 uppercase">
-                    {i.label}
+                    {it.label}
                   </span>
-                  <span className="text-muted">{i.line}</span>
+                  <span className="text-muted">{it.line}</span>
                 </li>
               ))}
             </ul>
           </div>
           <div className="md:col-span-5">
             <h3 className="t-label text-muted mb-4">/Organizations</h3>
-            <ul className="flex flex-wrap gap-2">
-              {organizations.map((o) => (
-                <li key={o.name} className="chip">
+            <ul className="md-stagger flex flex-wrap gap-2" data-inview="">
+              {organizations.map((o, i) => (
+                <li
+                  key={o.name}
+                  className="chip"
+                  style={{ "--i": i } as CSSProperties}
+                >
                   {o.name}
                   {o.short ? ` (${o.short})` : ""}
                 </li>
@@ -183,21 +235,6 @@ export function About() {
             </ul>
           </div>
         </div>
-      </div>
-    </section>
-  );
-}
-
-export function Manifesto() {
-  return (
-    <section aria-label="Manifesto" className="section-y pt-0">
-      <div className="container-page flex justify-center">
-        <ScrubText
-          className="t-manifesto max-w-[22ch] text-center text-balance"
-          text="From thesis to ship: tools that turn messy data into decisions."
-          accent="decisions."
-          serif={["messy", "data"]}
-        />
       </div>
     </section>
   );

@@ -19,7 +19,7 @@ export function Trophies() {
       id="trophies"
       aria-labelledby="trophies-title"
       data-theme="dark"
-      className="section-y border-line bg-bg-elev text-fg border-y"
+      className="section-y border-line bg-bg-elev text-fg border-y py-[clamp(80px,10vw,144px)]"
     >
       <div className="container-page">
         <SectionHeader
@@ -29,9 +29,12 @@ export function Trophies() {
           title="Leadership & recognition"
         />
         <p className="t-label text-muted -mt-8 mb-10 md:-mt-14">
-          Click a plaque for the story
+          Flip a plaque for the story
         </p>
-        <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <ul
+          className="md-plq-grid grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          data-inview=""
+        >
           {csb && (
             <Plaque
               wide
