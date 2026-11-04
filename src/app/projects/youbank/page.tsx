@@ -260,11 +260,7 @@ export default function Page() {
           aria-labelledby="studio-title"
           className={`${s.section} container-page`}
         >
-          <Head
-            code="STUDIO"
-            id="studio"
-            title="Watch the model build itself."
-          >
+          <Head code="STUDIO" id="studio" title="Watch the model build itself.">
             {studio.body.map((b) => (
               <p key={b} className="mb-4 last:mb-0">
                 {b}
