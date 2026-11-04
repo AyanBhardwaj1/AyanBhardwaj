@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { organizations } from "@/content/content";
 import { trophies } from "@/content/extras";
 import { Plaque } from "../ui/Plaque";
@@ -58,10 +59,17 @@ export function Trophies() {
             />
           ))}
         </ul>
-        <div className="mt-12 flex flex-wrap items-center gap-3">
+        <div
+          className="md-stagger mt-12 flex flex-wrap items-center gap-3"
+          data-inview=""
+        >
           <span className="t-label text-muted">Also active in</span>
-          {organizations.map((o) => (
-            <span key={o.name} className="chip">
+          {organizations.map((o, i) => (
+            <span
+              key={o.name}
+              className="chip"
+              style={{ "--i": i + 1 } as CSSProperties}
+            >
               {o.short ?? o.name}
             </span>
           ))}

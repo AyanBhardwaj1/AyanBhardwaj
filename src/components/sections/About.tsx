@@ -77,11 +77,12 @@ export function About() {
             </span>
             <span aria-hidden="true">Security description</span>
           </div>
-          <dl className="t-data border-line border-t">
-            {facts.map(([k, v]) => (
+          <dl className="md-stagger t-data border-line border-t" data-inview="">
+            {facts.map(([k, v], i) => (
               <div
                 key={k}
-                className="border-line grid grid-cols-[88px_1fr] gap-4 border-b py-3 sm:grid-cols-[180px_1fr]"
+                style={{ "--i": i } as CSSProperties}
+                className="md-des-row border-line grid grid-cols-[88px_1fr] gap-4 border-b py-3 sm:grid-cols-[180px_1fr]"
               >
                 <dt className="text-muted uppercase">{k}</dt>
                 <dd className="uppercase">{v}</dd>

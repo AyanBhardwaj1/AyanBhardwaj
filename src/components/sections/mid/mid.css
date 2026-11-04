@@ -278,6 +278,7 @@
 @media (prefers-reduced-motion: no-preference) {
   .js .md-tools-row,
   .js .md-stagger > * {
+    --i: 0;
     opacity: 0;
     transform: translateY(14px);
     transition:
@@ -302,6 +303,19 @@
   /* Once in, hover colour should respond instantly (no stagger delay). */
   .js .is-in .md-tools-row:hover .md-tool {
     transition-delay: 0s;
+  }
+}
+
+/* DES fact sheet: a terminal-style row highlight on hover. */
+.md-des-row {
+  transition: background-color 200ms var(--ease-expo);
+}
+@media (hover: hover) and (pointer: fine) {
+  .md-des-row:hover {
+    background: linear-gradient(90deg, var(--accent-glow), transparent 70%);
+  }
+  .md-des-row:hover > dt {
+    color: var(--accent);
   }
 }
 
@@ -829,4 +843,7 @@
   from {
     opacity: 0;
   }
+}
+.md-des-row > dt {
+  transition: color 200ms var(--ease-expo);
 }
