@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import "./jarvis.css";
 
 const ATTR = "data-jarvis-boot";
@@ -21,7 +21,17 @@ const LINES = [
  */
 const decide = `try{if(!sessionStorage.getItem("jarvis-booted")&&!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.setAttribute("${ATTR}","");sessionStorage.setItem("jarvis-booted","1")}}catch(e){}`;
 
+const noop = () => () => {};
+
 export function BootOverlay() {
+  // The inline script only belongs in server HTML (it runs before first
+  // paint). True while hydrating, false for client navigations, where React
+  // would warn about a script it never executes and the boot is skipped.
+  const fromServer = useSyncExternalStore(
+    noop,
+    () => false,
+    () => true,
+  );
   useEffect(() => {
     const html = document.documentElement;
     if (!html.hasAttribute(ATTR)) return;
@@ -41,7 +51,7 @@ export function BootOverlay() {
 
   return (
     <>
-      <script dangerouslySetInnerHTML={{ __html: decide }} />
+      {fromServer && <script dangerouslySetInnerHTML={{ __html: decide }} />}
       <div className="jv-boot" aria-hidden="true">
         <div className="jv-bootReactor">
           <i />
