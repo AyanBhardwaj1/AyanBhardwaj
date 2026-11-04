@@ -65,6 +65,8 @@
   display: none;
 }
 html[data-jarvis-boot] .jv-boot {
+  /* vertical centre of the reactor inside the centred stack */
+  --jv-cy: calc(50% - 84px);
   position: fixed;
   inset: 0;
   z-index: 100;
@@ -74,7 +76,51 @@ html[data-jarvis-boot] .jv-boot {
   gap: 28px;
   background: var(--ink);
   cursor: pointer;
-  animation: jv-bootOut 300ms ease-in 1.1s forwards;
+  /* Opens like an iris from the reactor: the page shows through a growing
+     hole, so the HUD is "revealed" rather than faded up. Ends itself in CSS
+     (visibility: hidden), so it can never trap anyone, JS or not. */
+  -webkit-mask-image: radial-gradient(
+    circle at 50% var(--jv-cy),
+    transparent var(--jv-iris),
+    #000 calc(var(--jv-iris) + 1px)
+  );
+  mask-image: radial-gradient(
+    circle at 50% var(--jv-cy),
+    transparent var(--jv-iris),
+    #000 calc(var(--jv-iris) + 1px)
+  );
+  animation: jv-bootOut 440ms cubic-bezier(0.65, 0, 0.35, 1) 0.78s forwards;
+}
+@property --jv-iris {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+html[data-jarvis-boot] .jv-boot::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: var(--jv-cy);
+  width: 140px;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  border: 1px solid var(--cyan-hot);
+  box-shadow:
+    0 0 24px rgba(45, 223, 255, 0.6),
+    inset 0 0 24px rgba(45, 223, 255, 0.4);
+  opacity: 0;
+  animation: jv-bootShock 520ms cubic-bezier(0.16, 1, 0.3, 1) 0.74s forwards;
+}
+@keyframes jv-bootShock {
+  0% {
+    opacity: 1;
+    scale: 0.6;
+  }
+  100% {
+    opacity: 0;
+    scale: 9;
+  }
 }
 .jv-bootReactor {
   position: relative;
@@ -117,8 +163,8 @@ html[data-jarvis-boot] .jv-boot {
 }
 .jv-bootLines li {
   opacity: 0;
-  animation: jv-bootLine 160ms steps(2) forwards;
-  animation-delay: calc(var(--i) * 170ms + 100ms);
+  animation: jv-bootLine 120ms steps(2) forwards;
+  animation-delay: calc(var(--i) * 115ms + 80ms);
 }
 .jv-bootLines li:last-child {
   color: var(--cyan-hot);
@@ -139,7 +185,14 @@ html[data-jarvis-boot] .jv-boot {
   }
 }
 @keyframes jv-bootOut {
-  to {
+  0% {
+    --jv-iris: 0%;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    --jv-iris: 75%;
     opacity: 0;
     visibility: hidden;
   }
@@ -1355,6 +1408,20 @@ html[data-jarvis-boot] .jv-boot {
   font: inherit;
   font-size: 16px;
 }
+@media (max-width: 479px) {
+  /* Phones: the prompt shrinks to its caret so the field gets the room. */
+  .jv-promptWord {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .jv-transmit {
+    padding: 0 12px;
+  }
+}
 .jv-command input::placeholder {
   color: var(--tx-3);
   opacity: 0.8;
@@ -1762,6 +1829,122 @@ html[data-jarvis-boot] .jv-boot {
 .jv-neigh b {
   font-weight: 400;
   color: var(--cyan);
+}
+
+/* ---------- HUD power-up ----------
+   The first time the HUD is on screen its panels come online one by one
+   (a short flicker, like a display warming up) and the stage brackets lock
+   onto the reactor. Runs once; gated on .js so no-JS pages stay visible. */
+@media (prefers-reduced-motion: no-preference) {
+  .js .jv-hud[data-inview]:not(.is-in) .jv-panel,
+  .js .jv-hud[data-inview]:not(.is-in) .jv-console,
+  .js .jv-hud[data-inview]:not(.is-in) .jv-stage,
+  .js .jv-hud[data-inview]:not(.is-in) .jv-brackets i {
+    opacity: 0;
+  }
+  .jv-hud.is-in .jv-panel,
+  .jv-hud.is-in .jv-console {
+    animation: jv-powerOn 560ms linear both;
+    animation-delay: var(--jv-on, 0ms);
+  }
+  .jv-hud.is-in .jv-grid > .jv-rail:nth-child(1) > .jv-panel:nth-child(1) {
+    --jv-on: 120ms;
+  }
+  .jv-hud.is-in .jv-grid > .jv-rail:nth-child(1) > .jv-panel:nth-child(2) {
+    --jv-on: 240ms;
+  }
+  .jv-hud.is-in .jv-grid > .jv-rail:nth-child(3) > .jv-panel:nth-child(1) {
+    --jv-on: 180ms;
+  }
+  .jv-hud.is-in .jv-grid > .jv-rail:nth-child(3) > .jv-panel:nth-child(2) {
+    --jv-on: 300ms;
+  }
+  .jv-hud.is-in .jv-grid > .jv-rail:nth-child(3) > .jv-panel:nth-child(3) {
+    --jv-on: 420ms;
+  }
+  .jv-hud.is-in .jv-console {
+    --jv-on: 480ms;
+  }
+  .jv-hud.is-in .jv-stage {
+    animation: jv-reactorOn 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .jv-hud.is-in .jv-brackets i {
+    animation: jv-lock 700ms cubic-bezier(0.16, 1, 0.3, 1) 200ms both;
+  }
+  .jv-brackets i:nth-child(1) {
+    --jv-dx: -28px;
+    --jv-dy: -28px;
+  }
+  .jv-brackets i:nth-child(2) {
+    --jv-dx: 28px;
+    --jv-dy: -28px;
+  }
+  .jv-brackets i:nth-child(3) {
+    --jv-dx: -28px;
+    --jv-dy: 28px;
+  }
+  .jv-brackets i:nth-child(4) {
+    --jv-dx: 28px;
+    --jv-dy: 28px;
+  }
+}
+@keyframes jv-powerOn {
+  0% {
+    opacity: 0;
+    clip-path: inset(-24px -24px 100% -24px);
+  }
+  30% {
+    opacity: 0.85;
+  }
+  38% {
+    opacity: 0.25;
+  }
+  52% {
+    opacity: 1;
+    clip-path: inset(-24px);
+  }
+  60% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+    clip-path: inset(-24px);
+  }
+}
+@keyframes jv-reactorOn {
+  0% {
+    opacity: 0;
+    scale: 0.82;
+    filter: brightness(2.2) blur(2px);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+    filter: none;
+  }
+}
+@keyframes jv-lock {
+  0% {
+    opacity: 0;
+    translate: var(--jv-dx, 0) var(--jv-dy, 0);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.7;
+    translate: 0 0;
+  }
+}
+
+/* Spinning rings stop while the HUD is off screen. */
+.jv-hud[data-idle] *,
+.jv-hud[data-idle] *::before,
+.jv-hud[data-idle] *::after {
+  animation-play-state: paused !important;
 }
 
 /* ---------- Reduced motion: static HUD, labels still change ---------- */

@@ -136,7 +136,20 @@ export function Hud() {
   const [extraLong, setExtraLong] = useState<Memory[]>([]);
   const [lastSync, setLastSync] = useState<"cloud" | "local" | null>(null);
   const timers = useRef<number[]>([]);
+  const hudRef = useRef<HTMLDivElement>(null);
   const inputId = useId();
+
+  // Pause the reactor's infinite spins while the HUD is off screen.
+  useEffect(() => {
+    const el = hudRef.current;
+    if (!el || !("IntersectionObserver" in window)) return;
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) el.removeAttribute("data-idle");
+      else el.setAttribute("data-idle", "");
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   const longPool = useMemo(
     () =>
@@ -252,10 +265,18 @@ export function Hud() {
           })),
         ]);
       if (newTasks.length)
-        setTasks((prev) => [
-          ...newTasks.map((t) => ({ ...t, isNew: true })),
-          ...prev.map((t) => ({ ...t, isNew: false })),
-        ]);
+        // Upsert: asking twice refreshes the task instead of
+        // adding a duplicate.
+        setTasks((prev) => {
+          const key = (t: Task) => `${t.title}|${t.due ?? ""}`;
+          const fresh = new Set(newTasks.map(key));
+          return [
+            ...newTasks.map((t) => ({ ...t, isNew: true })),
+            ...prev
+              .filter((t) => !fresh.has(key(t)))
+              .map((t) => ({ ...t, isNew: false })),
+          ];
+        });
       setState("idle");
       setStatus(
         quota
@@ -293,7 +314,9 @@ export function Hud() {
 
   return (
     <div
+      ref={hudRef}
       className="jv-hud"
+      data-inview=""
       data-state={state}
       data-offline={offline || alert ? "" : undefined}
     >
@@ -484,7 +507,10 @@ export function Hud() {
             </h3>
             <ul className="jv-tasks">
               {tasks.map((t) => (
-                <li key={t.title + t.due} data-new={t.isNew ? "" : undefined}>
+                <li
+                  key={`${t.title}|${t.due ?? ""}`}
+                  data-new={t.isNew ? "" : undefined}
+                >
                   <i className={`jv-p_${t.priority}`} aria-hidden="true" />
                   <span>
                     <strong>{t.title}</strong>
@@ -563,7 +589,7 @@ export function Hud() {
             }}
           >
             <label htmlFor={inputId} className="jv-prompt">
-              DIRECTIVE &gt;
+              <span className="jv-promptWord">DIRECTIVE </span>&gt;
             </label>
             <input
               id={inputId}

@@ -15,8 +15,9 @@ const LINES = [
 /**
  * Boot sequence, once per tab session, on a full page load only (a client
  * navigation from the home card keeps its morph). The inline script decides
- * before first paint; the timeline is pure CSS and ends itself. JS adds
- * Esc/click to skip. Never shown under reduced motion or without JS.
+ * before first paint; the timeline is pure CSS (about 1.2s) and ends itself.
+ * JS lets any key, click, scroll or tap skip it. Never shown under reduced
+ * motion or without JS.
  */
 const decide = `try{if(!sessionStorage.getItem("jarvis-booted")&&!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.setAttribute("${ATTR}","");sessionStorage.setItem("jarvis-booted","1")}}catch(e){}`;
 
@@ -24,12 +25,15 @@ export function BootOverlay() {
   useEffect(() => {
     const html = document.documentElement;
     if (!html.hasAttribute(ATTR)) return;
-    const end = () => html.removeAttribute(ATTR);
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && end();
-    window.addEventListener("keydown", onKey);
-    const t = window.setTimeout(end, 1500);
+    // Any intent to use the page skips it: a key, a click, a scroll, a tap.
+    const evs = ["keydown", "pointerdown", "wheel", "touchstart"] as const;
+    const end = () => {
+      html.removeAttribute(ATTR);
+      evs.forEach((e) => window.removeEventListener(e, end));
+    };
+    evs.forEach((e) => window.addEventListener(e, end, { passive: true }));
+    const t = window.setTimeout(end, 1300);
     return () => {
-      window.removeEventListener("keydown", onKey);
       window.clearTimeout(t);
       end();
     };
@@ -38,11 +42,7 @@ export function BootOverlay() {
   return (
     <>
       <script dangerouslySetInnerHTML={{ __html: decide }} />
-      <div
-        className="jv-boot"
-        aria-hidden="true"
-        onClick={() => document.documentElement.removeAttribute(ATTR)}
-      >
+      <div className="jv-boot" aria-hidden="true">
         <div className="jv-bootReactor">
           <i />
           <i />
@@ -55,7 +55,7 @@ export function BootOverlay() {
             </li>
           ))}
         </ol>
-        <span className="jv-bootSkip">SKIP ▸ ESC</span>
+        <span className="jv-bootSkip">PRESS ANY KEY TO SKIP</span>
       </div>
     </>
   );
