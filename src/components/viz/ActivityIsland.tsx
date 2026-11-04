@@ -92,7 +92,9 @@ export function ActivityIsland({ ranges }: { ranges: CompactRange[] }) {
           {r.stats.map(([k, v]) => (
             <div key={k}>
               <dt className="t-label text-muted">{k}</dt>
-              <dd className="text-fg mt-1 text-[15px]">{v}</dd>
+              <dd className="text-fg mt-1 text-[15px] whitespace-nowrap">
+                {v}
+              </dd>
             </div>
           ))}
         </dl>
