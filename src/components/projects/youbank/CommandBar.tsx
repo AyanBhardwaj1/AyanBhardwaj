@@ -120,6 +120,8 @@ export function CommandBar({
     let t = 0;
     const onKey = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+      // Leave the keys alone while a dialog (the site's ⌘K palette) is open.
+      if (document.querySelector("dialog[open], [aria-modal='true']")) return;
       const m = /^F([1-9])$/.exec(e.key);
       if (!m) return;
       const sec = sections[Number(m[1]) - 1];
