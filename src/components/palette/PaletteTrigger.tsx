@@ -8,9 +8,12 @@ import { usePalette } from "./PaletteProvider";
 export function PaletteTrigger({
   className = "",
   label = "Search",
+  alwaysLabel = false,
 }: {
   className?: string;
   label?: string;
+  /** Show the label at every width (by default it hides below sm). */
+  alwaysLabel?: boolean;
 }) {
   const { open, prefetch } = usePalette();
   return (
@@ -37,7 +40,7 @@ export function PaletteTrigger({
         <circle cx="7" cy="7" r="4.5" />
         <path d="m10.5 10.5 3 3" strokeLinecap="round" />
       </svg>
-      <span className="hidden sm:inline">{label}</span>
+      <span className={alwaysLabel ? "" : "hidden sm:inline"}>{label}</span>
       <kbd
         aria-hidden="true"
         className="hidden font-mono text-[0.6875rem] opacity-70 sm:inline"
