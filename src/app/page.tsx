@@ -13,6 +13,7 @@ import { Hero } from "@/components/sections/Hero";
 import { Projects } from "@/components/sections/Projects";
 import { Trophies } from "@/components/sections/Trophies";
 import { Spotlight } from "@/components/ui/Spotlight";
+import { PointerFx } from "@/components/motion/PointerFx";
 import { RevealObserver } from "@/components/motion/RevealObserver";
 import type { TickerItem } from "@/components/ui/Ticker";
 
@@ -30,7 +31,8 @@ export default function Home() {
       value: `10 shipped · ★ ${totalStars(mossIds)}`,
       delta: "up",
     },
-    { symbol: "LATENCY", value: "<10ms on-device", delta: "flat" },
+    { symbol: "MIT LL", value: "OncoSense research", delta: "flat" },
+    { symbol: "HACKATHONS", value: "Walk-Free · Runway", delta: "up" },
     { symbol: "RECALL@5", value: "0.85 → 0.97", delta: "up" },
     { symbol: "SEC TOOLS", value: "328", delta: "up" },
     { symbol: "GH 12M", value: `${last12.total} contributions`, delta: "up" },
@@ -76,6 +78,7 @@ export default function Home() {
       </main>
       <Footer hasResume={hasResume} />
       <RevealObserver />
+      <PointerFx />
     </>
   );
 }

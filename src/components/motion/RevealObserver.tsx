@@ -2,11 +2,15 @@
 
 import { useEffect } from "react";
 
-/** One IntersectionObserver for every [data-reveal] element on the page. */
+/**
+ * One IntersectionObserver for every [data-reveal] element on the page (fade
+ * up) and every [data-inview] element (just gets .is-in, for effects such as
+ * the section rule draw-in).
+ */
 export function RevealObserver() {
   useEffect(() => {
     const els = document.querySelectorAll<HTMLElement>(
-      "[data-reveal]:not(.is-in)",
+      "[data-reveal]:not(.is-in), [data-inview]:not(.is-in)",
     );
     if (!("IntersectionObserver" in window)) {
       els.forEach((el) => el.classList.add("is-in"));

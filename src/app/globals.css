@@ -912,7 +912,7 @@ html:not(.js) .moss-bar {
   content: "";
   position: absolute;
   inset-inline: 0;
-  bottom: 0;
+  bottom: -1px;
   height: 1px;
   background: var(--line-strong);
   transform-origin: left;

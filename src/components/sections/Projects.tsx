@@ -15,6 +15,7 @@ import { hasProjectPage, projectHref } from "@/lib/projects";
 import { Reveal } from "../motion/Reveal";
 import { SectionHeader } from "../ui/SectionHeader";
 import { ConstellationIsland } from "../viz/ConstellationIsland";
+import { CountUp } from "../motion/CountUp";
 import { MiniTerminal } from "../viz/MiniTerminal";
 
 const host = (url: string) =>
@@ -423,7 +424,7 @@ export function Projects() {
                     <span aria-hidden="true" className="text-accent">
                       ▲
                     </span>
-                    {m}
+                    <CountUp value={m} />
                   </li>
                 ))}
               </ul>

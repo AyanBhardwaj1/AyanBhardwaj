@@ -19,17 +19,19 @@
  *     barTheme   "inherit" | "dark" | "light": scope the top bar/footer to a
  *                theme if your body has a fixed look (default "inherit").
  *     className  extra classes on the <main> wrapper (e.g. your own background).
- *   The shell also mounts RevealObserver, so <Reveal> works in your body.
+ *   The shell also mounts RevealObserver, so <Reveal> works in your body, and
+ *   PointerFx, so [data-glow], [data-tilt] and [data-magnetic] work too.
  *     footer     false to drop the shared footer (keep prev/next somewhere).
  * - Building blocks you may reuse or ignore: ProjectHero, ProjectOverview,
  *   ProjectFeatures, ProjectGallery, ProjectLinks (./DefaultProjectPage).
  * - Floor: one h1, real links, visible focus, prefers-reduced-motion respected,
- *   no graduation year / GPA / phone anywhere, server-rendered text.
+ *   no graduation year, grades or phone number anywhere, server-rendered text.
  */
 import Link from "next/link";
 import { ViewTransition } from "react";
 import { projectMnemonic } from "@/content/extras";
 import { getProject, prevNext, type ProjectSlug } from "@/lib/projects";
+import { PointerFx } from "../motion/PointerFx";
 import { RevealObserver } from "../motion/RevealObserver";
 
 export function ProjectShell({
@@ -80,6 +82,7 @@ export function ProjectShell({
       </ViewTransition>
       {footer && <ProjectFooter slug={slug} barTheme={barTheme} />}
       <RevealObserver />
+      <PointerFx />
     </>
   );
 }

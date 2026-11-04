@@ -361,9 +361,9 @@ export const trophies: Trophy[] = [
     title: "CSB Honors",
     issuer: "UT Austin",
     tier: "special",
-    stat: "≤40",
+    stat: "20–30",
     statLabel: "students per cohort",
     story:
-      "Admitted to Texas CSB, the joint honors degree in computer science and business. Two honors degrees in four years.",
+      "Admitted to Texas CSB, UT Austin's Computer Science and Business Honors dual degree, with honors coursework in both.",
   },
 ];

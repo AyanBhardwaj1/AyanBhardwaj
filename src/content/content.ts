@@ -232,9 +232,9 @@ export const profile: Profile = {
     "Code like an engineer. Think like a dealmaker.",
   ],
   subheadline:
-    "CS + Business Honors at UT Austin. Software engineer at Moss (YC F25), where I shipped 10 open-source apps on a sub-10ms semantic search SDK. Now building YouBank, an AI research desk for finance.",
+    "CS + Business Honors at UT Austin. At Moss (YC F25) I shipped 10 open-source apps on its semantic search SDK, including mossJARVIS and Mycelium. Now building YouBank, an AI deal desk for finance.",
   subheadlineShort:
-    "CS + Business Honors at UT Austin. Shipped 10 open-source apps at Moss (YC F25). Building YouBank.",
+    "CS + Business Honors at UT Austin. 10 open-source apps at Moss (YC F25). Building YouBank.",
   status: {
     label: "Building YouBank",
     show: true,
@@ -242,11 +242,12 @@ export const profile: Profile = {
   bioOneLine:
     "Software engineer. CS + Business Honors at UT Austin. Ex-Moss and Koyal AI (both YC F25). Building YouBank.",
   aboutShort:
-    "I'm Ayan. I build software at the point where AI meets money: semantic search that runs on your laptop, research tools that cite every number, agents that know when not to hit send. I study CS and business in UT Austin's CSB Honors program, so I write the code and read the 10-K.",
+    "I'm Ayan. I build software where AI meets money: search that runs on your own machine, research tools that cite every number, agents that know when not to hit send. I'm in UT Austin's CS + Business Honors program, so I write the code and read the 10-K.",
   aboutLong: [
-    "I'm Ayan Bhardwaj, a software engineer in UT Austin's CSB Honors program, a joint degree in honors computer science and honors business.",
-    "I like building things that are fast and things that are honest. At Moss (YC F25) I shipped 10 open-source apps on their WebAssembly semantic search SDK: a Chrome extension that remembers everything you read, a memory layer that stops coding agents from re-reading the same file, an Iron Man-style desktop assistant. At Koyal AI (YC F25) I worked on computer vision for an AI filmmaking platform. At UNT's NLP lab I built the scrapers and cleaning scripts behind a Belarusian question-answering benchmark.",
-    "On the finance side, I founded Advanced Equities Organization, a financial-literacy nonprofit that grew to 200+ members and ran a $15,000 live portfolio. That's where YouBank came from. It's the AI research desk I wanted: 328 tools on SEC data, quant models written from scratch, and an email agent that has to earn the right to send on its own.",
+    "I'm Ayan Bhardwaj, a software engineer in UT Austin's Computer Science and Business Honors program (CSB), a dual degree with honors coursework on both sides.",
+    "At Moss (YC F25) I shipped 10 open-source apps on its WebAssembly semantic search SDK. Two became products in their own right: mossJARVIS, an Iron Man-style desktop assistant with a long-term memory, and Mycelium, a Chrome extension that remembers the ideas you read instead of the URLs. The other eight range from memory for coding agents to a tutor that floats over your notes. At Koyal AI (YC F25) I worked on computer vision for an AI filmmaking platform.",
+    "Between jobs I build at hackathons and in research. Walk-Free shows how hot every street feels before you walk it, Runway tells a startup the day its cash runs out, and OncoSense was built at MIT Lincoln Laboratory with Eric Niu. At UNT's NLP lab I wrote the scrapers and cleaning scripts behind a Belarusian question-answering benchmark.",
+    "On the finance side, I founded Advanced Equities Organization, a financial-literacy nonprofit that grew to 200+ members and ran a $15,000 live portfolio. That's where YouBank came from. It's the AI deal desk I wanted: 328 tools on SEC data, quant models written from scratch, and an email agent that has to earn the right to send on its own.",
     "Off the keyboard: Mavericks basketball, soccer, pickleball, and a jersey collection that's getting out of hand. I've also built simulators for all three of the first sports, which tells you something.",
     "I speak English and Hindi.",
   ],
@@ -262,18 +263,16 @@ export const profile: Profile = {
     location: "Austin, TX",
     csb: {
       oneLiner:
-        "CSB is UT Austin's joint honors degree in computer science and business: a B.S. in Computer Science (Honors) plus a B.B.A. through Canfield Business Honors, done in four years, with a cohort of 40 or fewer.",
+        "CSB is UT Austin's Computer Science and Business Honors program: a dual degree (a B.S. in Computer Science and a B.B.A.) with honors coursework in both, in a cohort of about 20 to 30 students.",
       paragraph:
-        "Texas CSB (Computer Science and Business Honors) is an integrated honors degree run jointly by UT Austin's Department of Computer Science and the McCombs Canfield Business Honors Program. Students earn a B.S. in Computer Science (Honors) and a B.B.A. (Honors) in four years, less time than double-majoring in both. Students can only apply when entering UT, and admission is highly selective: cohorts are capped at about 40, and the first class enrolled 23 students out of 409 applicants. Both parent programs rank among the top ten in their fields.",
+        "Texas CSB (Computer Science and Business Honors) is a dual-degree program run jointly by UT Austin's Department of Computer Science and the McCombs Canfield Business Honors Program. Students earn a B.S. in Computer Science and a B.B.A., take honors coursework on both sides, and move through the program as a small cohort of about 20 to 30 students a year.",
       tooltip:
-        "UT Austin's joint CS + Business honors degree. Two honors degrees in four years. Cohorts of 40 or fewer.",
+        "UT Austin's CS + Business honors dual degree. Honors coursework in both. Cohorts of about 20 to 30.",
       tooltipShort:
-        "Joint CS + Business honors degree at UT Austin. ~40 students a year.",
+        "CS + Business honors dual degree at UT Austin. About 20 to 30 students a year.",
       sources: [
         "https://csb.utexas.edu/",
         "https://csb.utexas.edu/admissions-faq",
-        "https://www.cs.utexas.edu/news/2018/new-dual-degree-honors-program-university-texas-austin-combines-computer-science-business",
-        "https://cs.utexas.edu/news/2019/new-joint-honors-program-gets-strong-start",
       ],
     },
   },
@@ -1022,7 +1021,7 @@ export const seo: Seo = {
   description:
     "Ayan Bhardwaj builds AI tools and fast search software. CS + Business Honors at UT Austin. Ex-Moss and Koyal AI (YC F25). Creator of YouBank.",
   ogDescription:
-    "Software engineer in UT Austin's CS + Business Honors program. 10 open-source apps at Moss (YC F25). Building YouBank, an AI research desk for finance.",
+    "Software engineer in UT Austin's CS + Business Honors program. Shipped 10 open-source apps at Moss (YC F25), including mossJARVIS and Mycelium. Building YouBank, an AI deal desk for finance.",
   twitterCard: "summary_large_image",
   keywords: [
     "Ayan Bhardwaj",

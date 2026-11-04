@@ -66,6 +66,24 @@ function Sparkline() {
   );
 }
 
+/** Each letter rises in a stagger (CSS only; see .hero-letter). */
+function Letters({ word, delay = 0 }: { word: string; delay?: number }) {
+  return [...word].map((ch, i) => (
+    <span
+      key={i}
+      className="hero-letter"
+      style={
+        {
+          "--i": i,
+          "--line-delay": `${delay}ms`,
+        } as React.CSSProperties
+      }
+    >
+      {ch}
+    </span>
+  ));
+}
+
 export function Hero({
   ticker,
   hasResume,
@@ -86,11 +104,11 @@ export function Hero({
         </p>
 
         <h1 aria-label={profile.name} className="t-display relative z-0">
-          <span aria-hidden="true" className="hero-line block">
-            Ayan
+          <span aria-hidden="true" className="block whitespace-nowrap">
+            <Letters word="Ayan" />
           </span>
-          <span aria-hidden="true" className="hero-line block">
-            Bhardwaj
+          <span aria-hidden="true" className="block whitespace-nowrap">
+            <Letters word="Bhardwaj" delay={140} />
           </span>
         </h1>
 
@@ -137,10 +155,10 @@ export function Hero({
           <span className="hidden md:inline">{profile.subheadline}</span>
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <a href="#projects" className="pill pill-solid">
+          <a href="#projects" className="pill pill-solid" data-magnetic="">
             See my work
           </a>
-          <a href="#contact" className="pill">
+          <a href="#contact" className="pill" data-magnetic="">
             Get in touch
           </a>
           {hasResume && (
