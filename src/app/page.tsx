@@ -28,7 +28,7 @@ export default function Home() {
     { symbol: "YOUBANK", value: "Live in beta", delta: "up" },
     {
       symbol: "MOSS APPS",
-      value: `10 shipped · ★ ${totalStars(mossIds)}`,
+      value: `10 shipped · ${totalStars(mossIds)} stars`,
       delta: "up",
     },
     { symbol: "MIT LL", value: "OncoSense research", delta: "flat" },
