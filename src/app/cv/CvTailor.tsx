@@ -54,6 +54,14 @@ export function CvTailorPills({
           {r.label}
         </button>
       ))}
+      {label && (
+        <a
+          href="#cv-proj"
+          className="t-label text-accent inline-flex min-h-9 items-center underline-offset-4 hover:underline"
+        >
+          Matching projects first ↓
+        </a>
+      )}
       <span className="sr-only" aria-live="polite">
         {label ? `CV tailored for ${label}: matching projects first.` : ""}
       </span>
