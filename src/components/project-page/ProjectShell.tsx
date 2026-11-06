@@ -45,7 +45,12 @@ import {
 import { PointerFx } from "../motion/PointerFx";
 import { RevealObserver } from "../motion/RevealObserver";
 import { ThemeToggle } from "../ui/ThemeToggle";
-import { AskAboutButton, Explored, ShareButton } from "./ProjectExtras";
+import {
+  AskAboutButton,
+  AskChips,
+  Explored,
+  ShareButton,
+} from "./ProjectExtras";
 import "./shell.css";
 
 export function ProjectShell({
@@ -169,6 +174,7 @@ export function ProjectFooter({
   barTheme?: "inherit" | "dark" | "light";
 }) {
   const { prev, next } = prevNext(slug);
+  const current = getProject(slug);
   const themeAttr = barTheme === "inherit" ? {} : { "data-theme": barTheme };
   const n = PROJECT_PAGES.length;
   const at = PROJECT_PAGES.indexOf(next.id as ProjectSlug) + 1;
@@ -176,6 +182,13 @@ export function ProjectFooter({
   return (
     <footer {...themeAttr} className="bg-bg border-line border-t">
       <nav aria-label="More projects" className="container-page py-12 md:py-16">
+        <div className="mb-8">
+          <AskChips
+            name={current.name}
+            stack={current.stack}
+            metrics={current.metrics ?? []}
+          />
+        </div>
         <div className="mb-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
           <Explored slug={slug} />
           <Link

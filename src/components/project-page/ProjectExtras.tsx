@@ -36,6 +36,57 @@ function readExplored(): string[] {
   }
 }
 
+/**
+ * "Worth asking about": three questions built from the project's own facts
+ * (a metric, the stack choice, how it works), each opening ayan-bot, which
+ * answers from the site's content.
+ */
+export function AskChips({
+  name,
+  stack,
+  metrics,
+}: {
+  name: string;
+  stack: string[];
+  metrics: string[];
+}) {
+  // The most telling metric: a before → after, else a percentage or speed.
+  const m =
+    metrics.find((x) => x.includes("→")) ??
+    metrics.find((x) => /%|ms\b|ns\b/.test(x)) ??
+    null;
+  const delta = m?.match(/^(.*?)\s*([\d.]+)\s*→\s*([\d.]+)$/);
+  const picks = stack.filter((x) => !/^(TypeScript|JavaScript)$/.test(x));
+  const qs = [
+    delta
+      ? `${name}: how did ${delta[1]} go from ${delta[2]} to ${delta[3]}?`
+      : m
+        ? `${name}: what's behind "${m}"?`
+        : null,
+    picks.length >= 2 ? `Why ${picks[0]} and ${picks[1]} for ${name}?` : null,
+    `How does ${name} work, end to end?`,
+  ].filter((q): q is string => Boolean(q));
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="t-label text-muted mr-1">Worth asking about</span>
+      {qs.map((q) => (
+        <button
+          key={q}
+          type="button"
+          onClick={() =>
+            window.dispatchEvent(
+              new CustomEvent("ayan-bot:open", { detail: { prompt: q } }),
+            )
+          }
+          className="border-line-strong hover:border-accent hover:text-accent min-h-9 rounded-full border px-3 text-left text-[13px] transition-colors"
+        >
+          {q}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function AskAboutButton({ name }: { name: string }) {
   return (
     <button
