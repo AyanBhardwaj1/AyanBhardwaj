@@ -129,6 +129,7 @@ const COMMANDS: { name: string; args?: string; help: string }[] = [
   },
   { name: "tour", help: "the 40-second guided tour" },
   { name: "neofetch", help: "the system, at a glance" },
+  { name: "share", help: "copy a link that replays your last command" },
   { name: "history", help: "commands you've run" },
   { name: "clear", help: "clear the screen (Ctrl+L)" },
   { name: "exit", help: "back to the site" },
@@ -735,6 +736,22 @@ export function Terminal({ data }: { data: TerminalData }) {
           ]);
           void import("@/components/fx/tour").then((t) => t.tour());
           return;
+        case "share": {
+          const last = [...hist].reverse().find((h) => !/^share\b/i.test(h));
+          if (!last) {
+            print([s("share: run something first, then share it.", "muted")]);
+            return;
+          }
+          const url = `${window.location.origin}/terminal?run=${encodeURIComponent(last)}`;
+          const path = url.slice(window.location.origin.length);
+          const shown = () => print([s("copy this: ", "muted"), a(path, path)]);
+          if (!navigator.clipboard) shown();
+          else
+            navigator.clipboard
+              .writeText(url)
+              .then(() => print([s("copied ", "up"), a(path, path)]), shown);
+          return;
+        }
         case "neofetch":
         case "fastfetch": {
           const logo = [
@@ -783,6 +800,47 @@ export function Terminal({ data }: { data: TerminalData }) {
     },
     [data, findProject, fit, hist, print, projectCard, router],
   );
+
+  // Shareable runs: /terminal?run=diff%20youbank%20runway. Only read-only
+  // commands run from a link (no ask, open, cv, tour or exit), so a link
+  // can't spend ayan-bot credits or send anyone elsewhere.
+  const ranLink = useRef(false);
+  useEffect(() => {
+    if (ranLink.current) return;
+    ranLink.current = true;
+    const cmd = new URLSearchParams(window.location.search)
+      .get("run")
+      ?.trim()
+      .slice(0, 400);
+    if (!cmd) return;
+    const head = cmd.split(/\s+/)[0].toLowerCase();
+    const SAFE = [
+      "help",
+      "whoami",
+      "ls",
+      "cat",
+      "less",
+      "more",
+      "exp",
+      "experience",
+      "skills",
+      "awards",
+      "stats",
+      "contact",
+      "grep",
+      "search",
+      "find",
+      "diff",
+      "compare",
+      "neofetch",
+      "interests",
+      "fit",
+      "history",
+    ];
+    if (!SAFE.includes(head) || /^fit\s+ask\b/i.test(cmd)) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time replay of a shared command
+    run(cmd);
+  }, [run]);
 
   /** Tab completion. Returns false when there is nothing to complete. */
   const complete = (): boolean => {
