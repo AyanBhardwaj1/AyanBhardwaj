@@ -226,7 +226,12 @@ export function ProjectFooter({
           />
         </div>
         <div className="mb-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
-          <Explored slug={slug} />
+          <Explored
+            slug={slug}
+            names={Object.fromEntries(
+              PROJECT_PAGES.map((id) => [id, getProject(id).name]),
+            )}
+          />
           <Link
             href={`/terminal?run=${encodeURIComponent(`cat ${slug}`)}`}
             className="t-label text-muted hover:text-fg inline-flex min-h-9 items-center"
