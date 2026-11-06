@@ -45,6 +45,8 @@ export type TerminalData = {
     page: string | null;
     stars: number | null;
     roles: string[];
+    /** Ids of the most similar builds (lib/related). */
+    related: string[];
   }[];
   experience: {
     company: string;
@@ -248,8 +250,20 @@ export function Terminal({ data }: { data: TerminalData }) {
       if (p.code_url) ls.push(a("code ↗", p.code_url, true), "  ");
       if (p.stars) ls.push(s(`★ ${p.stars}`, "muted"));
       print(ls);
+      const rel = p.related
+        .map((id) => data.projects.find((x) => x.id === id))
+        .filter((x): x is TerminalData["projects"][number] => !!x);
+      if (rel.length)
+        print([
+          s("related  ", "muted"),
+          ...rel.flatMap((r, i): Seg[] => [
+            ...(i ? [s(" · ", "muted")] : []),
+            s(r.name, "accent"),
+          ]),
+          s("   (cat <name>)", "muted"),
+        ]);
     },
-    [print],
+    [print, data.projects],
   );
 
   const run = useCallback(

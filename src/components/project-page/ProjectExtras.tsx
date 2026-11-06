@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   PROJECT_PAGES,
@@ -117,7 +118,14 @@ export function AskAboutButton({ name }: { name: string }) {
   );
 }
 
-export function Explored({ slug }: { slug: ProjectSlug }) {
+export function Explored({
+  slug,
+  names,
+}: {
+  slug: ProjectSlug;
+  /** Case-study names by slug (passed from the server; no content import). */
+  names: Record<string, string>;
+}) {
   const [seen, setSeen] = useState<string[] | null>(null);
 
   useEffect(() => {
@@ -147,6 +155,13 @@ export function Explored({ slug }: { slug: ProjectSlug }) {
 
   if (!seen) return null;
   const total = PROJECT_PAGES.length;
+  // The next case study after this one (in page order) not yet opened.
+  const at = PROJECT_PAGES.indexOf(slug);
+  const order = [...PROJECT_PAGES.slice(at + 1), ...PROJECT_PAGES.slice(0, at)];
+  const found = order.find((p) => !seen.includes(p));
+  // The footer already links the next page; only point elsewhere.
+  const nextId = found && found !== order[0] ? found : undefined;
+  const nextUnseen = nextId ? { id: nextId, name: names[nextId] } : undefined;
   const done = seen.length >= total;
   return (
     <div className="t-label text-muted flex flex-wrap items-center gap-3">
@@ -163,6 +178,14 @@ export function Explored({ slug }: { slug: ProjectSlug }) {
           ? `All ${total} case studies explored. Ayan says thanks.`
           : `${seen.length} of ${total} case studies explored`}
       </span>
+      {!done && nextUnseen && (
+        <Link
+          href={`/projects/${nextUnseen.id}`}
+          className="text-accent inline-flex min-h-9 items-center underline-offset-4 hover:underline"
+        >
+          Not yet seen: {nextUnseen.name} →
+        </Link>
+      )}
     </div>
   );
 }
