@@ -13,7 +13,8 @@ import {
 import { buildConstellation } from "@/lib/constellation";
 import { starsFor, totalStars } from "@/lib/github";
 import { projectScreenshots } from "@/lib/media";
-import { hasProjectPage, projectHref } from "@/lib/projects";
+import { hasProjectPage, PROJECT_PAGES, projectHref } from "@/lib/projects";
+import { ContinueExploring } from "../ui/ContinueExploring";
 import { Reveal } from "../motion/Reveal";
 import { SectionHeader } from "../ui/SectionHeader";
 import { ConstellationIsland } from "../viz/ConstellationIsland";
@@ -421,6 +422,15 @@ export function Projects() {
         />
 
         <RoleFilter scope="projects" />
+        <ContinueExploring
+          order={[...PROJECT_PAGES]}
+          names={Object.fromEntries(
+            PROJECT_PAGES.map((id) => [
+              id,
+              projects.find((p) => p.id === id)?.name ?? id,
+            ]),
+          )}
+        />
 
         {/* Featured: YouBank */}
         <Reveal>

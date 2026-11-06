@@ -19,7 +19,7 @@ import {
 
 const KEY = "ayan:explored";
 
-function readExplored(): string[] {
+export function readExplored(): string[] {
   try {
     const raw = localStorage.getItem(KEY);
     const arr = raw ? (JSON.parse(raw) as unknown) : [];
