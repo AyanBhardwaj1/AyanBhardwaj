@@ -11,7 +11,7 @@ export function StatusBar() {
   return (
     <aside
       aria-label="Status bar"
-      className="no-print fade-in border-line bg-bg-elev/90 fixed inset-x-0 top-0 z-50 h-8 border-b backdrop-blur-md"
+      className="no-print fade-in border-line bg-bg-elev/[0.97] fixed inset-x-0 top-0 z-50 h-8 border-b backdrop-blur-md"
     >
       <div className="container-page t-label text-muted flex h-full items-center justify-between gap-3 text-[11px] sm:text-[12px]">
         <div className="flex min-w-0 items-center gap-3">

@@ -144,7 +144,7 @@ export function EmailDraft({ to }: { to: string }) {
           </div>
           <div>
             <label htmlFor={`${uid}-co`} className="text-muted mb-1 block">
-              Company <span className="text-dim">(optional)</span>
+              Company <span>(optional)</span>
             </label>
             <input
               id={`${uid}-co`}
@@ -160,7 +160,7 @@ export function EmailDraft({ to }: { to: string }) {
         </div>
         <div>
           <label htmlFor={`${uid}-note`} className="text-muted mb-1 block">
-            Anything to add <span className="text-dim">(optional)</span>
+            Anything to add <span>(optional)</span>
           </label>
           <textarea
             id={`${uid}-note`}

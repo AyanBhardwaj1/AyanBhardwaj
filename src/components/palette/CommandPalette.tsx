@@ -82,6 +82,9 @@ const HELP_LINES = [
   "easter eggs exist. try: whoami, latency, mavs, sudo hire ayan, RAIN, BELL, ↑↑↓↓←→←→BA",
 ];
 
+/** Log lines kept: the newest, but always room for all of HELP plus its echo. */
+const LOG_MAX = HELP_LINES.length + 2;
+
 export default function CommandPalette({
   open,
   onOpenChange,
@@ -165,7 +168,9 @@ export default function CommandPalette({
 
   function print(lines: Omit<LogLine, "id">[]) {
     setLog((prev) =>
-      [...prev, ...lines.map((l) => ({ ...l, id: ++logId.current }))].slice(-8),
+      [...prev, ...lines.map((l) => ({ ...l, id: ++logId.current }))].slice(
+        -LOG_MAX,
+      ),
     );
   }
 

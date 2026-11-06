@@ -18,7 +18,8 @@ const TERMS: Term[] = [
   {
     id: "javascript",
     label: "JavaScript",
-    jd: "\\bjavascript\\b|\\bjs\\b|\\becmascript\\b",
+    // "js" alone, not the tail of Next.js / Node.js.
+    jd: "\\bjavascript\\b|(?<![.\\w])js\\b|\\becmascript\\b",
     ev: "\\b(javascript|typescript|react|next\\.js|node)\\b",
   },
   { id: "rust", label: "Rust", jd: "\\brust\\b" },
@@ -305,7 +306,10 @@ const haystacks = [
   })),
 ];
 
-/** Built on the server: every term with up to 4 pieces of evidence. */
+/**
+ * Built on the server: every term with up to 4 pieces of evidence. Terms
+ * with none stay in, so a role that asks for them shows an honest gap.
+ */
 export function fitIndex(): FitIndex {
   const terms = TERMS.map((t) => {
     const re = new RegExp(t.ev ?? t.jd, "i");
@@ -315,6 +319,6 @@ export function fitIndex(): FitIndex {
       .slice(0, 4)
       .map((h) => ({ name: h.name, href: h.href }));
     return { id: t.id, label: t.label, jd: t.jd, evidence };
-  }).filter((t) => t.evidence.length > 0);
+  });
   return { terms, notOnSite: NOT_ON_SITE };
 }

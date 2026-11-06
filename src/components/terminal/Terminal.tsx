@@ -370,11 +370,12 @@ export function Terminal({ data }: { data: TerminalData }) {
             );
             return;
           }
-          print([
-            s("opening ", "muted"),
-            a(target, target, !target.startsWith("/")),
-          ]);
-          if (target.startsWith("/")) router.push(target);
+          // Site pages route in place; files (the resume PDF) and other
+          // sites open in a new tab, so the terminal session survives.
+          const page =
+            target.startsWith("/") && !/\.[a-z0-9]{2,4}$/i.test(target);
+          print([s("opening ", "muted"), a(target, target, !page)]);
+          if (page) router.push(target);
           else window.open(target, "_blank", "noopener,noreferrer");
           return;
         }
@@ -489,6 +490,7 @@ export function Terminal({ data }: { data: TerminalData }) {
             return;
           }
           const r = matchFit(fit, arg);
+          lastFit.current = r.hits.length ? fitPrompt(r) : null;
           if (!r.total) {
             print([
               s(
@@ -519,7 +521,6 @@ export function Terminal({ data }: { data: TerminalData }) {
               s("not on this site: ", "muted"),
               r.gaps.join(", "),
             ]);
-          lastFit.current = r.hits.length ? fitPrompt(r) : null;
           if (r.hits.length)
             print([
               s("next: ", "muted"),
@@ -708,7 +709,9 @@ export function Terminal({ data }: { data: TerminalData }) {
     [data, findProject, fit, hist, print, projectCard, router],
   );
 
-  const complete = () => {
+  /** Tab completion. Returns false when there is nothing to complete. */
+  const complete = (): boolean => {
+    if (!value.trim()) return false;
     const parts = value.split(/\s+/);
     const pool =
       parts.length <= 1
@@ -742,6 +745,7 @@ export function Terminal({ data }: { data: TerminalData }) {
       }
       setHint(hits.slice(0, 12).join("  "));
     }
+    return hits.length > 0;
   };
 
   const onKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -751,9 +755,10 @@ export function Terminal({ data }: { data: TerminalData }) {
       setValue("");
       setHIdx(null);
       setHint("");
-    } else if (e.key === "Tab") {
-      e.preventDefault();
-      complete();
+    } else if (e.key === "Tab" && !e.shiftKey && !e.altKey) {
+      // Only hold Tab when it completes something, so keyboard users can
+      // always Tab (and Shift+Tab) out of the terminal.
+      if (complete()) e.preventDefault();
     } else if (e.key === "ArrowUp") {
       if (!hist.length) return;
       e.preventDefault();

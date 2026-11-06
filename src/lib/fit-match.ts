@@ -25,17 +25,23 @@ export function compileFit(index: FitIndex): CompiledFit {
     missing: index.notOnSite.map((m) => ({
       label: m,
       // Short, ambiguous words ("Go") must match exactly, case-sensitively.
-      re:
-        m.length <= 3
-          ? new RegExp(`(^|[^\\w.])${escape(m)}(?![\\w-])`)
-          : new RegExp(`(^|[^\\w.])${escape(m)}(?![\\w])`, "i"),
+      // Names that start with a symbol (".NET") need no left boundary, so
+      // "ASP.NET" still counts.
+      re: new RegExp(
+        `${/^\w/.test(m) ? "(?<![\\w.])" : ""}${escape(m)}(?![\\w${m.length <= 3 ? "-" : ""}])`,
+        m.length <= 3 ? "" : "i",
+      ),
     })),
   };
 }
 
 export function matchFit(c: CompiledFit, text: string): FitResult {
-  const hits = c.terms.filter((t) => t.re.test(text));
-  const gaps = c.missing.filter((m) => m.re.test(text)).map((m) => m.label);
+  const found = c.terms.filter((t) => t.re.test(text));
+  const hits = found.filter((t) => t.evidence.length > 0);
+  const gaps = [
+    ...found.filter((t) => !t.evidence.length).map((t) => t.label),
+    ...c.missing.filter((m) => m.re.test(text)).map((m) => m.label),
+  ];
   const total = hits.length + gaps.length;
   return {
     hits,

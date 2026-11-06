@@ -166,7 +166,7 @@ export const projectMnemonic: Record<string, string> = {
   quantdesk: "QDSK",
   dynasty: "DYNA",
   "golden-era-soccer": "GOLD",
-  tourlegend: "TOUR",
+  tourlegend: "TLGD",
   "tape-deck-mcp": "TAPE",
   nightshift: "NGHT",
   mnemos: "MNEM",

@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useDeferredValue, useEffect, useId, useMemo, useState } from "react";
+import {
+  useDeferredValue,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { FitIndex } from "@/lib/fit";
 import {
   compileFit,
@@ -28,6 +35,7 @@ export function FitCheck({ index }: { index: FitIndex }) {
   const id = useId();
   const [text, setText] = useState("");
   const [copied, setCopied] = useState(false);
+  const taRef = useRef<HTMLTextAreaElement>(null);
 
   // A job description handed over from ayan-bot (pasted into the chat).
   useEffect(() => {
@@ -101,6 +109,7 @@ export function FitCheck({ index }: { index: FitIndex }) {
         up, with evidence.
       </label>
       <textarea
+        ref={taRef}
         id={`${id}-jd`}
         name="job-description"
         rows={5}
@@ -123,7 +132,11 @@ export function FitCheck({ index }: { index: FitIndex }) {
           <button
             type="button"
             className="pill min-h-9 px-3 text-[12px]"
-            onClick={() => setText("")}
+            onClick={() => {
+              setText("");
+              // The button unmounts; keep focus somewhere useful.
+              taRef.current?.focus();
+            }}
           >
             Clear
           </button>

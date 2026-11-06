@@ -32,6 +32,7 @@ export function RoleFilter({ scope }: { scope: string }) {
           key={r.id}
           type="button"
           aria-pressed={role === r.id}
+          data-role-pill={r.id}
           onClick={() => setRole((cur) => (cur === r.id ? null : r.id))}
           className={`pill min-h-9 px-3.5 text-[12px] ${role === r.id ? "border-accent text-accent" : ""}`}
         >
@@ -41,7 +42,13 @@ export function RoleFilter({ scope }: { scope: string }) {
       {role && (
         <button
           type="button"
-          onClick={() => setRole(null)}
+          onClick={() => {
+            // Clear unmounts itself: hand focus back to the role it cleared.
+            document
+              .querySelector<HTMLButtonElement>(`[data-role-pill="${role}"]`)
+              ?.focus();
+            setRole(null);
+          }}
           className="t-label text-muted hover:text-fg min-h-9 px-2"
         >
           Clear

@@ -606,6 +606,7 @@ async function endpoints() {
       (b) => typeof JSON.parse(b).name === "string",
     ],
     ["/.well-known/security.txt", /^text\/plain/, (b) => /^Contact:/m.test(b)],
+    ["/ayan.vcf", /^text\/vcard/, (b) => /^BEGIN:VCARD/.test(b)],
   ];
   for (const [path, type, body] of cases) {
     await check("endpoints", path, async () => {
@@ -623,6 +624,15 @@ async function endpoints() {
       assert(ok, `unexpected body: ${b.slice(0, 80)}`);
     });
   }
+  await check("endpoints", "every function code is unique", async () => {
+    const html = await (await fetch(BASE + "/functions")).text();
+    const codes = [
+      ...html.matchAll(/<td class="text-accent[^"]*">([^<]+?)\s*<!-- -->/g),
+    ].map((m) => m[1].trim());
+    assert(codes.length > 20, `found only ${codes.length} codes`);
+    const dup = codes.filter((c, i) => codes.indexOf(c) !== i);
+    assert(!dup.length, `duplicate codes: ${dup.join(", ")}`);
+  });
   await check("endpoints", "sitemap lists /terminal and /cv", async () => {
     const b = await (await fetch(BASE + "/sitemap.xml")).text();
     const locs = [...b.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) =>
