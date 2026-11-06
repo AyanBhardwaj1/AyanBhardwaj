@@ -27,7 +27,7 @@ npm ci
 npm run dev        # http://localhost:3000
 ```
 
-No environment variables are required.
+No environment variables are required. ayan-bot (the chat agent) runs in a free mock mode locally; for production setup, spend caps and its security model see [docs/AYAN-BOT.md](docs/AYAN-BOT.md).
 
 ## Scripts
 

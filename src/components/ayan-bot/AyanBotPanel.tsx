@@ -3,6 +3,13 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { LIMITS, type ChatMessage } from "@/lib/ayan-bot/guard";
 import { Markdown } from "./Markdown";
+import {
+  currentPage,
+  dropTicket,
+  prefetchTicket,
+  takeTicket,
+  type Ticket,
+} from "./ticket";
 
 /**
  * The ayan-bot chat panel (lazy chunk). A non-modal side panel on desktop and
@@ -94,6 +101,8 @@ export default function AyanBotPanel({
   const [busy, setBusy] = useState(false);
   const [announce, setAnnounce] = useState("");
   const [mode, setMode] = useState<string | null>(null);
+  /** Messages this visitor has left in the current window (null = unknown). */
+  const [left, setLeft] = useState<number | null>(null);
   const [mobile, setMobile] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -123,6 +132,20 @@ export default function AyanBotPanel({
     const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
     if (nearBottom || !busy) el.scrollTop = el.scrollHeight;
   }, [msgs, busy]);
+
+  // Warm a solved ticket (and learn the visitor's allowance) when it opens.
+  useEffect(() => {
+    if (!open) return;
+    let live = true;
+    void prefetchTicket().then((t) => {
+      if (!live || !t) return;
+      if (t.remaining !== null) setLeft(t.remaining);
+      if (t.mode) setMode(t.mode);
+    });
+    return () => {
+      live = false;
+    };
+  }, [open]);
 
   // Focus the input when the panel opens; Esc closes from anywhere.
   useEffect(() => {
@@ -278,12 +301,27 @@ export default function AyanBotPanel({
       };
       let finalStatus: Msg["status"] = "done";
       try {
-        const res = await fetch("/api/ayan-bot", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: history }),
-          signal: ctrl.signal,
-        });
+        const post = (t: Ticket | null) =>
+          fetch("/api/ayan-bot", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              messages: history,
+              page: currentPage(),
+              ticket: t?.ticket ?? "",
+              nonce: t?.nonce ?? "",
+            }),
+            signal: ctrl.signal,
+          });
+        let res = await post(await takeTicket(ctrl.signal));
+        // A stale or reused ticket: solve a fresh one and send once more.
+        if (res.status === 401) {
+          dropTicket();
+          res = await post(await takeTicket(ctrl.signal));
+        }
+        const leftHeader = res.headers.get("x-ayan-bot-remaining");
+        if (leftHeader !== null && /^\d+$/.test(leftHeader))
+          setLeft(Number(leftHeader));
         const resMode = res.headers.get("x-ayan-bot-mode");
         setMode(resMode);
         const isJson = (res.headers.get("content-type") ?? "").includes(
@@ -672,6 +710,15 @@ export default function AyanBotPanel({
             className="text-muted mt-1.5 flex justify-between px-1 font-mono text-[10px] tracking-wide"
           >
             <span>Answers only about Ayan · AI can be wrong</span>
+            {left !== null && (
+              <span
+                className={left <= 3 ? "text-accent" : undefined}
+                title="Messages left for now; the allowance refills over time."
+              >
+                {" · "}
+                {left} {left === 1 ? "message" : "messages"} left
+              </span>
+            )}
             <span className={remaining < 60 ? "text-accent" : ""}>
               {remaining < 120 ? `${remaining} left` : ""}
             </span>
