@@ -398,8 +398,8 @@ export default function Page() {
         >
           <Head code="SCRN" id="screens" title="Screens.">
             <p>
-              From the public site, plus two signed-in views on a phone that a
-              visitor can&apos;t reach without an account.
+              From the public site, plus the signed-in Studio on a phone, which
+              a visitor can&apos;t reach without an account.
             </p>
           </Head>
           <div className="grid gap-4 md:grid-cols-2">
@@ -416,14 +416,24 @@ export default function Page() {
                 delay={(i % 2) * 0.06}
                 className={i === 2 ? "md:col-span-2" : undefined}
               >
-                <Shot img={m} sizes="(max-width: 768px) 100vw, 600px" />
+                <Shot
+                  img={m}
+                  sizes={
+                    i === 2
+                      ? "(max-width: 768px) 100vw, 1200px"
+                      : "(max-width: 768px) 100vw, 600px"
+                  }
+                />
               </Reveal>
             ))}
-            {media.phones.map((m, i) => (
-              <Reveal key={m.src} delay={(i % 2) * 0.06}>
-                <Shot img={m} sizes="(max-width: 768px) 100vw, 600px" />
-              </Reveal>
-            ))}
+            {/* Phones side by side at phone size, not stretched to a column. */}
+            <Reveal className="flex flex-wrap justify-center gap-4 md:col-span-2">
+              {media.phones.map((m) => (
+                <div key={m.src} className="w-[min(100%,300px)]">
+                  <Shot img={m} sizes="300px" />
+                </div>
+              ))}
+            </Reveal>
           </div>
         </section>
       </div>
