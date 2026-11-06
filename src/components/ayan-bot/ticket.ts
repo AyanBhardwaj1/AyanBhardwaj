@@ -71,5 +71,7 @@ export function currentPage(): string {
   const m = /^\/projects\/([a-z0-9-]+)\/?$/.exec(p);
   if (m) return m[1];
   if (p.startsWith("/functions")) return "functions";
+  if (p.startsWith("/terminal")) return "terminal";
+  if (p.startsWith("/cv")) return "cv";
   return "home";
 }

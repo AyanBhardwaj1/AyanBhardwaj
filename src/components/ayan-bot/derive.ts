@@ -126,7 +126,29 @@ export function projectQuestions(slug: ProjectSlug) {
 }
 
 /** Suggested questions for the page the panel opened on. */
+const PAGE_STARTERS: Record<string, string[]> = {
+  cv: [
+    "Give me a 30-second recruiter brief on Ayan.",
+    "What did he do at Koyal AI?",
+    "Which projects show his AI work?",
+    "How do I contact him?",
+  ],
+  terminal: [
+    "What did Ayan build at Moss?",
+    "Which project should I look at first?",
+    "Give me a 30-second recruiter brief on Ayan.",
+    "How do I contact him?",
+  ],
+  functions: [
+    "What can I do with the ⌘K palette?",
+    "What did Ayan build at Moss?",
+    "Show me his hackathon projects",
+    "How do I contact him?",
+  ],
+};
+
 export function startersFor(page: string): string[] {
+  if (PAGE_STARTERS[page]) return PAGE_STARTERS[page];
   if (!isSlug(page)) return HOME_STARTERS;
   const q = projectQuestions(page);
   return [
