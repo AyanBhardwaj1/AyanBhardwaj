@@ -60,13 +60,14 @@
   which requirements the site's own projects and roles back up, with links
   as evidence, and which it doesn't show. Only technical requirements are
   scored (startup experience and leadership are listed, not scored), and a
-  score needs at least three, so a sales or nursing posting doesn't light up. Runs in the browser; nothing is
+  score needs at least three, so a sales or nursing posting doesn't light up. A gauge sweeps to the score, and
+  "Show what it recognised" marks each matched phrase in the posting. Runs in the browser; nothing is
   sent. `fit <text>` does the same in the terminal, and `fit ask` hands the
   result to ayan-bot. Paste a job description into ayan-bot and it offers to
   hand the whole thing to the Fit check instead.
 - **Tailor the CV** for a role (`/cv?for=fintech`, or `CVFN <GO>`, `CVAI`…): matching projects first,
-  plus a few more that fit; Print / save as PDF keeps it, and the footer
-  names the version and its link.
+  plus a few more that fit (they glide into place); Print / save as PDF and
+  Copy as text keep it, and the footer names the version and its link.
 - **Copy as text** on `/cv` (also served at `/cv.md`): the CV as Markdown
   for application forms and recruiter notes.
 - **Role filter** on the projects section (AI, Fintech, Systems, Full-stack,
