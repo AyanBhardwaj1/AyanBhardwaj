@@ -1557,18 +1557,36 @@ html:not(.js) .section-rule::after {
 }
 
 /* ---------- Section title decode (glyphs resolve into the title) ---- */
+.dx,
+.dx-real {
+  display: block;
+}
+.dx {
+  position: relative;
+}
 .dx-w {
   white-space: nowrap;
 }
-.dx [data-c] {
-  position: relative;
+.dx-real [data-c] {
   transition: color 260ms var(--ease-out);
 }
-.dx [data-g] {
+.dx-real [data-h] {
   color: transparent;
   transition: none;
 }
-.dx [data-g]::after {
+/* The overlay clone: same box and wrapping as the real text, no ink of its
+   own; only the glyphs on unresolved characters show. */
+.dx-fx {
+  position: absolute;
+  inset: 0;
+  color: transparent;
+  pointer-events: none;
+  user-select: none;
+}
+.dx-fx [data-c] {
+  position: relative;
+}
+.dx-fx [data-g]::after {
   content: attr(data-g);
   position: absolute;
   inset: 0;
