@@ -45,6 +45,7 @@ import {
 import { PointerFx } from "../motion/PointerFx";
 import { RevealObserver } from "../motion/RevealObserver";
 import { ThemeToggle } from "../ui/ThemeToggle";
+import { AskAboutButton, Explored } from "./ProjectExtras";
 import "./shell.css";
 
 export function ProjectShell({
@@ -93,6 +94,7 @@ export function ProjectShell({
             &lt;GO&gt; · {p.name}
           </p>
           <div className="flex shrink-0 items-center gap-2">
+            <AskAboutButton name={p.name} />
             {themeToggle && (
               <ThemeToggle className="t-label h-10 min-w-10 justify-center px-3" />
             )}
@@ -173,6 +175,9 @@ export function ProjectFooter({
   return (
     <footer {...themeAttr} className="bg-bg border-line border-t">
       <nav aria-label="More projects" className="container-page py-12 md:py-16">
+        <div className="mb-6">
+          <Explored slug={slug} />
+        </div>
         {/* Next project: a large teaser. Its name shares a view-transition
             name with the next page's h1, so it morphs into the title. */}
         <Link
