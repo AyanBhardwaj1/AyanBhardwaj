@@ -6,6 +6,7 @@ import { test } from "node:test";
 import { gapPattern, NOT_ON_SITE, TERMS } from "../../src/lib/fit-terms.ts";
 import {
   compileFit,
+  fitMarks,
   fitRole,
   fitSummary,
   looksLikeJobDescription,
@@ -169,4 +170,19 @@ test("data-science wording", () => {
   for (const g of ["XGBoost", "Tableau", "Apache Spark", "Databricks"])
     assert.ok(ds.gaps.includes(g), g);
   assert.ok(!run("Meta's Muse Spark plans it").gaps.includes("Apache Spark"));
+});
+
+test("marks point at the recognised phrases, without overlaps", () => {
+  const text = "Python and React at an early-stage startup; Kubernetes a plus.";
+  const marks = fitMarks(c, text);
+  const got = marks.map((m) => [text.slice(m.start, m.end), m.kind]);
+  assert.deepEqual(got, [
+    ["Python", "hit"],
+    ["React", "hit"],
+    ["early-stage", "soft"],
+    ["startup", "soft"],
+    ["Kubernetes", "gap"],
+  ]);
+  for (let i = 1; i < marks.length; i++)
+    assert.ok(marks[i].start >= marks[i - 1].end);
 });
