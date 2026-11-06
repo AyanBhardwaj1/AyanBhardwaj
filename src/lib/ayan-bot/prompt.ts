@@ -196,6 +196,18 @@ Tags: ${x.tags.join(", ")}${
 export const SYSTEM_PROMPT = `${PERSONA}\n\n# DOSSIER (the only facts you may use)\n\n${dossier()}`;
 
 /**
+ * Who the visitor says they are (a toggle in the panel). Only the two known
+ * values add anything; the facts and rules above never change.
+ */
+export function audienceNote(a: string | null): string {
+  if (a === "recruiter")
+    return "\n\n# AUDIENCE\nThe visitor is a recruiter or hiring manager. Lead with impact, scope and outcomes in plain words; keep jargon light; name the most role-relevant work first.";
+  if (a === "engineer")
+    return "\n\n# AUDIENCE\nThe visitor is an engineer. Go deeper on architecture, stack choices, trade-offs and the numbers, still within the length limits.";
+  return "";
+}
+
+/**
  * Where the visitor is chatting from, appended to the instructions so "this
  * project" or "how does it work?" resolve to the page they are reading. Only
  * known page keys are accepted; anything else adds nothing.

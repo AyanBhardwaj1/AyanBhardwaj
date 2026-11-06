@@ -20,6 +20,7 @@ export async function ask(
   t?: { ticket: string; nonce: string } | null,
   extraH: Record<string, string> = {},
   page?: string,
+  extraBody: Record<string, unknown> = {},
 ) {
   const r = await fetch(BASE + "/api/ayan-bot", {
     method: "POST",
@@ -29,6 +30,7 @@ export async function ask(
       ticket: t?.ticket,
       nonce: t?.nonce,
       page,
+      ...extraBody,
     }),
   });
   return {

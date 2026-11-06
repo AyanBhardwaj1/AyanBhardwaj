@@ -36,7 +36,12 @@ import {
 import { botMode, type BotMode } from "@/lib/ayan-bot/mode";
 import { brief, mockChunks, mockReply } from "@/lib/ayan-bot/mock";
 import { TICKET_TTL_SEC, clientKey, verifyTicket } from "@/lib/ayan-bot/pow";
-import { CANARY, SYSTEM_PROMPT, pageContext } from "@/lib/ayan-bot/prompt";
+import {
+  CANARY,
+  SYSTEM_PROMPT,
+  audienceNote,
+  pageContext,
+} from "@/lib/ayan-bot/prompt";
 import { getStore, storeConfigured } from "@/lib/ayan-bot/store";
 
 /**
@@ -266,6 +271,13 @@ function pageOf(body: unknown): string | null {
   return typeof p === "string" && p.length <= 32 ? p : null;
 }
 
+/** "recruiter" | "engineer" | null; anything else is ignored. */
+function audienceOf(body: unknown): string | null {
+  if (typeof body !== "object" || body === null) return null;
+  const a = (body as { audience?: unknown }).audience;
+  return a === "recruiter" || a === "engineer" ? a : null;
+}
+
 const ticketOf = (body: unknown) => {
   const b = (typeof body === "object" && body !== null ? body : {}) as {
     ticket?: unknown;
@@ -449,7 +461,8 @@ export async function POST(request: Request) {
     );
 
   // 5. Hard budget: reserve the worst case before spending anything.
-  const instructions = SYSTEM_PROMPT + pageContext(pageOf(body));
+  const instructions =
+    SYSTEM_PROMPT + pageContext(pageOf(body)) + audienceNote(audienceOf(body));
   const model = process.env.OPENAI_MODEL || DEFAULT_MODEL;
   const price = pricing(model);
   const inChars =

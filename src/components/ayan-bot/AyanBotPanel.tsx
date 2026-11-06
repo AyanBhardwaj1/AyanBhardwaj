@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { LIMITS, type ChatMessage } from "@/lib/ayan-bot/guard";
+import { AUDIENCES, type Audience } from "@/lib/ayan-bot/audience";
 import {
   FIT_HANDOFF_EVENT,
   FIT_HANDOFF_KEY,
@@ -131,6 +132,8 @@ function saveTranscript(msgs: Msg[]) {
   window.setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
+const AUDIENCE_KEY = "ayan-bot:audience";
+
 export default function AyanBotPanel({
   open,
   onClose,
@@ -148,6 +151,8 @@ export default function AyanBotPanel({
   // for free, instead of a 500-character question.
   const [jd, setJd] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  /** Answer style the visitor picked; remembered on this device. */
+  const [audience, setAudience] = useState<Audience | null>(null);
   const [announce, setAnnounce] = useState("");
   const [mode, setMode] = useState<string | null>(null);
   /** Messages this visitor has left in the current window (null = unknown). */
@@ -167,6 +172,27 @@ export default function AyanBotPanel({
   const handled = useRef<number | null>(null);
   const titleId = useId();
   const counterId = useId();
+
+  useEffect(() => {
+    try {
+      const a = localStorage.getItem(AUDIENCE_KEY);
+      if (a === "recruiter" || a === "engineer")
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time read of a saved preference
+        setAudience(a);
+    } catch {
+      /* no storage */
+    }
+  }, []);
+  const pickAudience = (a: Audience) => {
+    const next = audience === a ? null : a;
+    setAudience(next);
+    try {
+      if (next) localStorage.setItem(AUDIENCE_KEY, next);
+      else localStorage.removeItem(AUDIENCE_KEY);
+    } catch {
+      /* fine: it just won't be remembered */
+    }
+  };
 
   // Restore this tab's conversation once.
   useEffect(() => {
@@ -389,6 +415,7 @@ export default function AyanBotPanel({
             body: JSON.stringify({
               messages: history,
               page: currentPage(),
+              ...(audience ? { audience } : {}),
               ticket: t?.ticket ?? "",
               nonce: t?.nonce ?? "",
             }),
@@ -484,7 +511,7 @@ export default function AyanBotPanel({
         );
       }
     },
-    [busy, msgs, patch, left],
+    [busy, msgs, patch, left, audience],
   );
 
   // Prompts handed in by the launcher (e.g. from the ⌘K palette).
@@ -817,6 +844,28 @@ export default function AyanBotPanel({
             void send(input);
           }}
         >
+          <div
+            role="group"
+            aria-label="Answer for"
+            className="text-muted mb-2 flex items-center gap-1 px-1 font-mono text-[10px] tracking-wide"
+          >
+            <span className="mr-1">answer for:</span>
+            {AUDIENCES.map((a) => (
+              <button
+                key={a}
+                type="button"
+                aria-pressed={audience === a}
+                onClick={() => pickAudience(a)}
+                className={`min-h-6 rounded-full border px-2 uppercase transition-colors ${
+                  audience === a
+                    ? "border-accent text-accent"
+                    : "hover:text-fg border-transparent"
+                }`}
+              >
+                {a}
+              </button>
+            ))}
+          </div>
           {jd && (
             <div className="border-line bg-card text-muted mb-2 flex items-start gap-2 rounded-[10px] border px-3 py-2 text-[12.5px] leading-snug">
               <p className="flex-1">
