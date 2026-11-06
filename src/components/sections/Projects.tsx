@@ -577,7 +577,7 @@ export function Projects() {
             </p>
           </div>
           {/* On phones it's a third list of the same projects: folded. */}
-          <MobileFold label="the knowledge graph">
+          <MobileFold label={`all ${projects.length} projects`}>
             <ConstellationIsland data={constellation} />
           </MobileFold>
         </div>
