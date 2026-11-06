@@ -603,7 +603,9 @@ async function firstScreen(browser) {
       "iPhone 390x664",
       { viewport: { width: 390, height: 664 }, isMobile: true, hasTouch: true },
     ],
+    ["tablet 768x1024", { viewport: { width: 768, height: 1024 } }],
     ["laptop 1280x720", { viewport: { width: 1280, height: 720 } }],
+    ["laptop 1280x800", { viewport: { width: 1280, height: 800 } }],
     ["laptop 1440x900", { viewport: { width: 1440, height: 900 } }],
   ]) {
     await check(
@@ -629,7 +631,18 @@ async function firstScreen(browser) {
               }
               return null;
             })
-            .filter(Boolean),
+            .filter(Boolean)
+            .concat(
+              // The tour / Hiring row: fully on screen or fully below the
+              // fold, never sliced by it.
+              [...document.querySelectorAll("#top a")]
+                .filter((a) => a.textContent.includes("Hiring?"))
+                .filter((a) => {
+                  const r = a.getBoundingClientRect();
+                  return r.top < innerHeight && r.bottom > innerHeight;
+                })
+                .map(() => "the Hiring link is cut by the fold"),
+            ),
         );
         await ctx.close();
         assert(!bad.length, bad.join("; "));

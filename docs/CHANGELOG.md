@@ -118,7 +118,7 @@
 
 ### Testing
 
-- `npm run test:smoke`: 76 browser checks against a production build (every
+- `npm run test:smoke`: 78 browser checks against a production build (every
   route renders without errors, metadata and share images, palette,
   terminal, Fit check, ayan-bot in mock mode, reduced motion, keyboard,
   endpoints). It caught `/functions` missing its share
