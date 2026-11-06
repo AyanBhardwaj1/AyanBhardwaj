@@ -1733,3 +1733,14 @@ html:not(.js) .section-rule::after {
   }
 }
 /* ---------------------------- end FX layer ------------------------- */
+
+/* Hero name scales with width, and with height on short laptop screens, so
+   the headline and CTAs make the first view (1280x720 included). */
+.hx-hero {
+  --hero-size: clamp(40px, 13vw, 196px);
+}
+@media (min-width: 768px) {
+  .hx-hero {
+    --hero-size: clamp(40px, min(13vw, 19vh), 196px);
+  }
+}
