@@ -97,6 +97,34 @@ const newId = () =>
 
 const MOBILE = "(max-width: 767px)";
 
+/** Downloads the conversation as Markdown (generated in the browser). */
+function saveTranscript(msgs: Msg[]) {
+  const origin = window.location.origin;
+  const lines = [
+    `# ayan-bot chat`,
+    ``,
+    `From ${origin}, ${new Date().toLocaleString()}. ayan-bot answers only from Ayan Bhardwaj's site and can be wrong.`,
+    ``,
+  ];
+  for (const m of msgs) {
+    if (!m.content || m.status === "error") continue;
+    // Site-relative links become absolute so they work outside the site.
+    const text = m.content.replace(/\]\((\/[^)\s]*)\)/g, `](${origin}$1)`);
+    lines.push(
+      m.role === "user" ? `**You:** ${text}` : `**ayan-bot:** ${text}`,
+      "",
+    );
+  }
+  const blob = new Blob([lines.join("\n")], { type: "text/markdown" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "ayan-bot-chat.md";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
 export default function AyanBotPanel({
   open,
   onClose,
@@ -553,6 +581,17 @@ export default function AyanBotPanel({
           )}
           <div className="ml-auto flex items-center gap-1">
             <BriefMenu disabled={busy} onPick={(q) => void send(q)} />
+            {msgs.some((m) => m.role === "assistant" && m.content) && (
+              <button
+                type="button"
+                onClick={() => saveTranscript(msgs)}
+                disabled={busy}
+                className="text-muted hover:text-fg hover:bg-card min-h-9 rounded-[8px] px-2.5 font-mono text-[11px] tracking-wider uppercase transition-colors disabled:opacity-40"
+              >
+                Save
+                <span className="sr-only"> this chat as a Markdown file</span>
+              </button>
+            )}
             {msgs.length > 0 && (
               <button
                 type="button"
