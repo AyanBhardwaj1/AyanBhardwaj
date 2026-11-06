@@ -11,6 +11,8 @@ import {
 import { hasProjectPage } from "@/lib/projects";
 import { SITE_URL, hasResume } from "@/lib/site";
 import { PrintButton } from "./PrintButton";
+import { FitCheck } from "@/components/fit/FitCheck";
+import { fitIndex } from "@/lib/fit";
 import "./cv.css";
 
 export const metadata: Metadata = {
@@ -60,6 +62,10 @@ export default function CvPage() {
             </a>
           )}
         </div>
+      </div>
+
+      <div className="cv-sheet cv-fitSheet no-print">
+        <FitCheck index={fitIndex()} />
       </div>
 
       <article className="cv-sheet">

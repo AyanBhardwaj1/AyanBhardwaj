@@ -1,0 +1,320 @@
+import { experience, projects } from "@/content/content";
+import { projectHref } from "./projects";
+
+/**
+ * Fit check: match a pasted job description against what this site can back
+ * up. Each term has a pattern for spotting it in a job description (`jd`) and
+ * one for finding evidence in the site's own content (`ev`). Evidence is
+ * computed here on the server from content.ts, so the client only receives a
+ * small index and never needs a model.
+ */
+
+type Term = { id: string; label: string; jd: string; ev?: string };
+
+const TERMS: Term[] = [
+  // Languages
+  { id: "python", label: "Python", jd: "\\bpython\\b" },
+  { id: "typescript", label: "TypeScript", jd: "\\btypescript\\b|\\bts\\b" },
+  {
+    id: "javascript",
+    label: "JavaScript",
+    jd: "\\bjavascript\\b|\\bjs\\b|\\becmascript\\b",
+    ev: "\\b(javascript|typescript|react|next\\.js|node)\\b",
+  },
+  { id: "rust", label: "Rust", jd: "\\brust\\b" },
+  { id: "cpp", label: "C++", jd: "c\\+\\+|\\bcpp\\b", ev: "c\\+\\+|arduino" },
+  { id: "java", label: "Java", jd: "\\bjava\\b(?!script)" },
+  {
+    id: "sql",
+    label: "SQL",
+    jd: "\\bsql\\b|\\bpostgres|\\bsqlite\\b|relational database",
+    ev: "\\bsql|postgres|sqlite|duckdb|neon",
+  },
+  // Web and apps
+  { id: "react", label: "React", jd: "\\breact\\b" },
+  { id: "nextjs", label: "Next.js", jd: "next\\.?js" },
+  { id: "node", label: "Node.js", jd: "node\\.?js|\\bnode\\b" },
+  {
+    id: "fastapi",
+    label: "FastAPI / Python APIs",
+    jd: "fastapi|flask|django",
+    ev: "fastapi|express|rest api",
+  },
+  {
+    id: "api",
+    label: "APIs / backend",
+    jd: "\\bapis?\\b|\\bbackend\\b|back-end|rest(ful)?\\b|microservices?",
+    ev: "\\bapi|express|fastapi|server|postgres|backend",
+  },
+  {
+    id: "frontend",
+    label: "Frontend / UI",
+    jd: "front-?end|\\bui\\b|user interface|css|tailwind",
+    ev: "react|next\\.js|tailwind|ui",
+  },
+  {
+    id: "fullstack",
+    label: "Full-stack",
+    jd: "full[- ]?stack",
+    ev: "next\\.js|react|postgres|supabase|express",
+  },
+  {
+    id: "desktop",
+    label: "Desktop apps",
+    jd: "desktop|electron|tauri",
+    ev: "tauri|desktop|overlay",
+  },
+  {
+    id: "extensions",
+    label: "Browser extensions",
+    jd: "browser extension|chrome extension",
+    ev: "chrome extension",
+  },
+  {
+    id: "wasm",
+    label: "WebAssembly",
+    jd: "webassembly|\\bwasm\\b",
+    ev: "webassembly|wasm|moss",
+  },
+  // Data
+  {
+    id: "postgres",
+    label: "PostgreSQL",
+    jd: "postgres",
+    ev: "postgres|neon|supabase",
+  },
+  {
+    id: "scraping",
+    label: "Scraping / data collection",
+    jd: "scrap(ing|er)|crawl|data collection",
+    ev: "scrap|beautifulsoup|selenium|crawl",
+  },
+  {
+    id: "pipelines",
+    label: "Data pipelines / ETL",
+    jd: "\\betl\\b|data pipelines?|data engineering|ingest",
+    ev: "pipeline|ingest|etl|cleaning",
+  },
+  // AI / ML
+  {
+    id: "ml",
+    label: "Machine learning",
+    jd: "machine learning|\\bml\\b",
+    ev: "pytorch|scikit|model|classifier|neural|graphsage",
+  },
+  {
+    id: "dl",
+    label: "Deep learning / PyTorch",
+    jd: "deep learning|pytorch|neural net",
+    ev: "pytorch|neural|graphsage",
+  },
+  {
+    id: "llm",
+    label: "LLMs",
+    jd: "\\bllms?\\b|large language model|gpt|openai|anthropic|generative ai|gen ?ai",
+    ev: "llm|openrouter|ai sdk|agent|gpt|muse spark",
+  },
+  {
+    id: "rag",
+    label: "Retrieval / RAG / search",
+    jd: "\\brag\\b|retrieval|semantic search|vector|embedding|search",
+    ev: "retrieval|semantic|search|rerank|moss|embedding",
+  },
+  {
+    id: "agents",
+    label: "AI agents",
+    jd: "\\bagents?\\b|agentic|tool use|autonomous",
+    ev: "\\bagents?\\b|autopilot|agentic",
+  },
+  {
+    id: "nlp",
+    label: "NLP",
+    jd: "\\bnlp\\b|natural language",
+    ev: "nlp|language|benchmark|qa",
+  },
+  {
+    id: "cv",
+    label: "Computer vision",
+    jd: "computer vision|opencv|image",
+    ev: "opencv|vision|face|scene",
+  },
+  {
+    id: "evals",
+    label: "Evals / benchmarks",
+    jd: "\\bevals?\\b|evaluation|benchmark",
+    ev: "eval|benchmark|recall@|ablation",
+  },
+  {
+    id: "gnn",
+    label: "Graph ML",
+    jd: "graph neural|\\bgnn\\b|graph ml",
+    ev: "graphsage|pytorch geometric|graph",
+  },
+  // Finance
+  {
+    id: "fintech",
+    label: "Fintech",
+    jd: "fintech|financial (services|technology)|banking|payments",
+    ev: "finance|fintech|sec|edgar|deal desk|cash",
+  },
+  {
+    id: "quant",
+    label: "Quant / risk models",
+    jd: "\\bquant|risk model|\\bvar\\b|volatility|garch|monte carlo|derivatives",
+    ev: "garch|\\bvar\\b|monte carlo|volatility|quant|risk",
+  },
+  {
+    id: "valuation",
+    label: "Valuation / DCF",
+    jd: "valuation|\\bdcf\\b|financial model|investment banking|private equity|m&a",
+    ev: "dcf|valuation|lbo|wacc|comps|m&a",
+  },
+  {
+    id: "sec",
+    label: "SEC / EDGAR / XBRL",
+    jd: "\\bsec\\b|edgar|xbrl|10-k|filings",
+    ev: "sec|edgar|xbrl|10-k",
+  },
+  {
+    id: "trading",
+    label: "Trading systems",
+    jd: "trading|order book|matching engine|market data|low latency",
+    ev: "matching engine|trading|market data|ops/sec",
+  },
+  // Engineering practice
+  {
+    id: "testing",
+    label: "Testing",
+    jd: "testing|unit tests?|tdd|test coverage|qa\\b",
+    ev: "unit tests|tests|hypothesis|property test",
+  },
+  {
+    id: "perf",
+    label: "Performance",
+    jd: "performance|latency|optimi[sz]",
+    ev: "sub-10ms|latency|ops/sec|p99",
+  },
+  {
+    id: "cloud",
+    label: "Cloud / deploys",
+    jd: "\\bcloud\\b|vercel|serverless|deploy",
+    ev: "vercel|modal|cloudflare|deploy",
+  },
+  {
+    id: "opensource",
+    label: "Open source",
+    jd: "open[- ]source",
+    ev: "open-source|open source|pull requests|stars",
+  },
+  {
+    id: "startup",
+    label: "Startup experience",
+    jd: "startup|early[- ]stage|founding|0 to 1|zero to one|fast-paced",
+    ev: "yc|startup|founded|founder|first interns",
+  },
+  {
+    id: "leadership",
+    label: "Leadership",
+    jd: "leadership|lead(ing)? (a )?team|mentor|ownership",
+    ev: "founded|founder|led|members|adopted by",
+  },
+  {
+    id: "product",
+    label: "Product sense",
+    jd: "product sense|product-minded|user empathy|customer",
+    ev: "users|advisors|founders|students|waitlist",
+  },
+];
+
+/** Common technologies this site has no evidence for (shown honestly). */
+const NOT_ON_SITE = [
+  "Kubernetes",
+  "Docker",
+  "AWS",
+  "GCP",
+  "Azure",
+  "Terraform",
+  "Go",
+  "Golang",
+  "Kotlin",
+  "Swift",
+  "iOS",
+  "Android",
+  "Scala",
+  "Apache Spark",
+  "Kafka",
+  "Airflow",
+  "dbt",
+  "Snowflake",
+  "Redis",
+  "MongoDB",
+  "GraphQL",
+  "C#",
+  ".NET",
+  "Ruby",
+  "Rails",
+  "PHP",
+  "Angular",
+  "Vue",
+  "Flutter",
+  "Salesforce",
+  "Hadoop",
+];
+
+export type FitTerm = {
+  id: string;
+  label: string;
+  jd: string;
+  evidence: { name: string; href: string | null }[];
+};
+export type FitIndex = { terms: FitTerm[]; notOnSite: string[] };
+
+const haystacks = [
+  ...projects.map((p) => ({
+    name: p.name,
+    href: projectHref(p.id),
+    text: [
+      p.tagline,
+      p.description,
+      ...(p.howItWorks ?? []),
+      ...p.stack,
+      ...(p.metrics ?? []),
+      p.category,
+      p.context ?? "",
+      p.builtAt ?? "",
+    ].join(" "),
+    weight:
+      p.tier === "featured"
+        ? 3
+        : p.tier === "moss" || p.tier === "hackathon"
+          ? 2
+          : 1,
+  })),
+  ...experience.map((e) => ({
+    name: e.company,
+    href: "/#experience",
+    text: [
+      e.role,
+      e.summary,
+      e.companyBlurb ?? "",
+      e.companyNote ?? "",
+      ...e.bullets,
+      ...e.tags,
+    ].join(" "),
+    weight: 3,
+  })),
+];
+
+/** Built on the server: every term with up to 4 pieces of evidence. */
+export function fitIndex(): FitIndex {
+  const terms = TERMS.map((t) => {
+    const re = new RegExp(t.ev ?? t.jd, "i");
+    const evidence = haystacks
+      .filter((h) => re.test(h.text))
+      .sort((a, b) => b.weight - a.weight)
+      .slice(0, 4)
+      .map((h) => ({ name: h.name, href: h.href }));
+    return { id: t.id, label: t.label, jd: t.jd, evidence };
+  }).filter((t) => t.evidence.length > 0);
+  return { terms, notOnSite: NOT_ON_SITE };
+}
