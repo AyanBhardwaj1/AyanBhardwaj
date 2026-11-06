@@ -1,3 +1,4 @@
+import { Decode } from "../fx/Decode";
 import { Reveal } from "../motion/Reveal";
 
 export const SECTION_TOTAL = 6;
@@ -31,9 +32,16 @@ export function SectionHeader({
         </span>
       </div>
       <Reveal className="flex flex-wrap items-end justify-between gap-6">
-        <h2 id={titleId} className="t-h2 max-w-[18ch]">
-          {title}
-        </h2>
+        {typeof title === "string" ? (
+          // Real text as the accessible name; the decode layer is visual only.
+          <h2 id={titleId} aria-label={title} className="t-h2 max-w-[18ch]">
+            <Decode text={title} />
+          </h2>
+        ) : (
+          <h2 id={titleId} className="t-h2 max-w-[18ch]">
+            {title}
+          </h2>
+        )}
         {aside}
       </Reveal>
     </header>

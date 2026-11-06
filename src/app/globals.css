@@ -1498,3 +1498,220 @@ html:not(.js) .section-rule::after {
     min-height: 0 !important;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* FX layer (src/components/fx): hero field, title decode, hero exit, */
+/* palette easter eggs. Every effect has a static reduced-motion stop. */
+/* ------------------------------------------------------------------ */
+
+/* ---------- Hero "after-hours field" (WebGL, loaded on idle) -------- */
+.hx-field {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+  /* Static fallback, and the base the shader draws over. */
+  background: radial-gradient(
+    ellipse 62% 46% at 50% 30%,
+    color-mix(in oklab, var(--accent-glow) 55%, transparent),
+    transparent 72%
+  );
+  /* Fade toward every edge; quietest at the bottom, under the ticker. */
+  -webkit-mask-image:
+    linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 14%,
+      #000 50%,
+      transparent 86%
+    ),
+    radial-gradient(ellipse 80% 75% at 50% 40%, #000 40%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 14%,
+      #000 50%,
+      transparent 86%
+    ),
+    radial-gradient(ellipse 80% 75% at 50% 40%, #000 40%, transparent 100%);
+  mask-composite: intersect;
+}
+.hx-field-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1200ms var(--ease-out);
+}
+.hx-field-canvas[data-on] {
+  opacity: 1;
+}
+.hx-field[data-fallback] .hx-field-canvas {
+  display: none;
+}
+
+/* ---------- Section title decode (glyphs resolve into the title) ---- */
+.dx-w {
+  white-space: nowrap;
+}
+.dx [data-c] {
+  position: relative;
+  transition: color 260ms var(--ease-out);
+}
+.dx [data-g] {
+  color: transparent;
+  transition: none;
+}
+.dx [data-g]::after {
+  content: attr(data-g);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.74em;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+/* ---------- Hero exit: the name loosens and fades as you scroll ----- */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .hx-letter {
+      animation:
+        hx-letter 760ms var(--ease-expo) both,
+        hx-drift linear both;
+      animation-delay: calc(var(--i, 0) * 34ms + var(--line-delay, 0ms)), 0s;
+      animation-timeline: auto, scroll(root block);
+      animation-range:
+        normal,
+        0 75svh;
+    }
+    .hx-line {
+      animation: hx-fade linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 75svh;
+    }
+  }
+}
+@keyframes hx-drift {
+  to {
+    translate: calc(var(--c, 0) * 0.07em) -0.08em;
+  }
+}
+@keyframes hx-fade {
+  25% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* ---------- Easter eggs: toast, RAIN overlay, BELL confetti --------- */
+.fx-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(5.25rem + env(safe-area-inset-bottom));
+  z-index: 210;
+  max-width: min(calc(100vw - 32px), 34rem);
+  padding: 10px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: color-mix(in oklab, var(--bg-elev) 92%, transparent);
+  box-shadow: var(--shadow-float);
+  backdrop-filter: blur(12px);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  opacity: 0;
+  translate: -50% 10px;
+  transition:
+    opacity var(--dur-ui) var(--ease-out),
+    translate 420ms var(--ease-expo);
+}
+.fx-toast[data-on] {
+  opacity: 1;
+  translate: -50% 0;
+}
+.fx-toast-k {
+  color: var(--accent);
+}
+@media (min-width: 768px) {
+  .fx-toast {
+    bottom: 28px;
+  }
+}
+.fx-rain,
+.fx-bell {
+  position: fixed;
+  inset: 0;
+  z-index: 205;
+}
+.fx-rain canvas,
+.fx-bell canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.fx-bell {
+  pointer-events: none;
+}
+.fx-rain {
+  cursor: pointer;
+  background: color-mix(in oklab, var(--bg) 64%, transparent);
+  opacity: 0;
+  transition: opacity var(--fx-out, 420ms) var(--ease-out);
+}
+.fx-rain[data-on] {
+  opacity: 1;
+}
+.fx-rain-hint {
+  position: absolute;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  translate: -50% 0;
+  padding: 8px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--bg-elev);
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.fx-rain-hint kbd {
+  color: var(--fg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hx-field-canvas {
+    display: none;
+  }
+  .fx-toast {
+    translate: -50% 0;
+  }
+}
+@media print {
+  .hx-field,
+  .fx-toast,
+  .fx-rain,
+  .fx-bell {
+    display: none !important;
+  }
+}
+/* ---------------------------- end FX layer ------------------------- */

@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { links, profile } from "@/content/content";
 import { headshot } from "@/content/extras";
+import { HeroField } from "../fx/HeroField";
+import { Konami } from "../fx/Konami";
 import { Ticker, type TickerItem } from "../ui/Ticker";
 
 function Spark({ className }: { className?: string }) {
@@ -71,6 +73,8 @@ function Sparkline() {
 /**
  * Each letter rises out of a mask in a stagger (CSS only; see .hx-letter).
  * Runs before hydration and needs no JS, so the name is never held back.
+ * --c (distance from the word's center) spreads the letters apart as the
+ * hero scrolls away (scroll-driven, where supported).
  */
 function Letters({ word, delay = 0 }: { word: string; delay?: number }) {
   return (
@@ -82,6 +86,7 @@ function Letters({ word, delay = 0 }: { word: string; delay?: number }) {
           style={
             {
               "--i": i,
+              "--c": i - (word.length - 1) / 2,
               "--line-delay": `${delay}ms`,
             } as React.CSSProperties
           }
@@ -107,8 +112,10 @@ export function Hero({
     <section
       id="top"
       aria-label="Introduction"
-      className="relative flex min-h-svh flex-col pt-16 md:pt-36"
+      className="hx-hero relative isolate flex min-h-svh flex-col pt-16 md:pt-36"
     >
+      <HeroField />
+      <Konami />
       <div className="container-page relative flex flex-1 flex-col items-center text-center">
         <p
           className="hx-rise t-label text-muted mb-5 text-balance md:mb-10"

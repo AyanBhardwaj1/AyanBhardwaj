@@ -14,7 +14,8 @@ import { hasProjectPage, projectHref } from "./projects";
  * Pure data (no React), so it is safe on both sides of the boundary.
  */
 
-export type CommandGroup = "Go" | "Ask" | "Projects" | "Links" | "Settings";
+export type CommandGroup =
+  "Go" | "Ask" | "Projects" | "Links" | "Fun" | "Settings";
 
 export type CommandAction =
   | { type: "scroll"; id: string }
@@ -24,7 +25,8 @@ export type CommandAction =
   | { type: "theme" }
   | { type: "shortcuts" }
   | { type: "help" }
-  | { type: "bot" };
+  | { type: "bot" }
+  | { type: "fx"; name: "rain" | "bell" };
 
 export type Command = {
   id: string;
@@ -194,6 +196,26 @@ export const commands: Command[] = [
     keywords: ["functions", "directory", "commands", "list"],
     action: { type: "route", href: "/functions" },
     href: "/functions",
+  },
+  {
+    id: "fun.rain",
+    mnemonic: "RAIN",
+    title: "Ticker rain",
+    hint: "Five seconds of falling quotes. Esc to stop",
+    group: "Fun",
+    keywords: ["rain", "matrix", "tickers", "quotes", "konami", "fun"],
+    action: { type: "fx", name: "rain" },
+    href: "/functions#rain",
+  },
+  {
+    id: "fun.bell",
+    mnemonic: "BELL",
+    title: "Ring the closing bell",
+    hint: "4:00 PM ET, whenever you like",
+    group: "Fun",
+    keywords: ["bell", "closing", "close", "confetti", "nyse", "fun"],
+    action: { type: "fx", name: "bell" },
+    href: "/functions#bell",
   },
   {
     id: "settings.theme",

@@ -33,6 +33,7 @@ const GROUP_ORDER: CommandGroup[] = [
   "Ask",
   "Projects",
   "Links",
+  "Fun",
   "Settings",
 ];
 const QUICK = ["PROJ", "EXP", "ASK", "AWRD", "CV", "MAIL", "THEME", "HELP"];
@@ -74,7 +75,7 @@ const HELP_LINES = [
   "or ASK <question> to ask ayan-bot",
   "↑ ↓ to move · Enter to run · Tab to complete · Esc to close",
   "shortcuts: ⌘K / Ctrl+K anywhere · / to open · KEYS <GO> for type-to-open",
-  "easter eggs exist. try: whoami, latency, mavs, sudo hire ayan",
+  "easter eggs exist. try: whoami, latency, mavs, sudo hire ayan, RAIN, BELL",
 ];
 
 export default function CommandPalette({
@@ -315,6 +316,13 @@ export default function CommandPalette({
       case "bot":
         close();
         return openAyanBot();
+      case "fx": {
+        // Close first: the modal <dialog> sits in the top layer, above any
+        // overlay. The effect module loads on demand.
+        close();
+        const fx = await import("@/components/fx/eggs");
+        return a.name === "rain" ? fx.rain() : fx.bell();
+      }
       case "help":
         return print(
           HELP_LINES.map((text) => ({ kind: "out" as const, text })),
