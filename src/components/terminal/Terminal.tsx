@@ -130,10 +130,12 @@ const COMMANDS: { name: string; args?: string; help: string }[] = [
   { name: "tour", help: "the 40-second guided tour" },
   { name: "neofetch", help: "the system, at a glance" },
   { name: "share", help: "copy a link that replays your last command" },
-  { name: "history", help: "commands you've run" },
+  { name: "history", args: "[-c]", help: "commands you've run (-c clears)" },
   { name: "clear", help: "clear the screen (Ctrl+L)" },
   { name: "exit", help: "back to the site" },
 ];
+
+const HIST_KEY = "ayan:term-history";
 
 const ROLE_IDS = ["ai", "fintech", "systems", "fullstack", "research"];
 
@@ -182,6 +184,34 @@ export function Terminal({ data }: { data: TerminalData }) {
   const [lines, setLines] = useState<Line[]>(() => bootLines(data));
   const [value, setValue] = useState("");
   const [hist, setHist] = useState<string[]>([]);
+  const histLoaded = useRef(false);
+
+  // History survives visits, on this device only. Long lines (a pasted job
+  // description) are never written down.
+  useEffect(() => {
+    try {
+      const raw = JSON.parse(localStorage.getItem(HIST_KEY) ?? "[]");
+      if (Array.isArray(raw)) {
+        const saved = raw.filter((x): x is string => typeof x === "string");
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time read of saved history
+        setHist((h) => [...saved, ...h].slice(-50));
+      }
+    } catch {
+      /* no storage or bad JSON: start fresh */
+    }
+    histLoaded.current = true;
+  }, []);
+  useEffect(() => {
+    if (!histLoaded.current) return;
+    try {
+      localStorage.setItem(
+        HIST_KEY,
+        JSON.stringify(hist.filter((h) => h.length <= 200).slice(-50)),
+      );
+    } catch {
+      /* fine: history just won't persist */
+    }
+  }, [hist]);
   const [hIdx, setHIdx] = useState<number | null>(null);
   const [hint, setHint] = useState("");
   const idRef = useRef(1000);
@@ -554,6 +584,11 @@ export function Terminal({ data }: { data: TerminalData }) {
           return;
         }
         case "history":
+          if (/^-c\b/.test(arg)) {
+            setHist([]);
+            print([s("history cleared (on this device too).", "muted")]);
+            return;
+          }
           hist.forEach((h, i) =>
             print([s(String(i + 1).padStart(3) + "  ", "muted"), h]),
           );
