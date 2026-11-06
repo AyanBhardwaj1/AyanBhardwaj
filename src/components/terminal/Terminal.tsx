@@ -695,6 +695,21 @@ export function Terminal({ data }: { data: TerminalData }) {
         case "logout":
           router.push("/");
           return;
+        case "rain":
+        case "bell": {
+          print([
+            s(
+              cmd === "rain"
+                ? "make it rain… (the tape, not money)"
+                : "ringing the closing bell…",
+              "muted",
+            ),
+          ]);
+          void import("@/components/fx/eggs").then((m) =>
+            cmd === "rain" ? m.rain() : m.bell(),
+          );
+          return;
+        }
         case "sudo":
           print(
             [
