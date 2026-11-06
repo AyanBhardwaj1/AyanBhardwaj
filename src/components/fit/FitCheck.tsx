@@ -29,6 +29,12 @@ import {
  * entirely in the browser: the text never leaves the page.
  */
 
+const KIND_WORDS = {
+  hit: "backed",
+  gap: "not on the site",
+  soft: "not scored",
+} as const;
+
 const SAMPLE = `Software Engineer, AI Products (Fintech)
 We're an early-stage startup building LLM agents for investment teams.
 You'll ship full-stack features in TypeScript, React and Next.js, build
@@ -91,9 +97,12 @@ export function FitCheck({ index }: { index: FitIndex }) {
         <mark
           key={m.start}
           className={`cv-mark cv-mark-${m.kind}`}
-          title={m.label}
+          title={m.labels.join(", ")}
         >
           {jd.slice(m.start, m.end)}
+          <span className="sr-only">
+            {` (${KIND_WORDS[m.kind]}: ${m.labels.join(", ")})`}
+          </span>
         </mark>,
       );
       at = m.end;
@@ -248,36 +257,38 @@ export function FitCheck({ index }: { index: FitIndex }) {
                 {headline}
               </p>
             </div>
-            <ul className="mt-4 grid gap-2 sm:grid-cols-2">
-              {result.hits.map((h, i) => (
-                <li
-                  key={h.id}
-                  className="cv-fitCard border-line rounded-[10px] border p-3"
-                  style={{ "--i": Math.min(i, 12) } as React.CSSProperties}
-                >
-                  <p className="font-medium">
-                    <span aria-hidden="true" className="text-up">
-                      ✓{" "}
-                    </span>
-                    {h.label}
-                  </p>
-                  <p className="text-muted mt-1 text-[13px]">
-                    {h.evidence.map((e, i) => (
-                      <span key={e.name}>
-                        {i > 0 && " · "}
-                        {e.href ? (
-                          <Link href={e.href} className="link">
-                            {e.name}
-                          </Link>
-                        ) : (
-                          e.name
-                        )}
+            {result.hits.length > 0 && (
+              <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+                {result.hits.map((h, i) => (
+                  <li
+                    key={h.id}
+                    className="cv-fitCard border-line rounded-[10px] border p-3"
+                    style={{ "--i": Math.min(i, 12) } as React.CSSProperties}
+                  >
+                    <p className="font-medium">
+                      <span aria-hidden="true" className="text-up">
+                        ✓{" "}
                       </span>
-                    ))}
-                  </p>
-                </li>
-              ))}
-            </ul>
+                      {h.label}
+                    </p>
+                    <p className="text-muted mt-1 text-[13px]">
+                      {h.evidence.map((e, i) => (
+                        <span key={e.name}>
+                          {i > 0 && " · "}
+                          {e.href ? (
+                            <Link href={e.href} className="link">
+                              {e.name}
+                            </Link>
+                          ) : (
+                            e.name
+                          )}
+                        </span>
+                      ))}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
             {result.soft.length > 0 && (
               <p className="text-muted mt-4 text-[14px]">
                 <span className="text-fg font-medium">Also, not scored: </span>
@@ -303,13 +314,14 @@ export function FitCheck({ index }: { index: FitIndex }) {
                 <summary className="t-label text-muted hover:text-fg min-h-9 cursor-pointer py-2">
                   Show what it recognised
                 </summary>
-                <p
+                <div
+                  role="region"
                   className="cv-annot"
                   tabIndex={0}
                   aria-label="The job description, with recognised phrases marked"
                 >
                   {annotated}
-                </p>
+                </div>
                 <p className="text-muted mt-2 flex flex-wrap gap-x-4 text-[12px]">
                   <span>
                     <mark className="cv-mark cv-mark-hit">backed</mark>
@@ -332,7 +344,7 @@ export function FitCheck({ index }: { index: FitIndex }) {
                 >
                   Ask ayan-bot for the strongest examples
                 </button>
-                {role && roleLabel && (
+                {result.scored && role && roleLabel && (
                   <button
                     type="button"
                     className="pill min-h-10"

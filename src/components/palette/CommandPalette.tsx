@@ -418,34 +418,36 @@ export default function CommandPalette({
           </button>
         </div>
 
-        {log.length > 0 && (
-          <div
-            role="log"
-            aria-live="polite"
-            aria-label="Palette output"
-            // Focusable so keyboard users can scroll long output (HELP).
-            tabIndex={0}
-            className="border-line-strong max-h-[min(42vh,20rem)] space-y-1 overflow-y-auto border-b px-4 py-3 text-[0.8125rem] focus-visible:ring-2 focus-visible:ring-[color:var(--accent)] focus-visible:outline-none focus-visible:ring-inset"
-          >
-            {log.map((l) => (
-              <p
-                key={l.id}
-                className={
-                  l.kind === "in"
-                    ? "text-muted"
-                    : l.kind === "err"
-                      ? "text-down"
-                      : "text-fg"
-                }
-              >
-                {l.kind === "in" ? (
-                  <span className="text-accent">› </span>
-                ) : null}
-                {l.text}
-              </p>
-            ))}
-          </div>
-        )}
+        {/* Always mounted, so screen readers announce the first line too. */}
+        <div
+          role="log"
+          aria-live="polite"
+          aria-label="Palette output"
+          // Focusable (when it has output) so keyboard users can scroll
+          // long output like HELP.
+          tabIndex={log.length ? 0 : undefined}
+          className={
+            log.length
+              ? "border-line-strong max-h-[min(42vh,20rem)] space-y-1 overflow-y-auto border-b px-4 py-3 text-[0.8125rem] focus-visible:ring-2 focus-visible:ring-[color:var(--accent)] focus-visible:outline-none focus-visible:ring-inset"
+              : "sr-only"
+          }
+        >
+          {log.map((l) => (
+            <p
+              key={l.id}
+              className={
+                l.kind === "in"
+                  ? "text-muted"
+                  : l.kind === "err"
+                    ? "text-down"
+                    : "text-fg"
+              }
+            >
+              {l.kind === "in" ? <span className="text-accent">› </span> : null}
+              {l.text}
+            </p>
+          ))}
+        </div>
 
         <div className="relative flex items-center gap-2 px-4 py-3.5">
           <span aria-hidden="true" className="text-accent shrink-0 font-medium">

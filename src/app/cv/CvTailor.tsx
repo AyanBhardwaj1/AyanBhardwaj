@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { ROLES, type RoleId } from "@/lib/roles";
 import { TAILOR_EVENT } from "@/lib/fit-match";
 
@@ -130,39 +130,59 @@ export function CvProjectList({
     : base;
 
   // FLIP: when the order changes, each project glides from where it was.
-  // Positions are layout offsets (not viewport), so scrolling in between
-  // doesn't skew them. Newcomers fade in. Nothing moves under reduced motion.
+  // Positions are measured from the list's own top, so anything above it
+  // changing height (Fit check results, wrapping, fonts) and scrolling can't
+  // skew them; they're re-measured on resize too. Newcomers fade in.
+  // Nothing moves under reduced motion.
   const nodes = useRef(new Map<string, HTMLDivElement>());
   const last = useRef(new Map<string, number>());
   const order = list.map((p) => p.id).join(",");
+  const measure = useCallback(() => {
+    const now = new Map<string, number>();
+    nodes.current.forEach((el, id) => {
+      const box = el.parentElement?.getBoundingClientRect().top ?? 0;
+      now.set(id, el.getBoundingClientRect().top - box);
+    });
+    return now;
+  }, []);
   useLayoutEffect(() => {
     const before = last.current;
     const reduce = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
-    const now = new Map<string, number>();
-    nodes.current.forEach((el, id) => {
-      now.set(id, el.offsetTop);
-      if (reduce || !before.size || typeof el.animate !== "function") return;
-      const was = before.get(id);
-      if (was === undefined)
-        el.animate([{ opacity: 0 }, { opacity: 1 }], {
-          duration: 320,
-          delay: 120,
-          easing: "ease-out",
-          fill: "backwards",
-        });
-      else if (was !== el.offsetTop)
-        el.animate(
-          [
-            { transform: `translateY(${was - el.offsetTop}px)` },
-            { transform: "translateY(0)" },
-          ],
-          { duration: 460, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" },
-        );
-    });
+    // Settle anything still moving, then read the new layout.
+    nodes.current.forEach((el) =>
+      el.getAnimations?.().forEach((a) => a.cancel()),
+    );
+    const now = measure();
+    if (!reduce && before.size)
+      nodes.current.forEach((el, id) => {
+        if (typeof el.animate !== "function") return;
+        const was = before.get(id);
+        const at = now.get(id) ?? 0;
+        if (was === undefined)
+          el.animate([{ opacity: 0 }, { opacity: 1 }], {
+            duration: 320,
+            delay: 120,
+            easing: "ease-out",
+            fill: "backwards",
+          });
+        else if (Math.abs(was - at) > 1)
+          el.animate(
+            [
+              { transform: `translateY(${was - at}px)` },
+              { transform: "translateY(0)" },
+            ],
+            { duration: 460, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" },
+          );
+      });
     last.current = now;
-  }, [order]);
+  }, [order, measure]);
+  useEffect(() => {
+    const onResize = () => (last.current = measure());
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [measure]);
 
   return (
     <>

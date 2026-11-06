@@ -158,15 +158,20 @@ export type FitMark = {
   start: number;
   end: number;
   kind: "hit" | "gap" | "soft";
-  label: string;
+  /** Every requirement this phrase counted toward (overlaps merge). */
+  labels: string[];
 };
+
+const RANK = { hit: 0, gap: 1, soft: 2 } as const;
 
 /**
  * Where in the pasted text each recognised requirement was found, for the
- * "show what it recognised" view. Overlaps keep the earliest, longest match.
+ * "show what it recognised" view. Overlapping matches merge into one mark
+ * that names every requirement ("Postgres" counts for SQL and PostgreSQL),
+ * so nothing that was counted goes unmarked.
  */
 export function fitMarks(c: CompiledFit, text: string): FitMark[] {
-  const marks: FitMark[] = [];
+  const raw: FitMark[] = [];
   const add = (re: RegExp, kind: FitMark["kind"], label: string) => {
     const g = new RegExp(
       re.source,
@@ -174,16 +179,27 @@ export function fitMarks(c: CompiledFit, text: string): FitMark[] {
     );
     for (const m of text.matchAll(g)) {
       if (!m[0]) continue;
-      marks.push({ start: m.index, end: m.index + m[0].length, kind, label });
-      if (marks.length > 400) return;
+      raw.push({
+        start: m.index,
+        end: m.index + m[0].length,
+        kind,
+        labels: [label],
+      });
     }
   };
   for (const t of c.terms)
     add(t.re, t.soft ? "soft" : t.evidence.length ? "hit" : "gap", t.label);
   for (const m of c.missing) add(m.re, "gap", m.label);
-  marks.sort((a, b) => a.start - b.start || b.end - a.end);
+  raw.sort((a, b) => a.start - b.start || b.end - a.end);
   const out: FitMark[] = [];
-  for (const m of marks)
-    if (!out.length || m.start >= out[out.length - 1].end) out.push(m);
+  for (const m of raw) {
+    const prev = out[out.length - 1];
+    if (prev && m.start < prev.end) {
+      prev.end = Math.max(prev.end, m.end);
+      if (RANK[m.kind] < RANK[prev.kind]) prev.kind = m.kind;
+      for (const l of m.labels)
+        if (!prev.labels.includes(l)) prev.labels.push(l);
+    } else out.push({ ...m, labels: [...m.labels] });
+  }
   return out;
 }

@@ -1020,6 +1020,16 @@ export function Terminal({ data }: { data: TerminalData }) {
     const el = inputRef.current;
     setOverflowing(!!el && el.scrollWidth > el.clientWidth + 1);
   }, [value]);
+  // ...and again when the input resizes (rotation, window width).
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() =>
+      setOverflowing(el.scrollWidth > el.clientWidth + 1),
+    );
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   const suggestion = (() => {
     if (!value || value.length > 60 || hIdx !== null || overflowing) return "";
     const v = value.toLowerCase();

@@ -186,3 +186,23 @@ test("marks point at the recognised phrases, without overlaps", () => {
   for (let i = 1; i < marks.length; i++)
     assert.ok(marks[i].start >= marks[i - 1].end);
 });
+
+test("every counted requirement is marked somewhere (overlaps merge)", () => {
+  for (const text of [
+    "Postgres and low latency trading systems",
+    "LLM evaluations, ML benchmarks and Graph neural networks",
+    "Python, React, early-stage startup, Kubernetes, ASP.NET",
+  ]) {
+    const r = matchFit(c, text);
+    const marked = new Set(fitMarks(c, text).flatMap((m) => m.labels));
+    for (const l of [
+      ...r.hits.map((h) => h.label),
+      ...r.soft.map((h) => h.label),
+      ...r.gaps,
+    ])
+      assert.ok(marked.has(l), `${l} unmarked in "${text}"`);
+  }
+  const pg = fitMarks(c, "Postgres");
+  assert.equal(pg.length, 1);
+  assert.deepEqual([...pg[0].labels].sort(), ["PostgreSQL", "SQL"]);
+});

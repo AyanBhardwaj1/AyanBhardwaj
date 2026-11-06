@@ -20,9 +20,9 @@ import {
   CvTailoredNote,
   type CvProject,
 } from "./CvTailor";
-import { CopyCv, CopyCvTailored } from "./CopyCv";
-import { cvMarkdown, cvSelection } from "@/lib/cv-text";
-import { ROLES, roleTags } from "@/lib/roles";
+import { CopyCvFromUrl, CopyCvTailored } from "./CopyCv";
+import { cvParts, cvSelection } from "@/lib/cv-text";
+import { roleTags } from "@/lib/roles";
 import { FitCheck } from "@/components/fit/FitCheck";
 import { fitIndex } from "@/lib/fit";
 import "./cv.css";
@@ -45,11 +45,9 @@ const plain = (t: string) => t.replace(/\*\*/g, "");
 
 export default function CvPage() {
   const { selected, extraFor } = cvSelection();
-  // The CV as text, untailored and for each role (Copy as text follows ?for=).
-  const texts: Record<string, string> = Object.fromEntries([
-    ["", cvMarkdown()],
-    ...ROLES.map((r) => [r.id, cvMarkdown(r.id)]),
-  ]);
+  // The CV as text, in parts; Copy as text assembles it for ?for= in the
+  // browser (each part ships once).
+  const parts = cvParts();
   const items: CvProject[] = [
     ...selected,
     ...projects.filter((p) => extraFor.has(p.id) && !selected.includes(p)),
@@ -79,8 +77,8 @@ export default function CvPage() {
         </Link>
         <div className="flex flex-wrap gap-2">
           <PrintButton />
-          <Suspense fallback={<CopyCv text={texts[""]} />}>
-            <CopyCvTailored texts={texts} />
+          <Suspense fallback={<CopyCvTailored parts={parts} role={null} />}>
+            <CopyCvFromUrl parts={parts} />
           </Suspense>
           {hasResume && (
             <a

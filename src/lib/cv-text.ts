@@ -7,6 +7,7 @@ import {
   skills,
 } from "@/content/content";
 import { SITE_URL } from "./site";
+import { composeCv, type CvParts } from "./cv-compose";
 import { ROLES, roleTags, type RoleId } from "./roles";
 import type { Project } from "@/content/content";
 
@@ -49,10 +50,9 @@ export function cvOrder(role: RoleId | null): Project[] {
  * The CV as Markdown, from the same content as /cv: for pasting into an
  * application form or recruiter notes, and served at /cv.md.
  */
-export function cvMarkdown(role: RoleId | null = null): string {
-  const selected = cvOrder(role);
-  const label = ROLES.find((r) => r.id === role)?.label;
-  return [
+/** The CV split into parts (see lib/cv-compose). */
+export function cvParts(): CvParts {
+  const head = [
     `# ${profile.name}`,
     `${profile.role} · ${profile.location}`,
     "",
@@ -71,14 +71,21 @@ export function cvMarkdown(role: RoleId | null = null): string {
       ),
     ]),
     "",
-    "## Selected projects",
-    ...selected.flatMap((p) => [
-      "",
-      `**${p.name}**: ${p.tagline}${p.builtAt ? ` (built at ${p.builtAt})` : p.context ? ` (${p.context})` : ""}`,
-      `- ${plain(p.description)}`,
-      `- Stack: ${p.stack.slice(0, 6).join(", ")}`,
-    ]),
-    "",
+  ].join("\n");
+  const orders: Record<string, string[]> = {
+    "": cvOrder(null).map((p) => p.id),
+  };
+  for (const r of ROLES) orders[r.id] = cvOrder(r.id).map((p) => p.id);
+  const ids = new Set(Object.values(orders).flat());
+  const blocks: Record<string, string> = {};
+  for (const p of projects)
+    if (ids.has(p.id))
+      blocks[p.id] = [
+        `**${p.name}**: ${p.tagline}${p.builtAt ? ` (built at ${p.builtAt})` : p.context ? ` (${p.context})` : ""}`,
+        `- ${plain(p.description)}`,
+        `- Stack: ${p.stack.slice(0, 6).join(", ")}`,
+      ].join("\n");
+  const tail = [
     "## Education",
     `${profile.education.school}, ${profile.education.program}`,
     ...profile.education.degrees.map((d) => `- ${d}`),
@@ -91,10 +98,18 @@ export function cvMarkdown(role: RoleId | null = null): string {
     "",
     "## Skills",
     ...skills.map((g) => `- ${g.label}: ${g.items.join(", ")}`),
-    "",
-    label
-      ? `Tailored for ${label} roles: ${SITE_URL}/cv?for=${role}`
-      : `Generated from ${SITE_URL}/cv`,
-    "",
   ].join("\n");
+  return {
+    head,
+    blocks,
+    orders,
+    labels: Object.fromEntries(ROLES.map((r) => [r.id, r.label])),
+    tail,
+    site: SITE_URL,
+  };
+}
+
+/** The CV as Markdown, untailored or for a role. */
+export function cvMarkdown(role: RoleId | null = null): string {
+  return composeCv(cvParts(), role);
 }
