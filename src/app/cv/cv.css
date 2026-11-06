@@ -219,20 +219,48 @@
 }
 
 /* Fit check: the bar fills, then new matches rise in one after another. */
-.cv-fitBar {
-  transform-origin: left;
-  transform: scaleX(var(--p, 0));
-  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-  animation: cv-fit-grow 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+.cv-gauge path {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+.cv-gaugeTrack {
+  stroke: var(--line-strong);
+}
+.cv-gaugeFill {
+  stroke: var(--accent);
+  stroke-dasharray: 100;
+  stroke-dashoffset: calc(100 - var(--p, 0));
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: cv-gauge-sweep 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.cv-gaugeNeedle {
+  stroke: var(--fg);
+  stroke-width: 2;
+  stroke-linecap: round;
+  fill: var(--fg);
+  transform-origin: 60px 60px;
+  transform: rotate(calc(var(--p, 0) * 1.8deg - 90deg));
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: cv-needle-sweep 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.cv-gaugeNum {
+  fill: var(--fg);
+  font: 600 15px var(--font-mono);
+}
+@keyframes cv-gauge-sweep {
+  from {
+    stroke-dashoffset: 100;
+  }
+}
+@keyframes cv-needle-sweep {
+  from {
+    transform: rotate(-90deg);
+  }
 }
 .cv-fitCard {
   animation: cv-fit-rise 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   animation-delay: calc(var(--i, 0) * 35ms);
-}
-@keyframes cv-fit-grow {
-  from {
-    transform: scaleX(0);
-  }
 }
 @keyframes cv-fit-rise {
   from {
@@ -241,7 +269,8 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cv-fitBar,
+  .cv-gaugeFill,
+  .cv-gaugeNeedle,
   .cv-fitCard {
     animation: none;
     transition: none;

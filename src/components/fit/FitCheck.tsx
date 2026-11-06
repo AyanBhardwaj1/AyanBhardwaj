@@ -172,20 +172,36 @@ export function FitCheck({ index }: { index: FitIndex }) {
         )}
         {result && total > 0 && (
           <>
-            <div className="flex flex-wrap items-center gap-3">
-              <p className="text-fg font-semibold">
+            <div className="flex flex-wrap items-center gap-4">
+              {/* A market-style gauge: the arc sweeps to the share backed. */}
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 120 84"
+                className="cv-gauge h-[84px] w-[120px] shrink-0"
+                style={{ "--p": pct } as React.CSSProperties}
+              >
+                <path
+                  d="M10 60 A50 50 0 0 1 110 60"
+                  pathLength={100}
+                  className="cv-gaugeTrack"
+                />
+                <path
+                  d="M10 60 A50 50 0 0 1 110 60"
+                  pathLength={100}
+                  className="cv-gaugeFill"
+                />
+                <g className="cv-gaugeNeedle">
+                  <line x1="60" y1="60" x2="60" y2="24" />
+                  <circle cx="60" cy="60" r="3.5" />
+                </g>
+                <text x="60" y="81" textAnchor="middle" className="cv-gaugeNum">
+                  {pct}%
+                </text>
+              </svg>
+              <p className="text-fg max-w-[30ch] font-semibold">
                 {result.hits.length} of {total} recognised requirements backed
                 by work on this site
               </p>
-              <span
-                aria-hidden="true"
-                className="bg-line-strong relative h-1.5 w-40 overflow-hidden rounded-full"
-              >
-                <span
-                  className="cv-fitBar bg-accent absolute inset-0 rounded-full"
-                  style={{ "--p": pct / 100 } as React.CSSProperties}
-                />
-              </span>
             </div>
             <ul className="mt-4 grid gap-2 sm:grid-cols-2">
               {result.hits.map((h, i) => (
