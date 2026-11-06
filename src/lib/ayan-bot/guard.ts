@@ -122,19 +122,29 @@ const INJECTION_PATTERNS: RegExp[] = [
   /\bnew (instructions|rules)\s*:/i,
   // Chat-template and role markers pasted in to fake a turn boundary.
   /<\|(im_start|im_end|system|endoftext)\|>|\[\/?INST\]|<<\/?SYS>>/i,
-  /(^|\n)\s*(#{1,3}\s*)?(system|assistant|developer)\s*:/i,
   // Asking for the hidden setup in other words.
-  /\b(your|the) (initial|original|hidden|secret|internal) (prompt|instructions|rules|context|configuration)\b/i,
+  /\byour (initial|original|hidden|secret|internal|system) (prompt|instructions|rules|context|configuration)\b/i,
+  /\bthe (hidden|secret|internal|system|developer) (prompt|instructions|message)\b/i,
   /\b(print|dump|repeat|output|echo)\b[^.?!\n]{0,30}\b(everything|all text|the text|verbatim)\b[^.?!\n]{0,30}\b(above|before|so far)\b/i,
-  /\bapi[ _-]?key\b|\benv(ironment)? var(iable)?s?\b|\bprocess\.env\b/i,
+  // The bot's own secrets (not questions about how a project uses keys).
+  /\b(your|ayan-bot'?s|this (site|bot)'?s|the site'?s|openai) (api[ _-]?key|secret key|token|credentials?)\b/i,
+  /\b(your|the server'?s|this site'?s) env(ironment)? var(iable)?s?\b|\bprocess\.env\b/i,
 ];
 
 /** Long base64-ish blobs: smuggled instructions or payloads, never a real question. */
 const BLOB = /[A-Za-z0-9+/=_-]{120,}/;
 
+/** A pasted role line ("system: …") at the start of any line. Checked on the
+ * original text, since flattening whitespace would hide the line break. */
+const ROLE_LINE = /^\s*(#{1,3}\s*)?(system|assistant|developer)\s*:/im;
+
 export function looksLikeInjection(text: string): boolean {
   const flat = text.replace(/\s+/g, " ");
-  return BLOB.test(text) || INJECTION_PATTERNS.some((re) => re.test(flat));
+  return (
+    BLOB.test(text) ||
+    ROLE_LINE.test(text) ||
+    INJECTION_PATTERNS.some((re) => re.test(flat))
+  );
 }
 
 // ---------- Output guard ----------

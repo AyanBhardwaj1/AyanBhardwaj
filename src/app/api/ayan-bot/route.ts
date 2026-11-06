@@ -27,7 +27,7 @@ import {
   type Reservation,
 } from "@/lib/ayan-bot/budget";
 import {
-  BASE_BITS,
+  baseBits,
   breakerOpen,
   powDisabled,
   recordUpstreamFailure,
@@ -363,11 +363,7 @@ export async function POST(request: Request) {
   // 1. Proof of work: a fresh, signed, single-use ticket for this visitor.
   if (!powDisabled()) {
     const { ticket, nonce } = ticketOf(body);
-    const minBits = Math.min(
-      20,
-      Math.max(8, Number(process.env.AYAN_BOT_POW_BITS) || BASE_BITS),
-    );
-    const t = verifyTicket(ticket, nonce, client, minBits);
+    const t = verifyTicket(ticket, nonce, client, baseBits());
     if (!t.ok)
       return json(
         401,
@@ -397,7 +393,10 @@ export async function POST(request: Request) {
         429,
         { error: "rate_limited", message: RATE_LIMIT_MESSAGE },
         m,
-        { "Retry-After": String(rl.retryAfterSec) },
+        {
+          "Retry-After": String(rl.retryAfterSec),
+          "X-Ayan-Bot-Remaining": "0",
+        },
       );
     const shared = await guarded(() => takeMessage(store, client), {
       ok: true,

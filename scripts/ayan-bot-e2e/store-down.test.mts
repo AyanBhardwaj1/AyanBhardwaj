@@ -1,5 +1,8 @@
 import { ask, ticket, calls } from "./client.mts";
-const ok = (c: boolean, m: string) => console.log((c ? "PASS " : "FAIL ") + m);
+const ok = (c: boolean, m: string) => {
+  if (!c) process.exitCode = 1;
+  console.log((c ? "PASS " : "FAIL ") + m);
+};
 const t = await ticket().catch(() => null);
 ok(
   !t || !t.ticket,

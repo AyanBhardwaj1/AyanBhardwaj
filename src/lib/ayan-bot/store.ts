@@ -25,6 +25,12 @@ export interface Store {
   setOnce(key: string, ttlSec: number): Promise<boolean>;
   /** EXISTS key. */
   has(key: string): Promise<boolean>;
+  /** Several INCRBYs (each with a first-write TTL) in one round trip. */
+  incrMany(
+    items: { key: string; by: number; ttlSec: number }[],
+  ): Promise<number[]>;
+  /** Several GETs as numbers (0 when missing) in one round trip. */
+  getMany(keys: string[]): Promise<number[]>;
 }
 
 const TIMEOUT_MS = 1500;
@@ -85,6 +91,21 @@ class RedisStore implements Store {
     const [v] = await this.pipeline([["EXISTS", key]]);
     return Number(v) > 0;
   }
+  async incrMany(items: { key: string; by: number; ttlSec: number }[]) {
+    if (!items.length) return [];
+    const out = await this.pipeline(
+      items.flatMap((i): Cmd[] => [
+        ["INCRBY", i.key, Math.trunc(i.by)],
+        ["EXPIRE", i.key, i.ttlSec, "NX"],
+      ]),
+    );
+    return items.map((_, k) => Number(out[k * 2]));
+  }
+  async getMany(keys: string[]) {
+    if (!keys.length) return [];
+    const out = await this.pipeline(keys.map((k): Cmd => ["GET", k]));
+    return out.map((v) => (v == null ? 0 : Number(v)));
+  }
 }
 
 class MemoryStore implements Store {
@@ -126,6 +147,14 @@ class MemoryStore implements Store {
   }
   async has(key: string) {
     return this.live(key) !== undefined;
+  }
+  async incrMany(items: { key: string; by: number; ttlSec: number }[]) {
+    const out: number[] = [];
+    for (const i of items) out.push(await this.incr(i.key, i.by, i.ttlSec));
+    return out;
+  }
+  async getMany(keys: string[]) {
+    return Promise.all(keys.map((k) => this.getNum(k)));
   }
 }
 

@@ -141,7 +141,7 @@ export function Terminal({ data }: { data: TerminalData }) {
   }, []);
 
   const findProject = useCallback(
-    (q: string) => {
+    (q: string, fuzzy = true) => {
       const k = q.toLowerCase().replace(/[^a-z0-9]/g, "");
       if (!k) return undefined;
       return (
@@ -159,7 +159,7 @@ export function Terminal({ data }: { data: TerminalData }) {
               .startsWith(k) || (p.code ?? "").toLowerCase().startsWith(k),
         ) ??
         // Last resort: letters in order ("yb" -> YouBank, "jrv" -> mossJARVIS).
-        (k.length >= 2
+        (fuzzy && k.length >= 2
           ? data.projects.find((p) => {
               let i = 0;
               for (const ch of p.name.toLowerCase()) if (ch === k[i]) i++;
@@ -195,13 +195,22 @@ export function Terminal({ data }: { data: TerminalData }) {
       ],
     ];
     if (reduce) {
-      boot.forEach(([segs, kind]) => print(segs, kind));
-      return;
+      const t = window.setTimeout(
+        () => boot.forEach(([segs, kind]) => print(segs, kind)),
+        0,
+      );
+      return () => {
+        window.clearTimeout(t);
+        setLines([]);
+      };
     }
     const timers = boot.map(([segs, kind], i) =>
       window.setTimeout(() => print(segs, kind), 60 * i),
     );
-    return () => timers.forEach(clearTimeout);
+    return () => {
+      timers.forEach(clearTimeout);
+      setLines([]);
+    };
   }, [data, print]);
 
   // Keep the newest output in view.
@@ -489,7 +498,9 @@ export function Terminal({ data }: { data: TerminalData }) {
           );
           return;
         default: {
-          const p = findProject(line);
+          // A bare project name works as a shortcut, but only on a close
+          // match: a mistyped command should say so, not open a random card.
+          const p = findProject(line, false);
           if (p) {
             projectCard(p);
             return;

@@ -87,16 +87,19 @@ export async function reserve(
   const { dailyUsd, monthlyUsd } = budgets(env);
   const keys = periodKeys(now);
   try {
-    const day = await store.incr(keys.day, micros, DAY_TTL);
-    if (day > toMicros(dailyUsd)) {
-      await store.incr(keys.day, -micros, DAY_TTL);
-      return { ok: false, reason: "daily" };
-    }
-    const month = await store.incr(keys.month, micros, MONTH_TTL);
-    if (month > toMicros(monthlyUsd)) {
-      await store.incr(keys.month, -micros, MONTH_TTL);
-      await store.incr(keys.day, -micros, DAY_TTL);
-      return { ok: false, reason: "monthly" };
+    // Both counters in one round trip; whoever crosses a cap backs out.
+    const [day, month] = await store.incrMany([
+      { key: keys.day, by: micros, ttlSec: DAY_TTL },
+      { key: keys.month, by: micros, ttlSec: MONTH_TTL },
+    ]);
+    const overDay = day > toMicros(dailyUsd);
+    const overMonth = month > toMicros(monthlyUsd);
+    if (overDay || overMonth) {
+      await store.incrMany([
+        { key: keys.day, by: -micros, ttlSec: DAY_TTL },
+        { key: keys.month, by: -micros, ttlSec: MONTH_TTL },
+      ]);
+      return { ok: false, reason: overDay ? "daily" : "monthly" };
     }
     return { ok: true, reservation: { micros, keys } };
   } catch {
@@ -115,8 +118,10 @@ export async function settle(
   const refund = r.micros - Math.min(r.micros, Math.max(0, actualMicros));
   if (refund <= 0) return;
   try {
-    await store.incr(r.keys.day, -refund, DAY_TTL);
-    await store.incr(r.keys.month, -refund, MONTH_TTL);
+    await store.incrMany([
+      { key: r.keys.day, by: -refund, ttlSec: DAY_TTL },
+      { key: r.keys.month, by: -refund, ttlSec: MONTH_TTL },
+    ]);
   } catch {
     // Keeping the full reservation only over-counts spend, which is safe.
   }
@@ -125,9 +130,6 @@ export async function settle(
 /** Spend so far, for the status endpoint (micro-dollars). */
 export async function spent(store: Store, now = new Date()) {
   const keys = periodKeys(now);
-  const [day, month] = await Promise.all([
-    store.getNum(keys.day),
-    store.getNum(keys.month),
-  ]);
+  const [day, month] = await store.getMany([keys.day, keys.month]);
   return { day, month };
 }

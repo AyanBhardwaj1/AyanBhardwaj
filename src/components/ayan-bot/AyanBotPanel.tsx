@@ -112,6 +112,8 @@ export default function AyanBotPanel({
   const [left, setLeft] = useState<number | null>(null);
   /** Minutes until the allowance refills, from the last 429's Retry-After. */
   const [retryMin, setRetryMin] = useState<number | null>(null);
+  /** When the allowance should have refilled (ms epoch), after a 429. */
+  const refillAt = useRef(0);
   const [mobile, setMobile] = useState(false);
   /** currentPage() key ("home", "functions" or a project slug). */
   const [page, setPage] = useState("home");
@@ -327,7 +329,9 @@ export default function AyanBotPanel({
         await drain();
       };
       try {
-        if (left === 0 && local) {
+        // Out of messages and the window hasn't refilled yet: answer from the
+        // saved briefs without a request. After the refill time, ask again.
+        if (left === 0 && local && Date.now() < refillAt.current) {
           await answerLocally();
           return;
         }
@@ -343,11 +347,27 @@ export default function AyanBotPanel({
             }),
             signal: ctrl.signal,
           });
-        let res = await post(await takeTicket(ctrl.signal));
+        let ticket = await takeTicket(ctrl.signal);
+        // No ticket means the challenge endpoint refused or is down: treat
+        // it as unavailable (saved brief if there is one) instead of sending
+        // a request that can only come back "session expired".
+        if (!ticket) {
+          if (local) {
+            await answerLocally();
+            return;
+          }
+          acc =
+            "ayan-bot can't take questions right now. Try again in a few minutes, or email Ayan at ayan.bhardwaj@utexas.edu.";
+          finalStatus = "offline";
+          flushNow();
+          return;
+        }
+        let res = await post(ticket);
         // A stale or reused ticket: solve a fresh one and send once more.
         if (res.status === 401) {
           dropTicket();
-          res = await post(await takeTicket(ctrl.signal));
+          ticket = await takeTicket(ctrl.signal);
+          res = await post(ticket);
         }
         const leftHeader = res.headers.get("x-ayan-bot-remaining");
         if (leftHeader !== null && /^\d+$/.test(leftHeader))
@@ -355,8 +375,11 @@ export default function AyanBotPanel({
         const resMode = res.headers.get("x-ayan-bot-mode");
         setMode(resMode);
         if (res.status === 429) {
-          setLeft(0);
           const after = Number(res.headers.get("retry-after"));
+          // Only a per-visitor limit says how many are left (header "0");
+          // a site-wide limit shouldn't zero this visitor's meter.
+          if (leftHeader === "0") setLeft(0);
+          refillAt.current = Date.now() + (after > 0 ? after : 300) * 1000;
           setRetryMin(after > 0 ? Math.ceil(after / 60) : null);
         } else if (res.ok) setRetryMin(null);
         const isJson = (res.headers.get("content-type") ?? "").includes(

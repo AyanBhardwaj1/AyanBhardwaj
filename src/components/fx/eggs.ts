@@ -250,7 +250,9 @@ let bellBusy = false;
 
 /** Where to ring from: the NYSE status in the top bar, else top center. */
 function bellOrigin() {
-  const spans = document.querySelectorAll<HTMLElement>("body > div.fixed span");
+  const spans = document.querySelectorAll<HTMLElement>(
+    '[aria-label="Status bar"] span, body > div.fixed span',
+  );
   for (const s of spans) {
     if (!/^NYSE/.test(s.textContent ?? "")) continue;
     const r = s.getBoundingClientRect();

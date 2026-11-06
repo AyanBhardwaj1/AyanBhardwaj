@@ -32,18 +32,21 @@ export type RateResult = {
   retryAfterSec: number;
 };
 
-/** Counts one message for `client` and says whether it is allowed. */
+/** Counts one message for `client` (all windows in one round trip). */
 export async function takeMessage(
   store: Store,
   client: string,
   now = Date.now(),
 ): Promise<RateResult> {
+  const ks = rateKeys(client, now);
+  const ns = await store.incrMany(
+    ks.map((r) => ({ key: r.key, by: 1, ttlSec: r.windowSec + 60 })),
+  );
   let remaining = Infinity;
-  for (const r of rateKeys(client, now)) {
-    const n = await store.incr(r.key, 1, r.windowSec + 60);
-    if (n > r.max)
-      return { ok: false, remaining: 0, retryAfterSec: r.retryAfterSec };
-    remaining = Math.min(remaining, r.max - n);
+  for (let i = 0; i < ks.length; i++) {
+    if (ns[i] > ks[i].max)
+      return { ok: false, remaining: 0, retryAfterSec: ks[i].retryAfterSec };
+    remaining = Math.min(remaining, ks[i].max - ns[i]);
   }
   return { ok: true, remaining, retryAfterSec: 0 };
 }
@@ -54,10 +57,9 @@ export async function peekRemaining(
   client: string,
   now = Date.now(),
 ): Promise<number> {
-  let remaining = Infinity;
-  for (const r of rateKeys(client, now))
-    remaining = Math.min(remaining, r.max - (await store.getNum(r.key)));
-  return Math.max(0, remaining);
+  const ks = rateKeys(client, now);
+  const ns = await store.getMany(ks.map((r) => r.key));
+  return Math.max(0, Math.min(...ks.map((r, i) => r.max - ns[i])));
 }
 
 /** Counts one ticket request for `client`. */
@@ -98,12 +100,13 @@ export async function breakerOpen(store: Store) {
 
 export const BASE_BITS = 15;
 
-/** 15 bits normally; harder as the day's budget runs down. */
+/** The configured base difficulty (8-20 bits). Also the minimum accepted. */
+export const baseBits = (env = process.env) =>
+  Math.min(20, Math.max(8, Number(env.AYAN_BOT_POW_BITS) || BASE_BITS));
+
+/** Base bits normally; harder as the day's budget runs down. */
 export async function difficulty(store: Store, env = process.env) {
-  const base = Math.min(
-    20,
-    Math.max(8, Number(env.AYAN_BOT_POW_BITS) || BASE_BITS),
-  );
+  const base = baseBits(env);
   try {
     const { day } = await spent(store);
     const cap = budgets(env).dailyUsd * 1_000_000;
