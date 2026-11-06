@@ -9,7 +9,10 @@ import { ThemeToggle } from "./ui/ThemeToggle";
  */
 export function StatusBar() {
   return (
-    <div className="no-print fade-in border-line bg-bg-elev/90 fixed inset-x-0 top-0 z-50 h-8 border-b backdrop-blur-md">
+    <aside
+      aria-label="Status bar"
+      className="no-print fade-in border-line bg-bg-elev/90 fixed inset-x-0 top-0 z-50 h-8 border-b backdrop-blur-md"
+    >
       <div className="container-page t-label text-muted flex h-full items-center justify-between gap-3 text-[11px] sm:text-[12px]">
         <div className="flex min-w-0 items-center gap-3">
           <span className="text-fg hidden sm:inline">{profile.name}</span>
@@ -30,6 +33,6 @@ export function StatusBar() {
       </div>
       {/* Reading progress: a CSS scroll-driven hairline, no JS. */}
       <span aria-hidden="true" className="scroll-progress" />
-    </div>
+    </aside>
   );
 }

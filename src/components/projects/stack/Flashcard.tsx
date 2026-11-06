@@ -42,11 +42,6 @@ export function Flashcard() {
         className={s.cardFace}
         data-flipped={flipped}
         onClick={() => setFlipped((v) => !v)}
-        aria-label={
-          flipped
-            ? `Answer: ${card.b} Show the question.`
-            : `Question: ${card.f} Show the answer.`
-        }
       >
         <span className={s.cardSide} aria-hidden={flipped}>
           <span className={s.cardHint}>Question · tap to flip</span>

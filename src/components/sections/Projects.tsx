@@ -95,7 +95,16 @@ function ProjectLinks({ p, big }: { p: Project; big?: boolean }) {
  * whole card (stretched link), so there are no nested links and the accessible
  * name stays the project name.
  */
-function CardTitle({ p, className }: { p: Project; className: string }) {
+function CardTitle({
+  p,
+  className,
+  level = 4,
+}: {
+  p: Project;
+  className: string;
+  level?: 3 | 4;
+}) {
+  const H = level === 3 ? "h3" : "h4";
   const href = projectHref(p.id);
   const inner = (
     <Link
@@ -107,7 +116,7 @@ function CardTitle({ p, className }: { p: Project; className: string }) {
     </Link>
   );
   return (
-    <h4 className={className}>
+    <H className={className}>
       {hasProjectPage(p.id) ? (
         <ViewTransition
           name={`project-name-${p.id}`}
@@ -119,7 +128,7 @@ function CardTitle({ p, className }: { p: Project; className: string }) {
       ) : (
         inner
       )}
-    </h4>
+    </H>
   );
 }
 
@@ -418,7 +427,7 @@ export function Projects() {
                   </span>
                 </div>
                 <div>
-                  <CardTitle p={youbank} className="t-h2" />
+                  <CardTitle p={youbank} className="t-h2" level={3} />
                   <p className="t-lead mt-3 max-w-[28ch]">{youbank.tagline}</p>
                 </div>
                 <p className="text-muted max-w-[56ch]">{youbank.description}</p>

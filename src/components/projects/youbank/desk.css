@@ -888,7 +888,6 @@
   display: inline-block;
   width: 22px;
   color: var(--d-muted);
-  opacity: 0.6;
 }
 .yb-totalRow td,
 .yb-totalRow th {

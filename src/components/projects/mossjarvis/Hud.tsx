@@ -366,29 +366,37 @@ export function Hud() {
               <div>
                 <dt>MOSS LATENCY</dt>
                 <dd>{latency === null ? "--" : `${latency.toFixed(2)} MS`}</dd>
-                <i
-                  style={
-                    { "--p": latency === null ? 0 : 0.7 } as React.CSSProperties
-                  }
-                />
+                <dd aria-hidden="true" className="jv-barCell">
+                  <i
+                    style={
+                      {
+                        "--p": latency === null ? 0 : 0.7,
+                      } as React.CSSProperties
+                    }
+                  />
+                </dd>
               </div>
               <div>
                 <dt>MEMORY RECALL</dt>
                 <dd>
                   {hits ? `${hits.w.length + hits.l.length} VECTORS` : "--"}
                 </dd>
-                <i
-                  style={
-                    {
-                      "--p": hits ? (hits.w.length + hits.l.length) / 10 : 0,
-                    } as React.CSSProperties
-                  }
-                />
+                <dd aria-hidden="true" className="jv-barCell">
+                  <i
+                    style={
+                      {
+                        "--p": hits ? (hits.w.length + hits.l.length) / 10 : 0,
+                      } as React.CSSProperties
+                    }
+                  />
+                </dd>
               </div>
               <div>
                 <dt>VOICE MATRIX</dt>
                 <dd>TEXT ONLY</dd>
-                <i style={{ "--p": 0.12 } as React.CSSProperties} />
+                <dd aria-hidden="true" className="jv-barCell">
+                  <i style={{ "--p": 0.12 } as React.CSSProperties} />
+                </dd>
               </div>
             </dl>
             <p className="jv-note">
@@ -453,8 +461,10 @@ export function Hud() {
             onClick={() =>
               setState(STATES[(STATES.indexOf(state) + 1) % STATES.length])
             }
-            aria-label={`Arc reactor, state ${coreLabel}. Activate to cycle the state.`}
           >
+            <span className="sr-only">
+              {`Arc reactor, state ${coreLabel}. Activate to cycle the state.`}
+            </span>
             <span className="jv-orbitA" aria-hidden="true">
               <i />
               <i />
