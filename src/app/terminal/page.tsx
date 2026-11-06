@@ -14,6 +14,7 @@ import { fitIndex } from "@/lib/fit";
 import { contributionRanges, githubStats, starsFor } from "@/lib/github";
 import { hasProjectPage } from "@/lib/projects";
 import { roleTags } from "@/lib/roles";
+import { related } from "@/lib/related";
 import { hasResume } from "@/lib/site";
 import { Terminal, type TerminalData } from "@/components/terminal/Terminal";
 
@@ -56,6 +57,7 @@ function data(): TerminalData {
       page: hasProjectPage(p.id) ? `/projects/${p.id}` : null,
       stars: starsFor(projectRepo[p.id]) ?? null,
       roles: roleTags(p),
+      related: related(p.id).map((r) => r.project.id),
     })),
     experience: experience.map((e) => ({
       company: e.company,
