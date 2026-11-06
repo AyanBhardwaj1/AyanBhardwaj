@@ -885,7 +885,36 @@ export function Terminal({ data }: { data: TerminalData }) {
     return hits.length > 0;
   };
 
+  // Fish-style autosuggestion: the newest history entry (or a command) that
+  // starts with what's typed, shown dim after the caret; → or End accepts.
+  const suggestion = (() => {
+    if (!value || value.length > 60 || hIdx !== null) return "";
+    const v = value.toLowerCase();
+    const pool = [
+      ...[...hist].reverse(),
+      ...COMMANDS.map((c) => c.name),
+      "ls projects",
+      "cat youbank",
+      "diff youbank runway",
+    ];
+    const hit = pool.find(
+      (x) => x.length > value.length && x.toLowerCase().startsWith(v),
+    );
+    return hit ? hit.slice(value.length) : "";
+  })();
+
   const onKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const el = e.currentTarget;
+    if (
+      suggestion &&
+      (e.key === "ArrowRight" || e.key === "End") &&
+      el.selectionStart === value.length &&
+      el.selectionEnd === value.length
+    ) {
+      e.preventDefault();
+      setValue(value + suggestion);
+      return;
+    }
     if (e.key === "Enter") {
       e.preventDefault();
       run(value);
@@ -1035,23 +1064,31 @@ export function Terminal({ data }: { data: TerminalData }) {
             <span className="tm-muted">:~$</span>
             <span className="sr-only"> command</span>
           </label>
-          <input
-            ref={inputRef}
-            id={inputId}
-            value={value}
-            onChange={(e) => {
-              setValue(e.target.value);
-              setHint("");
-            }}
-            onKeyDown={onKey}
-            autoComplete="off"
-            autoCapitalize="off"
-            autoCorrect="off"
-            spellCheck={false}
-            enterKeyHint="go"
-            className="tm-input"
-            aria-describedby={hint ? `${inputId}-hint` : undefined}
-          />
+          <span className="tm-field">
+            {suggestion && (
+              <span aria-hidden="true" className="tm-ghost">
+                <span className="tm-ghostTyped">{value}</span>
+                {suggestion}
+              </span>
+            )}
+            <input
+              ref={inputRef}
+              id={inputId}
+              value={value}
+              onChange={(e) => {
+                setValue(e.target.value);
+                setHint("");
+              }}
+              onKeyDown={onKey}
+              autoComplete="off"
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
+              enterKeyHint="go"
+              className="tm-input"
+              aria-describedby={hint ? `${inputId}-hint` : undefined}
+            />
+          </span>
         </form>
         {hint && (
           <p id={`${inputId}-hint`} className="tm-line tm-muted">
