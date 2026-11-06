@@ -19,7 +19,7 @@ Source for my personal developer portfolio: who I am, what I've built, and how t
 
 - **Home**: hero with a WebGL "after-hours" contour field, decoding section titles, the AYAN index career chart, project cards (Runway plays its demo on hover), a physics project graph, the trophy case and a GitHub contribution surface.
 - **Seven case studies** at `/projects/<slug>`, each with its own design, live demos that play once on first view, an "Ask about" button for ayan-bot, prev/next morphing titles and an "explored n of 7" tracker.
-- **⌘K command palette** with Bloomberg-style codes (`PROJ`, `EXP`, `CV`, `TERM`, `MOTION`, `RAIN`, `BELL`, `ASK …`); `/functions` lists them all.
+- **⌘K command palette** with Bloomberg-style codes (`PROJ`, `EXP`, `CV`, `TOUR`, `TERM`, `MOTION`, `RAIN`, `BELL`, `ASK …`); `/functions` lists them all.
 - **ayan-bot**, a grounded chat agent about Ayan: page-aware starters, inline project cards, follow-ups, a recruiter brief, copy and read-aloud, "select text → ask", ⌘J. Hard spend caps and layered defenses: see [docs/AYAN-BOT.md](docs/AYAN-BOT.md).
 - **`/terminal`**: a command line over the site (`whoami`, `ls projects`, `cat youbank`, `ask …`).
 - **`/cv`**: a web CV generated from the same content, print-ready.

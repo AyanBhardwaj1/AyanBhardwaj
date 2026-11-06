@@ -77,7 +77,7 @@ const HELP_LINES = [
   "shortcuts: ⌘K / Ctrl+K anywhere · / or ? to open · KEYS <GO> for type-to-open",
   "ayan-bot: ⌘J / Ctrl+J · select any text on the page to ask about it",
   "case studies: F1–F8 jump between sections on YouBank · 'Ask about' in the bar",
-  "prefer a shell? TERM <GO> opens the terminal (whoami, ls, cat youbank)",
+  "new here? TOUR <GO> for a 40-second guided tour · TERM <GO> opens the terminal",
   "easter eggs exist. try: whoami, latency, mavs, sudo hire ayan, RAIN, BELL, ↑↑↓↓←→←→BA",
 ];
 
@@ -348,6 +348,10 @@ export default function CommandPalette({
         // Close first: the modal <dialog> sits in the top layer, above any
         // overlay. The effect module loads on demand.
         close();
+        if (a.name === "tour") {
+          const t = await import("@/components/fx/tour");
+          return t.tour();
+        }
         const fx = await import("@/components/fx/eggs");
         return a.name === "rain" ? fx.rain() : fx.bell();
       }

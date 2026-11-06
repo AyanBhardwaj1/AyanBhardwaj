@@ -27,7 +27,7 @@ export type CommandAction =
   | { type: "motion" }
   | { type: "help" }
   | { type: "bot" }
-  | { type: "fx"; name: "rain" | "bell" };
+  | { type: "fx"; name: "rain" | "bell" | "tour" };
 
 export type Command = {
   id: string;
@@ -207,6 +207,23 @@ export const commands: Command[] = [
     keywords: ["rain", "matrix", "tickers", "quotes", "konami", "fun"],
     action: { type: "fx", name: "rain" },
     href: "/functions#rain",
+  },
+  {
+    id: "fun.tour",
+    mnemonic: "TOUR",
+    title: "Take the guided tour",
+    hint: "40 seconds through the highlights; any key stops it",
+    group: "Fun",
+    keywords: [
+      "tour",
+      "guide",
+      "walkthrough",
+      "highlights",
+      "intro",
+      "recruiter",
+    ],
+    action: { type: "fx", name: "tour" },
+    href: "/functions#tour",
   },
   {
     id: "link.terminal",

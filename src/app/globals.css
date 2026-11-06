@@ -1759,3 +1759,93 @@ html[data-motion="reduce"] ::after {
   transition-duration: 0.01ms !important;
   scroll-behavior: auto !important;
 }
+
+/* TOUR <GO>: the guided-tour caption card. */
+.fx-tour {
+  position: fixed;
+  left: 50%;
+  bottom: calc(1.25rem + env(safe-area-inset-bottom));
+  z-index: 120;
+  width: min(92vw, 34rem);
+  padding: 14px 16px 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: 16px;
+  background: color-mix(in oklab, var(--bg-elev) 92%, transparent);
+  color: var(--fg);
+  box-shadow: var(--shadow-float);
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+  opacity: 0;
+  translate: -50% 12px;
+  transition:
+    opacity 300ms var(--ease-expo),
+    translate 300ms var(--ease-expo);
+}
+.fx-tour[data-on] {
+  opacity: 1;
+  translate: -50% 0;
+}
+.fx-tour-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  white-space: pre;
+}
+.fx-tour-title {
+  margin-top: 6px;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.fx-tour-line {
+  margin-top: 4px;
+  color: var(--fg-muted);
+  font-size: 15px;
+  line-height: 1.45;
+  padding-right: 6.5rem;
+}
+.fx-tour-stop {
+  position: absolute;
+  right: 12px;
+  bottom: 14px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  background: transparent;
+}
+.fx-tour-stop:hover,
+.fx-tour-stop:focus-visible {
+  color: var(--fg);
+  border-color: var(--accent);
+}
+.fx-tour-bar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  background: var(--accent);
+  transform-origin: left;
+  transform: scaleX(0);
+}
+.fx-tour-bar[data-run] {
+  animation: fx-tour-bar var(--d, 4400ms) linear forwards;
+}
+@keyframes fx-tour-bar {
+  to {
+    transform: scaleX(1);
+  }
+}
+@media (max-width: 767px) {
+  .fx-tour {
+    /* Sit above the docked nav pill and bot button. */
+    bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
+}

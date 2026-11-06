@@ -24,6 +24,11 @@ const typing = (el: Element | null) =>
 
 /** ↑↑↓↓←→←→BA anywhere on the page: it starts raining tickers. */
 export function Konami() {
+  // A TOUR <GO> started on another page continues here.
+  useEffect(() => {
+    void import("./tour").then((m) => m.resumeTourIfPending());
+  }, []);
+
   useEffect(() => {
     let at = 0;
     const onKey = (e: KeyboardEvent) => {
