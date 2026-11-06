@@ -38,15 +38,28 @@ const KIND_WORDS = {
   soft: "not scored",
 } as const;
 
-const SAMPLE = `Software Engineer, AI Products (Fintech)
+/** Made-up sample postings, one per kind of role, to show how it reads. */
+const SAMPLES = [
+  `Software Engineer, AI Products (Fintech)
 We're an early-stage startup building LLM agents for investment teams.
 You'll ship full-stack features in TypeScript, React and Next.js, build
 retrieval (RAG) over SEC filings, and work on Python data pipelines.
-Bonus: Rust, quant/risk models, open-source contributions, Kubernetes.`;
+Bonus: Rust, quant/risk models, open-source contributions, Kubernetes.`,
+  `Frontend Engineer
+Build the user interfaces of a web platform in React, Next.js and
+TypeScript with Tailwind CSS. Work with backend engineers on REST APIs and
+PostgreSQL, write unit tests, and care about performance. Experience with
+Vue or Angular, GraphQL and Docker is a plus.`,
+  `Quantitative Developer
+Build low-latency trading systems: market data, order books and a
+matching engine in C++ or Rust, with Python research tooling. Monte Carlo,
+volatility and risk models; options pricing. Nice to have: Kafka, AWS.`,
+];
 
 export function FitCheck({ index }: { index: FitIndex }) {
   const id = useId();
   const [text, setText] = useState("");
+  const [sampleAt, setSampleAt] = useState(0);
   const [copied, setCopied] = useState(false);
   const taRef = useRef<HTMLTextAreaElement>(null);
 
@@ -226,7 +239,8 @@ export function FitCheck({ index }: { index: FitIndex }) {
           type="button"
           className="pill min-h-9 px-3 text-[12px]"
           onClick={() => {
-            setText(SAMPLE);
+            setText(SAMPLES[sampleAt % SAMPLES.length]);
+            setSampleAt((i) => i + 1);
             if (shared) {
               setShared(null);
               window.history.replaceState(
@@ -237,7 +251,9 @@ export function FitCheck({ index }: { index: FitIndex }) {
             }
           }}
         >
-          Try a sample
+          {sampleAt === 0
+            ? "Try a sample"
+            : `Another sample (${(sampleAt % SAMPLES.length) + 1}/${SAMPLES.length})`}
         </button>
         {text && (
           <button
