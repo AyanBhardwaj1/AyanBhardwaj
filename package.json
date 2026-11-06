@@ -15,6 +15,7 @@
     "postbuild": "node scripts/check-leaks.mjs",
     "test:bot": "bash scripts/ayan-bot-e2e/run.sh",
     "test:smoke": "bash scripts/smoke/run.sh",
+    "test:prod": "SMOKE_SKIP=bot SMOKE_BASE=${SMOKE_BASE:-https://ayan-bhardwaj.vercel.app} NODE_USE_ENV_PROXY=1 node scripts/smoke/site.test.mjs",
     "test:unit": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --disable-warning=ExperimentalWarning --test \"scripts/unit/*.test.mts\""
   },
   "dependencies": {

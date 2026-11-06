@@ -23,6 +23,9 @@ const BASE = (process.env.SMOKE_BASE ?? "http://127.0.0.1:3041").replace(
   "",
 );
 const CHECK_TIMEOUT = 60_000;
+const SKIP = new Set(
+  (process.env.SMOKE_SKIP ?? "").split(",").map((x) => x.trim()),
+);
 
 const PROJECTS = [
   "youbank",
@@ -681,7 +684,9 @@ try {
   await routes(browser);
   await metadata(browser);
   await palette(browser);
-  await ayanBot(browser);
+  // SMOKE_SKIP=bot skips the ayan-bot group, e.g. against production,
+  // where a question would spend real API credits.
+  if (!SKIP.has("bot")) await ayanBot(browser);
   await terminal(browser);
   await fitCheck(browser);
   await reducedMotion(browser);
