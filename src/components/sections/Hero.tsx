@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Image from "next/image";
 import { links, profile } from "@/content/content";
 import { headshot } from "@/content/extras";
@@ -217,8 +218,20 @@ export function Hero({
             </a>
           )}
         </div>
-        <div className="hx-rise mt-3" style={rise(640)}>
+        <div
+          className="hx-rise mt-3 flex flex-wrap items-center justify-center gap-x-6"
+          style={rise(640)}
+        >
           <TourLink />
+          <Link
+            href="/cv#fit"
+            className="t-label text-muted hover:text-fg inline-flex min-h-10 items-center gap-2 transition-colors"
+          >
+            <span aria-hidden="true" className="text-accent">
+              ▸
+            </span>
+            Hiring? Check a job description
+          </Link>
         </div>
 
         <div

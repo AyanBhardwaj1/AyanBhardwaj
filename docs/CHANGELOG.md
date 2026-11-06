@@ -2,7 +2,8 @@
 
 ## After launch (Nov 6, 2026)
 
-- **Related work** at the end of each case study: the most similar builds,
+- **Related work** at the end of each case study that has close relatives
+  (OncoSense has none): the most similar builds,
   ranked by shared tools, category, where they were built and role lens,
   with the reason shown. `cat <project>` in the terminal lists them too.
 - **Case-study navigation**: `[` / `]` step to the previous / next case
@@ -11,6 +12,11 @@
 - **Fit check**: three sample postings (AI fintech, frontend, quant), and
   "Email Ayan about this role", which opens your mail app with the score,
   what matched and the shareable result link (never the posting).
+- **First impressions** (from a live-site audit): the hero's buttons make
+  the first screen on phones and laptops (smoke-checked at 390x664,
+  1280x720 and 1440x900); the CV prints on one page; "Hiring? Check a job
+  description" on the hero, a Fit check item in the nav, "Case study →" on
+  project cards and a Hiring line at the end of each case study.
 - **Testing**: `npm run test:prod` runs the smoke checks against the live
   site after each deploy (skipping ayan-bot, so no credits are spent).
 

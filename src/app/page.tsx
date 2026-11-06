@@ -51,6 +51,7 @@ export default function Home() {
       href: `#${s.id}`,
       external: false,
     })),
+    { id: "fit", label: "Fit check", href: "/cv#fit", external: false },
     ...(hasResume
       ? [
           {
