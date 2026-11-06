@@ -26,6 +26,10 @@
   `/functions`), inline project cards, follow-up chips, a recruiter brief
   (SWE / AI / Fintech), copy, read aloud, save chat as Markdown, select any
   text to ask about it, ⌘J / Ctrl+J, and a usage meter.
+- **Answer for: recruiter | engineer**: one switch changes the depth of
+  answers (impact first, or architecture and trade-offs). The server accepts
+  only those two values; remembered on the device.
+- A pasted job description gets an offer to run the Fit check on all of it.
 
 ### Motion and delight
 
