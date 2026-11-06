@@ -58,6 +58,8 @@
 - **`draft --to ayan`** in Contact writes a clear first email and opens it in
   your own mail app (or copies it).
 - **Share** button on every case study; `j` / `k` jump between home sections.
+- **Save contact** (`VCF <GO>`): a vCard built from the site's content.
+- The 404 page suggests the page you probably meant (`/termnal` → Terminal).
 
 ### Accessibility and performance
 

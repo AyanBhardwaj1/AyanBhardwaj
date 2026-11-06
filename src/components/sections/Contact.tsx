@@ -101,6 +101,10 @@ export function Contact({ hasResume }: { hasResume: boolean }) {
                   </span>
                   <span className="sr-only"> your email app</span>
                 </a>
+                <a href="/ayan.vcf" download className="pill min-h-10">
+                  Save contact
+                  <span className="sr-only"> card (vCard)</span>
+                </a>
               </div>
               <p className="text-muted mt-6">
                 <span className="text-accent">&gt;</span> links

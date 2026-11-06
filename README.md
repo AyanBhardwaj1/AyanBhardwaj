@@ -23,7 +23,7 @@ Source for my personal developer portfolio: who I am, what I've built, and how t
 - **ayan-bot**, a grounded chat agent about Ayan: page-aware starters, inline project cards, follow-ups, a recruiter brief, copy and read-aloud, "select text → ask", ⌘J. Hard spend caps and layered defenses: see [docs/AYAN-BOT.md](docs/AYAN-BOT.md).
 - **`/terminal`**: a command line over the site (`whoami`, `ls projects ai`, `cat youbank`, `fit …`, `ask …`).
 - **`/cv`**: a web CV generated from the same content, print-ready, with a **Fit check**: paste a job description, see which requirements the work backs up (in the browser, nothing sent).
-- **For recruiters**: a role filter on the projects, `FIT <GO>`, a share button on every case study, and `draft --to ayan`, which writes a first email for your own mail app.
+- **For recruiters**: a role filter on the projects, `FIT <GO>`, a share button on every case study, `draft --to ayan`, which writes a first email for your own mail app, and a one-tap contact card (`/ayan.vcf`).
 - **Accessibility**: keyboard first, axe-clean, `MOTION <GO>` turns animations down site-wide, reduced-motion respected everywhere.
 - **Share cards and SEO**: branded Open Graph images per page, JSON-LD, sitemap, `llms.txt`, `resume.json`.
 

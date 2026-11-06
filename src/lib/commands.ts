@@ -21,6 +21,7 @@ export type CommandAction =
   | { type: "scroll"; id: string }
   | { type: "route"; href: string }
   | { type: "external"; href: string }
+  | { type: "download"; href: string }
   | { type: "copy"; value: string; toast: string }
   | { type: "theme" }
   | { type: "shortcuts" }
@@ -142,6 +143,16 @@ export const commands: Command[] = [
       toast: ui.contact.copied,
     },
     href: links.email.href,
+  },
+  {
+    id: "link.vcf",
+    mnemonic: "VCF",
+    title: "Save contact card",
+    hint: "vCard for your phone or address book",
+    group: "Links",
+    keywords: ["vcard", "contact", "save", "phone", "address book"],
+    action: { type: "download", href: "/ayan.vcf" },
+    href: "/ayan.vcf",
   },
   {
     id: "link.cv",

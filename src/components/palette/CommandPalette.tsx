@@ -289,6 +289,13 @@ export default function CommandPalette({
         return print([
           { kind: "out", text: `opened ${a.href.replace(/^https?:\/\//, "")}` },
         ]);
+      case "download": {
+        const link = document.createElement("a");
+        link.href = a.href;
+        link.download = "";
+        link.click();
+        return print([{ kind: "out", text: `downloading ${a.href}` }]);
+      }
       case "copy":
         try {
           await navigator.clipboard.writeText(a.value);
