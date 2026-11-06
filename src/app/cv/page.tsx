@@ -12,6 +12,8 @@ import { hasProjectPage } from "@/lib/projects";
 import { SITE_URL, hasResume } from "@/lib/site";
 import { PrintButton } from "./PrintButton";
 import { CvTailor } from "./CvTailor";
+import { CopyCv } from "./CopyCv";
+import { cvMarkdown } from "@/lib/cv-text";
 import { ROLES, roleTags, type RoleId } from "@/lib/roles";
 import { FitCheck } from "@/components/fit/FitCheck";
 import { fitIndex } from "@/lib/fit";
@@ -66,6 +68,7 @@ export default function CvPage() {
         </Link>
         <div className="flex flex-wrap gap-2">
           <PrintButton />
+          <CopyCv text={cvMarkdown()} />
           {hasResume && (
             <a
               href={links.resume.href}

@@ -35,6 +35,7 @@ export function GET() {
     "## Links",
     `- Site: ${SITE_URL}`,
     `- Machine-readable resume: ${SITE_URL}/resume.json`,
+    `- CV as Markdown: ${SITE_URL}/cv.md`,
     `- Email: ${links.email.display}`,
     `- GitHub: ${links.github.href}`,
     `- LinkedIn: ${links.linkedin.href}`,

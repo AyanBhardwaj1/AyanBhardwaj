@@ -60,6 +60,8 @@
   hand the whole thing to the Fit check instead.
 - **Tailor the CV** for a role (`/cv?for=fintech`): matching projects first,
   plus a few more that fit; Print / save as PDF keeps it.
+- **Copy as text** on `/cv` (also served at `/cv.md`): the CV as Markdown
+  for application forms and recruiter notes.
 - **Role filter** on the projects section (AI, Fintech, Systems, Full-stack,
   Research).
 - **`draft --to ayan`** in Contact writes a clear first email and opens it in
@@ -78,7 +80,7 @@
 
 ### Testing
 
-- `npm run test:smoke`: 69 browser checks against a production build (every
+- `npm run test:smoke`: 70 browser checks against a production build (every
   route renders without errors, metadata and share images, palette,
   terminal, Fit check, ayan-bot in mock mode, reduced motion, keyboard,
   endpoints). It caught `/functions` missing its share

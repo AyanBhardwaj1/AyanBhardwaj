@@ -617,6 +617,7 @@ async function endpoints() {
     ],
     ["/.well-known/security.txt", /^text\/plain/, (b) => /^Contact:/m.test(b)],
     ["/ayan.vcf", /^text\/vcard/, (b) => /^BEGIN:VCARD/.test(b)],
+    ["/cv.md", /^text\/markdown/, (b) => /^# .+\n[\s\S]*## Experience/.test(b)],
   ];
   for (const [path, type, body] of cases) {
     await check("endpoints", path, async () => {
