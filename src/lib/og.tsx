@@ -301,3 +301,122 @@ export function projectOgImage(slug: ProjectSlug) {
     { ...OG_SIZE, fonts: OG_FONTS },
   );
 }
+
+/**
+ * A share card for a non-project page: a terminal window with a prompt, a
+ * few output lines and the page's URL. Used by /terminal and /cv.
+ */
+export function pageOgImage({
+  path,
+  command,
+  title,
+  lines,
+}: {
+  path: string;
+  command: string;
+  title: string;
+  lines: string[];
+}) {
+  const host = SITE_URL.replace(/^https?:\/\//, "");
+  return new ImageResponse(
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        padding: "56px 64px",
+        background: `radial-gradient(900px circle at 85% -10%, rgba(255,163,26,0.18), transparent 60%), ${C.bg}`,
+        color: C.fg,
+        fontFamily: "Archivo",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          fontSize: 22,
+          color: C.muted,
+          fontFamily: "Plex",
+        }}
+      >
+        <span style={{ display: "flex" }}>
+          ayan<span style={{ color: C.accent }}>://</span>bhardwaj
+          <span style={{ marginLeft: 10 }}>{path}</span>
+        </span>
+        <span>{host}</span>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          border: `1px solid ${C.line}`,
+          borderRadius: 18,
+          background: "#0f0f0e",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            gap: 10,
+            padding: "16px 20px",
+            borderBottom: `1px solid ${C.line}`,
+          }}
+        >
+          {["#ff5f57", "#febc2e", "#28c840"].map((c) => (
+            <span
+              key={c}
+              style={{ width: 14, height: 14, borderRadius: 14, background: c }}
+            />
+          ))}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 10,
+            padding: "26px 30px 30px",
+            fontFamily: "Plex",
+            fontSize: 26,
+          }}
+        >
+          <span style={{ display: "flex" }}>
+            <span style={{ color: C.accent }}>ayan@after-hours</span>
+            <span style={{ color: C.muted }}>:~$&nbsp;</span>
+            <span>{command}</span>
+          </span>
+          <span
+            style={{
+              fontFamily: "Archivo",
+              fontWeight: 800,
+              fontSize: 76,
+              letterSpacing: -3,
+              lineHeight: 1,
+              marginTop: 8,
+            }}
+          >
+            {title}
+          </span>
+          {lines.map((l) => (
+            <span key={l} style={{ color: C.muted }}>
+              {l}
+            </span>
+          ))}
+        </div>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          fontSize: 20,
+          color: C.muted,
+          fontFamily: "Plex",
+        }}
+      >
+        {profile.name} · {profile.role}
+      </div>
+    </div>,
+    { ...OG_SIZE, fonts: OG_FONTS },
+  );
+}
