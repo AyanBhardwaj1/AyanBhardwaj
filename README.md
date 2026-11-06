@@ -43,6 +43,8 @@ No environment variables are required.
 
 CI runs `lint`, `typecheck`, `format:check` and `build` on every pull request and on pushes to `main`, plus an advisory Lighthouse audit. Run the same four commands locally before opening a PR.
 
+A weekly workflow (`.github/workflows/refresh-data.yml`) re-fetches the public GitHub snapshot in `src/data/` and opens a PR when it changed. It needs one repo setting: **Settings > Actions > General > Workflow permissions > Allow GitHub Actions to create and approve pull requests**. Run it any time from the Actions tab, or locally with `npm run data:refresh`.
+
 ## Project structure
 
 ```text

@@ -6,7 +6,8 @@ import { StatusBar } from "@/components/StatusBar";
 
 export const metadata: Metadata = {
   title: "404 · Security not found",
-  robots: { index: false },
+  // Next adds its own noindex to 404 responses; just don't claim the home canonical.
+  alternates: { canonical: null },
 };
 
 const SUGGEST = sections.filter((s) =>

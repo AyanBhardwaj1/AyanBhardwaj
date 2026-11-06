@@ -19,12 +19,6 @@ export const metadata = projectMetadata("runway", {
   title: "Runway: know the day your startup's cash runs out",
   description:
     "A case study of Runway: deterministic burn and runway math from a read-only bank feed, four waste detectors, a 1,000-path Monte Carlo forecast and agents whose every draft waits for a person.",
-  image: {
-    src: SHOTS.hero.src,
-    width: 1440,
-    height: 900,
-    alt: SHOTS.hero.alt,
-  },
 });
 
 const ext = { target: "_blank", rel: "noopener noreferrer" } as const;

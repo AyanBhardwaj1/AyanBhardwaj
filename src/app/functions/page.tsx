@@ -9,6 +9,12 @@ export const metadata: Metadata = {
   description:
     "Every ⌘K command on Ayan Bhardwaj's site, Bloomberg-style: mnemonic, name, and where it goes.",
   alternates: { canonical: "/functions" },
+  openGraph: {
+    url: "/functions",
+    title: "Function directory · Ayan Bhardwaj",
+    description:
+      "Every ⌘K command on Ayan Bhardwaj's site, Bloomberg-style: mnemonic, name, and where it goes.",
+  },
 };
 
 /** No-JS fallback for the palette, and a fun page on its own. */

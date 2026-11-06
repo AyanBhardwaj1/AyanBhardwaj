@@ -1433,3 +1433,68 @@ html:not(.js) .section-rule::after {
     transform: none;
   }
 }
+
+/* Print: a clean, light, ink-friendly fallback résumé. */
+@media print {
+  /* Doubled :root outranks the light-scheme :root:not(...) token block. */
+  :root:root,
+  [data-theme] {
+    --bg: #fff;
+    --bg-elev: #fff;
+    --bg-card: #fff;
+    --fg: #111;
+    --fg-muted: #444;
+    --line: #ddd;
+    --line-strong: #bbb;
+    --accent: #7a3d00;
+  }
+  html,
+  body {
+    background: #fff !important;
+    color: #111 !important;
+    font-size: 11pt;
+  }
+  .rails::before,
+  .rails::after,
+  .ticker,
+  .bob,
+  #activity,
+  #constellation,
+  [aria-label="Manifesto"],
+  [data-print="hide"] {
+    display: none !important;
+  }
+  .section-y {
+    padding-block: 18pt;
+  }
+  .js [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .card:not(:has(.card)),
+  figure {
+    break-inside: avoid;
+  }
+  /* Scoped dark slabs (trophies, footer) print on paper too. */
+  :root [data-theme="dark"] {
+    --bg: #fff;
+    --bg-elev: #fff;
+    --bg-card: #fff;
+    --bg-card-hover: #fff;
+    --fg: #111;
+    --fg-muted: #444;
+    --line: #ddd;
+    --line-strong: #bbb;
+    --accent: #7a3d00;
+    background: #fff !important;
+    color: #111 !important;
+  }
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+  .min-h-svh {
+    min-height: 0 !important;
+  }
+}

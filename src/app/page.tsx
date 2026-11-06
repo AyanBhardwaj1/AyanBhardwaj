@@ -1,4 +1,5 @@
 import { links, projects } from "@/content/content";
+import { JsonLd, homeJsonLd } from "@/lib/jsonld";
 import { projectRepo, sections } from "@/content/extras";
 import { contributionRanges, githubStats, totalStars } from "@/lib/github";
 import { hasResume } from "@/lib/site";
@@ -63,6 +64,7 @@ export default function Home() {
 
   return (
     <>
+      <JsonLd data={homeJsonLd()} />
       <StatusBar />
       <NavPill items={navItems} />
       <Spotlight />
