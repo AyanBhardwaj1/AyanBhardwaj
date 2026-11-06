@@ -63,13 +63,17 @@
   result to ayan-bot. Paste a job description into ayan-bot and it offers to
   hand the whole thing to the Fit check instead.
 - **Tailor the CV** for a role (`/cv?for=fintech`, or `CVFN <GO>`, `CVAI`…): matching projects first,
-  plus a few more that fit; Print / save as PDF keeps it.
+  plus a few more that fit; Print / save as PDF keeps it, and the footer
+  names the version and its link.
 - **Copy as text** on `/cv` (also served at `/cv.md`): the CV as Markdown
   for application forms and recruiter notes.
 - **Role filter** on the projects section (AI, Fintech, Systems, Full-stack,
   Research).
 - **`draft --to ayan`** in Contact writes a clear first email and opens it in
   your own mail app (or copies it).
+- **Worth asking about** on every case study: questions built from the
+  project's own facts ("how did recall@5 go from 0.85 to 0.97?") that open
+  ayan-bot.
 - **Share** button on every case study; `j` / `k` jump between home sections.
 - **Save contact** (`VCF <GO>`): a vCard built from the site's content.
 - The 404 page suggests the page you probably meant (`/termnal` → Terminal).
