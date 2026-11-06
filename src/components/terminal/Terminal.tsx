@@ -13,7 +13,7 @@ import {
 } from "react";
 import type { FitIndex } from "@/lib/fit";
 import { COMMANDS, EXAMPLES, linkSafe } from "@/lib/terminal-commands";
-import { compileFit, fitPrompt, matchFit } from "@/lib/fit-match";
+import { compileFit, encodeFit, fitPrompt, matchFit } from "@/lib/fit-match";
 import "./terminal.css";
 
 /**
@@ -559,12 +559,19 @@ export function Terminal({ data }: { data: TerminalData }) {
               s("not on this site: ", "muted"),
               r.gaps.join(", "),
             ]);
-          if (r.hits.length)
+          if (r.hits.length) {
             print([
               s("next: ", "muted"),
               s("fit ask", "accent"),
               s(" to have ayan-bot point to the strongest examples", "muted"),
             ]);
+            const link = `/cv#fit=${encodeFit(r)}`;
+            print([
+              s("share: ", "muted"),
+              a("this result on the CV →", link),
+              s("  (requirements only, never your text)", "muted"),
+            ]);
+          }
           return;
         }
         case "go":
