@@ -125,7 +125,7 @@ export function AyanBot() {
           <path d="m6.5 8 2 1.5-2 1.5M10.5 11h3" />
         </svg>
         <span className="hidden md:inline">
-          <span className="text-muted group-hover:text-fg transition-colors">
+          <span className="text-fg/70 group-hover:text-fg transition-colors">
             ask{" "}
           </span>
           ayan-bot
