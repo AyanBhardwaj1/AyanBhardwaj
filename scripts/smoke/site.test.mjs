@@ -310,6 +310,14 @@ async function palette(browser) {
   await check("palette", "PROJ <GO> scrolls to #projects", async () => {
     await open();
     await page.keyboard.type("PROJ");
+    // Enter only once the list has filtered to the PROJ row, so a slow
+    // network can't race the keystroke.
+    await until(() =>
+      dialog
+        .locator("[cmdk-item][data-selected='true']", { hasText: "PROJ" })
+        .count()
+        .then((n) => n > 0 || null),
+    );
     await page.keyboard.press("Enter");
     const top = await until(
       () =>
