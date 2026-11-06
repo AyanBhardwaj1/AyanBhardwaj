@@ -127,7 +127,7 @@ export function FitCheck({
   const result = typed ?? (jd.trim() ? null : shared);
   const isShared = !typed && !!result;
   const total = result?.total ?? 0;
-  const role = result ? fitRole(result) : null;
+  const role = result ? fitRole(result, typed ? jd : "") : null;
 
   // The pasted text with each recognised phrase marked, so the score can be
   // checked against the posting itself.

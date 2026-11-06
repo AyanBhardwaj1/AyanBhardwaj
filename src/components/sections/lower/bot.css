@@ -37,8 +37,9 @@
     right: 9px;
   }
 }
-/* Phones, on the home hero: off the call-to-action buttons until you scroll. */
-@media (max-width: 767px) {
+/* Phones and tablets, on the home hero: off the call-to-action buttons and
+   the ticker strip until you scroll. */
+@media (max-width: 1023px) {
   html[data-nav-at-top="true"]
     .ab-launcher:not([data-open]):not(:focus-visible) {
     transform: translateY(calc(100% + 24px + env(safe-area-inset-bottom)));

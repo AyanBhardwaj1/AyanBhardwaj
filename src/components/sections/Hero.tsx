@@ -141,7 +141,7 @@ export function Hero({
         >
           <Spark className="hx-glyph absolute top-[-0.2em] left-[-1.4em] hidden size-[0.42em] md:block" />
           <Candles className="hx-glyph hx-glyph-b absolute right-[-1.5em] bottom-[0.6em] hidden size-[0.5em] md:block" />
-          <figure className="hx-portrait group border-line-strong bg-card relative w-[clamp(108px,min(30vw,17vh),144px)] overflow-hidden rounded-xl border text-base md:w-[clamp(128px,min(15vw,19vh),230px)]">
+          <figure className="hx-portrait group border-line-strong bg-card relative w-[clamp(108px,min(30vw,17vh),144px)] overflow-hidden rounded-xl border text-base md:w-[clamp(104px,min(15vw,15vh),230px)]">
             <Image
               src={headshot.src}
               alt={headshot.alt}
@@ -171,17 +171,17 @@ export function Hero({
         </div>
 
         <p
-          className="hx-rise t-lead mt-5 max-w-[24ch] text-balance md:mt-[min(2.5rem,3vh)]"
+          className="hx-rise t-lead mt-5 max-w-[24ch] text-balance md:mt-[min(2.5rem,2.5vh)]"
           style={rise(420)}
         >
           {profile.headline}
         </p>
         <p className="hx-rise text-muted mt-4 max-w-[52ch]" style={rise(500)}>
           {/* The short line on phones and on short laptop screens. */}
-          <span className="md:hidden [@media(max-height:800px)]:inline">
+          <span className="md:hidden [@media(max-height:940px)]:inline">
             {profile.subheadlineShort}
           </span>
-          <span className="hidden md:inline [@media(max-height:800px)]:hidden">
+          <span className="hidden md:inline [@media(max-height:940px)]:hidden">
             {profile.subheadline}
           </span>
         </p>
@@ -219,7 +219,7 @@ export function Hero({
           )}
         </div>
         <div
-          className="hx-rise mt-3 flex flex-wrap items-center justify-center gap-x-6"
+          className="hx-rise mt-1 flex flex-wrap items-center justify-center gap-x-6"
           style={rise(640)}
         >
           <TourLink />
