@@ -130,7 +130,9 @@ export default function FunctionsPage() {
                 >
                   <td className="py-3 pr-4 pl-2">
                     <a href={href} className="link text-accent">
-                      <code>{c.args ? `${c.name} ${c.args}` : c.name}</code>
+                      <code className="[overflow-wrap:anywhere]">
+                        {c.args ? `${c.name} ${c.args}` : c.name}
+                      </code>
                     </a>
                   </td>
                   <td className="text-muted py-3 pr-4">{c.help}</td>

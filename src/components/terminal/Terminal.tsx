@@ -299,7 +299,12 @@ export function Terminal({ data }: { data: TerminalData }) {
           }
           COMMANDS.forEach((c) =>
             print([
-              s(`${c.name}${c.args ? ` ${c.args}` : ""}`.padEnd(42), "accent"),
+              s(
+                ((sig) => sig.padEnd(Math.max(42, sig.length + 2)))(
+                  `${c.name}${c.args ? ` ${c.args}` : ""}`,
+                ),
+                "accent",
+              ),
               s(c.help, "muted"),
             ]),
           );

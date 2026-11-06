@@ -36,7 +36,7 @@ export const TERMS: Term[] = [
   {
     id: "sql",
     label: "SQL",
-    jd: "\\bsql\\b|\\bpostgres|\\bsqlite\\b|relational database",
+    jd: "\\bsql\\b|\\bpostgres(ql)?|\\bsqlite\\b|relational database",
     ev: "\\bsql|postgres|sqlite|duckdb|\\bneon\\b",
   },
   // Web and apps
@@ -89,7 +89,7 @@ export const TERMS: Term[] = [
   {
     id: "postgres",
     label: "PostgreSQL",
-    jd: "postgres",
+    jd: "postgres(ql)?",
     ev: "postgres|\\bneon\\b|supabase",
   },
   {

@@ -421,6 +421,21 @@ export default function CommandPalette({
         {/* Always mounted, so screen readers announce the first line too. */}
         <div
           role="log"
+          // cmdk's root claims arrows/Home/End for the list; while the log
+          // is focused, let them scroll the log instead.
+          onKeyDown={(e) => {
+            if (
+              [
+                "ArrowUp",
+                "ArrowDown",
+                "Home",
+                "End",
+                "PageUp",
+                "PageDown",
+              ].includes(e.key)
+            )
+              e.stopPropagation();
+          }}
           aria-live="polite"
           aria-label="Palette output"
           // Focusable (when it has output) so keyboard users can scroll

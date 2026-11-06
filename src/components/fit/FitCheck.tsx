@@ -204,7 +204,19 @@ export function FitCheck({ index }: { index: FitIndex }) {
         rows={5}
         maxLength={8000}
         value={text}
-        onChange={(e) => setText(e.target.value)}
+        onChange={(e) => {
+          setText(e.target.value);
+          // Your own posting replaces a shared result for good (Clear and
+          // reload don't bring it back).
+          if (shared && e.target.value.trim()) {
+            setShared(null);
+            window.history.replaceState(
+              null,
+              "",
+              window.location.pathname + window.location.search,
+            );
+          }
+        }}
         placeholder="Paste the role here…"
         spellCheck={false}
         className="border-line-strong bg-bg text-fg placeholder:text-dim focus-visible:border-accent mt-2 w-full resize-y rounded-[10px] border px-3 py-2 font-mono text-[13px] focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]/40 focus-visible:outline-none"
@@ -213,7 +225,17 @@ export function FitCheck({ index }: { index: FitIndex }) {
         <button
           type="button"
           className="pill min-h-9 px-3 text-[12px]"
-          onClick={() => setText(SAMPLE)}
+          onClick={() => {
+            setText(SAMPLE);
+            if (shared) {
+              setShared(null);
+              window.history.replaceState(
+                null,
+                "",
+                window.location.pathname + window.location.search,
+              );
+            }
+          }}
         >
           Try a sample
         </button>
