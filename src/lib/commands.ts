@@ -254,6 +254,25 @@ export const commands: Command[] = [
     action: { type: "route", href: "/cv#fit" },
     href: "/cv#fit",
   },
+  // The CV, tailored for each role lens (see /cv "Tailor for").
+  ...(
+    [
+      ["ai", "CVAI", "AI / ML", ["ai", "ml", "machine learning", "llm"]],
+      ["fintech", "CVFN", "Fintech", ["fintech", "finance", "quant"]],
+      ["systems", "CVSY", "Systems", ["systems", "rust", "performance"]],
+      ["fullstack", "CVFS", "Full-stack", ["full-stack", "fullstack", "web"]],
+      ["research", "CVRS", "Research", ["research", "nlp", "evals"]],
+    ] as const
+  ).map(([role, mnemonic, label, kw]): Command => ({
+    id: `link.cv-${role}`,
+    mnemonic,
+    title: `CV for ${label}`,
+    hint: "The web CV with matching projects first",
+    group: "Links",
+    keywords: ["cv", "resume", "tailored", ...kw],
+    action: { type: "route", href: `/cv?for=${role}` },
+    href: `/cv?for=${role}`,
+  })),
   {
     id: "link.terminal",
     mnemonic: "TERM",
