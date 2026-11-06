@@ -2,6 +2,7 @@ import Image from "next/image";
 import { links, profile } from "@/content/content";
 import { headshot } from "@/content/extras";
 import { HeroField } from "../fx/HeroField";
+import { TourLink } from "../fx/TourLink";
 import { Konami } from "../fx/Konami";
 import { Ticker, type TickerItem } from "../ui/Ticker";
 
@@ -210,6 +211,9 @@ export function Hero({
               <span className="sr-only">(PDF, opens in a new tab)</span>
             </a>
           )}
+        </div>
+        <div className="hx-rise mt-3" style={rise(640)}>
+          <TourLink />
         </div>
 
         <div
