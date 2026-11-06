@@ -901,17 +901,26 @@
 .yb-cellOn {
   color: var(--d-fg);
 }
+/* Fresh cells flash amber through a composited overlay (opacity only);
+   cells are already position: relative. */
 @media (prefers-reduced-motion: no-preference) {
-  .yb-cellOn {
+  .yb-cellOn::after,
+  .yb-cellFlash::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: rgb(245 166 35 / 0.35);
+    opacity: 0;
     animation: glow 900ms ease-out;
   }
-  .yb-cellFlash {
-    animation: glow 700ms ease-out;
+  .yb-cellFlash::after {
+    animation-duration: 700ms;
   }
 }
 @keyframes glow {
   from {
-    background: rgb(245 166 35 / 0.35);
+    opacity: 1;
   }
 }
 .yb-cellCursor {
@@ -1153,17 +1162,23 @@
   border-radius: 50%;
   background: var(--d-pos);
 }
+.yb-liveDot {
+  position: relative;
+}
 @media (prefers-reduced-motion: no-preference) {
-  .yb-liveDot {
+  .yb-liveDot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: rgb(63 185 80 / 0.6);
     animation: pulse 2s ease-out infinite;
   }
 }
 @keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgb(63 185 80 / 0.6);
-  }
-  100% {
-    box-shadow: 0 0 0 8px rgb(63 185 80 / 0);
+  to {
+    opacity: 0;
+    transform: scale(3.2);
   }
 }
 .yb-wireList li {
