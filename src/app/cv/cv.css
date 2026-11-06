@@ -349,3 +349,20 @@
   text-decoration-style: dotted;
   text-decoration-color: var(--fg-muted);
 }
+
+/* Phones: the CV first, the Fit check after it (it's still at /cv#fit). */
+@media (max-width: 767.98px) {
+  .cv {
+    display: flex;
+    flex-direction: column;
+  }
+  /* Auto side margins would shrink flex children to their content. */
+  .cv > * {
+    width: 100%;
+  }
+  .cv > .cv-fitSheet {
+    order: 1;
+    margin-top: 20px;
+    margin-bottom: 0;
+  }
+}
