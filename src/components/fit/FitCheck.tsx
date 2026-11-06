@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useDeferredValue, useId, useMemo, useState } from "react";
 import type { FitIndex } from "@/lib/fit";
-import { compileFit, fitPrompt, matchFit } from "@/lib/fit-match";
+import { compileFit, fitPrompt, fitSummary, matchFit } from "@/lib/fit-match";
 
 /**
  * Paste a job description; see which of its requirements this site can back
@@ -20,6 +20,7 @@ Bonus: Rust, quant/risk models, open-source contributions, Kubernetes.`;
 export function FitCheck({ index }: { index: FitIndex }) {
   const id = useId();
   const [text, setText] = useState("");
+  const [copied, setCopied] = useState(false);
   const jd = useDeferredValue(text);
 
   const compiled = useMemo(() => compileFit(index), [index]);
@@ -29,6 +30,19 @@ export function FitCheck({ index }: { index: FitIndex }) {
   );
   const total = result?.total ?? 0;
   const pct = result?.pct ?? 0;
+
+  const copy = async () => {
+    if (!result) return;
+    try {
+      await navigator.clipboard.writeText(
+        fitSummary(result, `${window.location.origin}/cv#fit`),
+      );
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setCopied(false);
+    }
+  };
 
   const askBot = () => {
     if (!result) return;
@@ -109,16 +123,17 @@ export function FitCheck({ index }: { index: FitIndex }) {
                 className="bg-line-strong relative h-1.5 w-40 overflow-hidden rounded-full"
               >
                 <span
-                  className="bg-accent absolute inset-y-0 left-0 rounded-full"
-                  style={{ width: `${pct}%` }}
+                  className="cv-fitBar bg-accent absolute inset-0 rounded-full"
+                  style={{ "--p": pct / 100 } as React.CSSProperties}
                 />
               </span>
             </div>
             <ul className="mt-4 grid gap-2 sm:grid-cols-2">
-              {result.hits.map((h) => (
+              {result.hits.map((h, i) => (
                 <li
                   key={h.id}
-                  className="border-line rounded-[10px] border p-3"
+                  className="cv-fitCard border-line rounded-[10px] border p-3"
+                  style={{ "--i": Math.min(i, 12) } as React.CSSProperties}
                 >
                   <p className="font-medium">
                     <span aria-hidden="true" className="text-up">
@@ -152,13 +167,21 @@ export function FitCheck({ index }: { index: FitIndex }) {
               </p>
             )}
             {result.hits.length > 0 && (
-              <button
-                type="button"
-                onClick={askBot}
-                className="pill pill-solid mt-4 min-h-10"
-              >
-                Ask ayan-bot for the strongest examples
-              </button>
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={askBot}
+                  className="pill pill-solid min-h-10"
+                >
+                  Ask ayan-bot for the strongest examples
+                </button>
+                <button type="button" onClick={copy} className="pill min-h-10">
+                  {copied ? "Copied" : "Copy summary"}
+                </button>
+                <span className="sr-only" aria-live="polite">
+                  {copied ? "Fit summary copied to the clipboard." : ""}
+                </span>
+              </div>
             )}
           </>
         )}

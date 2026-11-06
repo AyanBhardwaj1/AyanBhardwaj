@@ -56,3 +56,18 @@ export function fitPrompt(r: FitResult): string {
     480,
   );
 }
+
+/** A plain-text summary to paste into notes, an ATS or a message. */
+export function fitSummary(r: FitResult, url: string): string {
+  return [
+    `Ayan Bhardwaj: fit check (${url})`,
+    `${r.hits.length} of ${r.total} recognised requirements backed by work on the site.`,
+    "",
+    ...r.hits.map(
+      (h) => `+ ${h.label}: ${h.evidence.map((e) => e.name).join(", ")}`,
+    ),
+    ...(r.gaps.length
+      ? ["", `Not shown on the site: ${r.gaps.join(", ")}`]
+      : []),
+  ].join("\n");
+}

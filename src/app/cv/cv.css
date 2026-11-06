@@ -217,3 +217,33 @@
 .cv-fitSheet {
   margin-bottom: 20px;
 }
+
+/* Fit check: the bar fills, then new matches rise in one after another. */
+.cv-fitBar {
+  transform-origin: left;
+  transform: scaleX(var(--p, 0));
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: cv-fit-grow 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.cv-fitCard {
+  animation: cv-fit-rise 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 35ms);
+}
+@keyframes cv-fit-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes cv-fit-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cv-fitBar,
+  .cv-fitCard {
+    animation: none;
+    transition: none;
+  }
+}
