@@ -42,8 +42,21 @@
 ### New pages
 
 - `/terminal`: a command line over the site (`whoami`, `ls projects`,
-  `cat youbank`, `open resume`, `ask …`).
+  `ls projects ai`, `cat youbank`, `open resume`, `fit …`, `ask …`).
 - `/cv`: a web CV generated from the same content, print-ready.
+
+### For recruiters
+
+- **Fit check** (`FIT <GO>`, on `/cv`): paste a job description and see
+  which requirements the site's own projects and roles back up, with links
+  as evidence, and which it doesn't show. Runs in the browser; nothing is
+  sent. `fit <text>` does the same in the terminal, and `fit ask` hands the
+  result to ayan-bot.
+- **Role filter** on the projects section (AI, Fintech, Systems, Full-stack,
+  Research).
+- **`draft --to ayan`** in Contact writes a clear first email and opens it in
+  your own mail app (or copies it).
+- **Share** button on every case study; `j` / `k` jump between home sections.
 
 ### Accessibility and performance
 
@@ -52,6 +65,14 @@
   exactly (CSS and JS).
 - Hero fits a 1280×720 laptop fold; composited animations on YouBank;
   terminal boot in the server HTML (Lighthouse 91 → 100).
+
+### Testing
+
+- `npm run test:smoke`: 65 browser checks against a production build (every
+  route renders without errors, metadata and share images, palette,
+  terminal, Fit check, ayan-bot in mock mode, reduced motion, keyboard,
+  endpoints). It caught `/functions` missing its share
+  image.
 
 ### SEO and plumbing
 

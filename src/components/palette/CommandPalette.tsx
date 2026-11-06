@@ -78,6 +78,7 @@ const HELP_LINES = [
   "ayan-bot: ⌘J / Ctrl+J · select any text on the page to ask about it",
   "case studies: F1–F8 jump between sections on YouBank · 'Ask about' in the bar",
   "new here? TOUR <GO> for a 40-second guided tour · TERM <GO> opens the terminal",
+  "hiring? FIT <GO>: paste a job description, see what his work backs up",
   "easter eggs exist. try: whoami, latency, mavs, sudo hire ayan, RAIN, BELL, ↑↑↓↓←→←→BA",
 ];
 

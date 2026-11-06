@@ -433,6 +433,15 @@ async function terminal(browser) {
   await check("terminal", "cat yb prints YouBank", async () => {
     assert(await run("cat yb", /YouBank/), "no YouBank in output");
   });
+  await check("terminal", "fit matches a job description", async () => {
+    const out = await run(
+      "fit Python, React, LLM agents and Kubernetes",
+      /not on this site/,
+    );
+    assert(out, "fit printed no result");
+    assert(/✓ Python/.test(out), "fit did not back Python");
+    assert(/Kubernetes/.test(out), "fit did not list the Kubernetes gap");
+  });
   await check("terminal", "unknown command", async () => {
     assert(
       await run("frobnicate", /command not found/),
@@ -456,6 +465,30 @@ async function terminal(browser) {
       );
     },
   );
+  await ctx.close();
+}
+
+async function fitCheck(browser) {
+  const ctx = await newContext(browser);
+  const page = await ctx.newPage();
+  await page.goto(BASE + "/cv#fit", { waitUntil: "load" });
+  await check("fit", "sample job description gets evidence", async () => {
+    await page.getByRole("button", { name: "Try a sample" }).click();
+    const summary = await until(async () => {
+      const t = await page.locator("#fit").innerText();
+      return /\d+ of \d+ recognised requirements/.test(t) ? t : null;
+    });
+    assert(summary, "no fit summary after the sample");
+    assert(
+      (await page.locator("#fit li a[href]").count()) > 0,
+      "no evidence links",
+    );
+  });
+  await check("fit", "hidden when printing", async () => {
+    await page.emulateMedia({ media: "print" });
+    assert(!(await page.locator("#fit").isVisible()), "#fit visible in print");
+    await page.emulateMedia({ media: "screen" });
+  });
   await ctx.close();
 }
 
@@ -607,6 +640,7 @@ try {
   await palette(browser);
   await ayanBot(browser);
   await terminal(browser);
+  await fitCheck(browser);
   await reducedMotion(browser);
   await keyboard(browser);
   await endpoints();
