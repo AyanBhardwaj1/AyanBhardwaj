@@ -138,11 +138,27 @@ const COMMANDS: { name: string; args?: string; help: string }[] = [
 
 const HIST_KEY = "ayan:term-history";
 
+/** Examples for help <command>. */
+const EXAMPLES: Record<string, string[]> = {
+  ls: ["ls projects", "ls projects fintech", "ls exp"],
+  cat: ["cat youbank", "cat jrv", "cat walk-free"],
+  open: ["open resume", "open github", "open runway"],
+  grep: ["grep pytorch", "grep rust", "grep monte carlo"],
+  diff: ["diff youbank runway", "diff mycelium mossjarvis"],
+  fit: ["fit Python, React, LLM agents, Kubernetes", "fit ask"],
+  cv: ["cv", "cv fintech", "cv ai"],
+  ask: ["ask what did he build at Moss", "ask why Rust for QuantDesk"],
+  go: ["go projects", "go contact"],
+  history: ["history", "history -c"],
+  share: ["grep rust", "share"],
+};
+
 /**
  * Commands a shared link (?run=) may replay: read-only ones. Never ask
  * (credits), fit ask, open/cv/tour/exit (navigation) or history -c.
  */
 const LINK_SAFE = new Set([
+  "man",
   "help",
   "whoami",
   "ls",
@@ -353,14 +369,36 @@ export function Terminal({ data }: { data: TerminalData }) {
       switch (cmd) {
         case "help":
         case "?":
-        case "man":
+        case "man": {
+          // help <cmd> / man <cmd>: one command, with examples.
+          const one = arg
+            ? COMMANDS.find((c) => c.name === arg.toLowerCase().trim())
+            : undefined;
+          if (arg && !one) {
+            print([s(`${cmd}: no entry for ${arg}. Type help.`, "muted")]);
+            return;
+          }
+          if (one) {
+            print([
+              s(`${one.name}${one.args ? ` ${one.args}` : ""}`, "accent"),
+            ]);
+            print([`  ${one.help}`]);
+            const ex = EXAMPLES[one.name];
+            if (ex?.length) {
+              print([s("  examples", "muted")]);
+              ex.forEach((e) => print([s("    $ ", "muted"), e]));
+            }
+            return;
+          }
           COMMANDS.forEach((c) =>
             print([
               s(`${c.name}${c.args ? ` ${c.args}` : ""}`.padEnd(42), "accent"),
               s(c.help, "muted"),
             ]),
           );
+          print([s("help <command> shows one, with examples.", "muted")]);
           return;
+        }
         case "whoami":
           print([
             s(data.name, "strong"),
@@ -988,11 +1026,13 @@ export function Terminal({ data }: { data: TerminalData }) {
             ? SECTIONS
             : ["cv", "tailor"].includes(parts[0].toLowerCase())
               ? ROLE_IDS
-              : parts[0].toLowerCase() === "ls"
-                ? parts.length > 2
-                  ? ROLE_IDS
-                  : ["projects", "exp", "skills"]
-                : [];
+              : ["help", "man"].includes(parts[0].toLowerCase())
+                ? COMMANDS.map((c) => c.name)
+                : parts[0].toLowerCase() === "ls"
+                  ? parts.length > 2
+                    ? ROLE_IDS
+                    : ["projects", "exp", "skills"]
+                  : [];
     const last = (parts.at(-1) ?? "").toLowerCase();
     const hits = pool.filter((x) => x.startsWith(last));
     if (hits.length === 1) {
