@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { ROLES, type RoleId } from "@/lib/roles";
 import { TAILOR_EVENT } from "@/lib/fit-match";
 
@@ -120,10 +120,53 @@ export function CvProjectList({
         ...base.filter((p) => !p.roles.includes(role)),
       ]
     : base;
+
+  // FLIP: when the order changes, each project glides from where it was.
+  // Positions are layout offsets (not viewport), so scrolling in between
+  // doesn't skew them. Newcomers fade in. Nothing moves under reduced motion.
+  const nodes = useRef(new Map<string, HTMLDivElement>());
+  const last = useRef(new Map<string, number>());
+  const order = list.map((p) => p.id).join(",");
+  useLayoutEffect(() => {
+    const before = last.current;
+    const reduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const now = new Map<string, number>();
+    nodes.current.forEach((el, id) => {
+      now.set(id, el.offsetTop);
+      if (reduce || !before.size || typeof el.animate !== "function") return;
+      const was = before.get(id);
+      if (was === undefined)
+        el.animate([{ opacity: 0 }, { opacity: 1 }], {
+          duration: 320,
+          delay: 120,
+          easing: "ease-out",
+          fill: "backwards",
+        });
+      else if (was !== el.offsetTop)
+        el.animate(
+          [
+            { transform: `translateY(${was - el.offsetTop}px)` },
+            { transform: "translateY(0)" },
+          ],
+          { duration: 460, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" },
+        );
+    });
+    last.current = now;
+  }, [order]);
+
   return (
     <>
       {list.map((p) => (
-        <div key={p.id} className="cv-item">
+        <div
+          key={p.id}
+          className="cv-item"
+          ref={(el) => {
+            if (el) nodes.current.set(p.id, el);
+            else nodes.current.delete(p.id);
+          }}
+        >
           <div className="cv-itemHead">
             <h3>
               {p.page ? <Link href={p.page}>{p.name}</Link> : p.name}
