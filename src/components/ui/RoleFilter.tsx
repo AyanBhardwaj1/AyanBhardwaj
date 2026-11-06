@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ROLES, type RoleId } from "@/lib/roles";
 
@@ -46,10 +47,18 @@ export function RoleFilter({ scope }: { scope: string }) {
           Clear
         </button>
       )}
-      <span className="t-label text-muted ml-auto" aria-live="polite">
-        {count !== null
-          ? `${count} ${count === 1 ? "project matches" : "projects match"}`
-          : ""}
+      <span className="t-label text-muted ml-auto flex flex-wrap items-center gap-x-4">
+        <span aria-live="polite">
+          {count !== null
+            ? `${count} ${count === 1 ? "project matches" : "projects match"}`
+            : ""}
+        </span>
+        <Link
+          href="/cv#fit"
+          className="text-accent inline-flex min-h-9 items-center underline-offset-4 hover:underline"
+        >
+          Check a job description →
+        </Link>
       </span>
     </div>
   );
