@@ -840,11 +840,19 @@ export function Terminal({ data }: { data: TerminalData }) {
         case "top":
         case "htop": {
           // Count each technology once per project ("Next.js 15" and
-          // "Tauri 2" fold into their names).
+          // "Tauri 2" fold into their names; every Moss SDK piece counts
+          // as the Moss SDK).
           const count = new Map<string, { n: number; names: string[] }>();
           for (const p of data.projects)
             for (const t of new Set(
-              p.stack.map((x) => x.replace(/\s+\d+(\.\d+)*$/, "").trim()),
+              p.stack.map((x) =>
+                /^Moss\b/.test(x)
+                  ? "Moss SDK"
+                  : x
+                      .replace(/\s*\(.*?\)\s*/g, " ")
+                      .replace(/\s+\d+(\.\d+)*$/, "")
+                      .trim(),
+              ),
             )) {
               const c = count.get(t) ?? { n: 0, names: [] };
               c.n++;

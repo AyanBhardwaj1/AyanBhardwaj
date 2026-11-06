@@ -101,6 +101,16 @@ export function FitCheck({
   // A result opened from a shared link (#fit=…): term ids only, no text.
   const [shared, setShared] = useState<FitResult | null>(null);
   useEffect(() => {
+    // Plain #fit: land on the Fit check even if content above it settles
+    // after load (on phones it sits below the CV).
+    if (window.location.hash === "#fit") {
+      const t = window.setTimeout(
+        () =>
+          document.getElementById("fit")?.scrollIntoView({ block: "start" }),
+        250,
+      );
+      return () => window.clearTimeout(t);
+    }
     const m = window.location.hash.match(/^#fit=(.+)$/);
     if (!m) return;
     const r = decodeFit(compiled, m[1]);
