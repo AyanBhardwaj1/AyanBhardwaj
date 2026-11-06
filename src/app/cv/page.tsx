@@ -29,12 +29,12 @@ import "./cv.css";
 
 export const metadata: Metadata = {
   title: "CV",
-  description: `${profile.name}'s CV: experience, selected projects, skills and education, generated from the same content as the site.`,
+  description: `${profile.name}'s CV: experience, selected projects, skills and education. Tailor it for a role, or paste a job description into the Fit check.`,
   alternates: { canonical: "/cv" },
   openGraph: {
     url: "/cv",
     title: `CV · ${profile.name}`,
-    description: `${profile.name}'s CV: experience, selected projects, skills and education.`,
+    description: `${profile.name}'s CV, tailored to the role you're hiring for, with a Fit check for job descriptions.`,
   },
 };
 

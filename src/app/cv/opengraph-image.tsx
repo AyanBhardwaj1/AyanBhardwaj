@@ -11,7 +11,7 @@ export default function Image() {
     title: "Ayan Bhardwaj, CV",
     lines: [
       "Moss (YC F25) · Koyal AI (YC F25) · UNT NLP lab",
-      "Experience, projects, skills. Always current.",
+      "Tailor it for a role. Fit check a job description.",
     ],
   });
 }
