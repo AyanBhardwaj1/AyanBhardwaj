@@ -2,6 +2,7 @@ import { links, ui } from "@/content/content";
 import { Reveal } from "../motion/Reveal";
 import "./lower/lower.css";
 import { CopyEmail } from "../ui/CopyEmail";
+import { EmailDraft } from "../ui/EmailDraft";
 import { SectionHeader } from "../ui/SectionHeader";
 
 export function Contact({ hasResume }: { hasResume: boolean }) {
@@ -122,6 +123,7 @@ export function Contact({ hasResume }: { hasResume: boolean }) {
                   </li>
                 ))}
               </ul>
+              <EmailDraft to={email} />
             </div>
           </Reveal>
         </div>

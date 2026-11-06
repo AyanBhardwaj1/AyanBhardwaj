@@ -115,3 +115,64 @@ export function Explored({ slug }: { slug: ProjectSlug }) {
     </div>
   );
 }
+
+/**
+ * Share this case study: the native share sheet where there is one (phones),
+ * otherwise copy the link. The URL is the page's canonical address.
+ */
+export function ShareButton({ name, path }: { name: string; path: string }) {
+  const [done, setDone] = useState(false);
+  const share = async () => {
+    const url = new URL(path, window.location.origin).href;
+    const data = { title: `${name} · Ayan Bhardwaj`, url };
+    try {
+      if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
+        await navigator.share(data);
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setDone(true);
+      window.setTimeout(() => setDone(false), 1600);
+    } catch {
+      /* dismissed the sheet, or clipboard blocked */
+    }
+  };
+  return (
+    <>
+      <button
+        type="button"
+        onClick={share}
+        className="t-label border-line-strong hover:border-accent hover:text-accent inline-flex h-10 items-center gap-2 rounded-full border px-3 transition-colors"
+      >
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          className="size-4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          {done ? (
+            <path d="m5 12.5 4.5 4.5L19 7.5" />
+          ) : (
+            <>
+              <path d="M12 3v12M7.5 7.5 12 3l4.5 4.5" />
+              <path d="M5 13v5.5A2.5 2.5 0 0 0 7.5 21h9a2.5 2.5 0 0 0 2.5-2.5V13" />
+            </>
+          )}
+        </svg>
+        <span className="hidden lg:inline">
+          {done ? "Link copied" : "Share"}
+        </span>
+        <span className="sr-only lg:hidden">
+          {done ? "Link copied" : `Share ${name}`}
+        </span>
+      </button>
+      <span className="sr-only" aria-live="polite">
+        {done ? "Link copied to the clipboard." : ""}
+      </span>
+    </>
+  );
+}

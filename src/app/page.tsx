@@ -1,4 +1,5 @@
 import { links, projects } from "@/content/content";
+import { SectionKeys } from "@/components/ui/SectionKeys";
 import { JsonLd, homeJsonLd } from "@/lib/jsonld";
 import { projectRepo, sections } from "@/content/extras";
 import { contributionRanges, githubStats, totalStars } from "@/lib/github";
@@ -81,6 +82,7 @@ export default function Home() {
       <Footer hasResume={hasResume} />
       <RevealObserver />
       <PointerFx />
+      <SectionKeys />
     </>
   );
 }

@@ -74,7 +74,7 @@ const HELP_LINES = [
   "or type words to search projects and experience, on-device",
   "or ASK <question> to ask ayan-bot",
   "↑ ↓ to move · Enter to run · Tab to complete · Esc to close",
-  "shortcuts: ⌘K / Ctrl+K anywhere · / or ? to open · KEYS <GO> for type-to-open",
+  "shortcuts: ⌘K / Ctrl+K anywhere · / or ? to open · j / k next and previous section · KEYS <GO> for type-to-open",
   "ayan-bot: ⌘J / Ctrl+J · select any text on the page to ask about it",
   "case studies: F1–F8 jump between sections on YouBank · 'Ask about' in the bar",
   "new here? TOUR <GO> for a 40-second guided tour · TERM <GO> opens the terminal",

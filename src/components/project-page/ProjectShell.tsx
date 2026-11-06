@@ -45,7 +45,7 @@ import {
 import { PointerFx } from "../motion/PointerFx";
 import { RevealObserver } from "../motion/RevealObserver";
 import { ThemeToggle } from "../ui/ThemeToggle";
-import { AskAboutButton, Explored } from "./ProjectExtras";
+import { AskAboutButton, Explored, ShareButton } from "./ProjectExtras";
 import "./shell.css";
 
 export function ProjectShell({
@@ -94,6 +94,7 @@ export function ProjectShell({
             &lt;GO&gt; · {p.name}
           </p>
           <div className="flex shrink-0 items-center gap-2">
+            <ShareButton name={p.name} path={`/projects/${slug}`} />
             <AskAboutButton name={p.name} />
             {themeToggle && (
               <ThemeToggle className="t-label h-10 min-w-10 justify-center px-3" />
