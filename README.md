@@ -43,18 +43,18 @@ No environment variables are required. ayan-bot (the chat agent) runs in a free 
 
 ## Scripts
 
-| Command                | What it does                                                |
-| ---------------------- | ----------------------------------------------------------- |
-| `npm run dev`          | Start the dev server with hot reload                        |
-| `npm run build`        | Production build                                            |
-| `npm run start`        | Serve the production build (run `build` first)              |
-| `npm run lint`         | ESLint                                                      |
-| `npm run typecheck`    | Generate Next.js route types, then `tsc --noEmit`           |
-| `npm run format`       | Format everything with Prettier                             |
-| `npm run format:check` | Check formatting without writing                            |
-| `npm run test:smoke`   | 70 browser checks on a production build (`build` first)     |
-| `npm run test:unit`    | Fit check matcher unit tests (Node's test runner, no build) |
-| `npm run test:bot`     | ayan-bot route against local fakes, no credits spent        |
+| Command                | What it does                                                          |
+| ---------------------- | --------------------------------------------------------------------- |
+| `npm run dev`          | Start the dev server with hot reload                                  |
+| `npm run build`        | Production build                                                      |
+| `npm run start`        | Serve the production build (run `build` first)                        |
+| `npm run lint`         | ESLint                                                                |
+| `npm run typecheck`    | Generate Next.js route types, then `tsc --noEmit`                     |
+| `npm run format`       | Format everything with Prettier                                       |
+| `npm run format:check` | Check formatting without writing                                      |
+| `npm run test:smoke`   | 70 browser checks on a production build (`build` first)               |
+| `npm run test:unit`    | Fit check and terminal-link unit tests (Node's test runner, no build) |
+| `npm run test:bot`     | ayan-bot route against local fakes, no credits spent                  |
 
 CI runs `lint`, `typecheck`, `format:check`, `test:unit` and `build` on every pull request and on pushes to `main`, plus an advisory Lighthouse audit. Run the same commands locally before opening a PR.
 
