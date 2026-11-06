@@ -16,6 +16,7 @@ import {
   FIT_HANDOFF_EVENT,
   FIT_HANDOFF_KEY,
   fitPrompt,
+  fitMarks,
   fitRole,
   TAILOR_EVENT,
   fitSummary,
@@ -74,6 +75,32 @@ export function FitCheck({ index }: { index: FitIndex }) {
   );
   const total = result?.total ?? 0;
   const role = result ? fitRole(result) : null;
+
+  // The pasted text with each recognised phrase marked, so the score can be
+  // checked against the posting itself.
+  const marks = useMemo(
+    () => (result ? fitMarks(compiled, jd) : []),
+    [result, compiled, jd],
+  );
+  const annotated = useMemo(() => {
+    const out: React.ReactNode[] = [];
+    let at = 0;
+    for (const m of marks) {
+      if (m.start > at) out.push(jd.slice(at, m.start));
+      out.push(
+        <mark
+          key={m.start}
+          className={`cv-mark cv-mark-${m.kind}`}
+          title={m.label}
+        >
+          {jd.slice(m.start, m.end)}
+        </mark>,
+      );
+      at = m.end;
+    }
+    out.push(jd.slice(at));
+    return out;
+  }, [marks, jd]);
 
   // Announce the score once typing settles, not on every keystroke.
   const headline = !result
@@ -270,6 +297,31 @@ export function FitCheck({ index }: { index: FitIndex }) {
                 </span>
                 {result.gaps.join(", ")}. Worth asking Ayan directly.
               </p>
+            )}
+            {marks.length > 0 && (
+              <details className="cv-annotWrap mt-4">
+                <summary className="t-label text-muted hover:text-fg min-h-9 cursor-pointer py-2">
+                  Show what it recognised
+                </summary>
+                <p
+                  className="cv-annot"
+                  tabIndex={0}
+                  aria-label="The job description, with recognised phrases marked"
+                >
+                  {annotated}
+                </p>
+                <p className="text-muted mt-2 flex flex-wrap gap-x-4 text-[12px]">
+                  <span>
+                    <mark className="cv-mark cv-mark-hit">backed</mark>
+                  </span>
+                  <span>
+                    <mark className="cv-mark cv-mark-gap">not on the site</mark>
+                  </span>
+                  <span>
+                    <mark className="cv-mark cv-mark-soft">not scored</mark>
+                  </span>
+                </p>
+              </details>
             )}
             {result.hits.length > 0 && (
               <div className="mt-4 flex flex-wrap items-center gap-2">

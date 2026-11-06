@@ -282,3 +282,33 @@
   max-width: 860px;
   margin: 0 auto 16px;
 }
+
+/* Fit check: the posting with recognised phrases marked. */
+.cv-annot {
+  margin-top: 8px;
+  max-height: 16rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--fg-muted);
+}
+.cv-mark {
+  color: var(--fg);
+  border-radius: 3px;
+  padding: 0 2px;
+}
+.cv-mark-hit {
+  background: color-mix(in srgb, var(--up) 24%, transparent);
+}
+.cv-mark-gap {
+  background: color-mix(in srgb, var(--down) 22%, transparent);
+}
+.cv-mark-soft {
+  background: color-mix(in srgb, var(--fg) 10%, transparent);
+}
