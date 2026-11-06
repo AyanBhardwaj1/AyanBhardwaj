@@ -18,6 +18,7 @@ import { ConstellationIsland } from "../viz/ConstellationIsland";
 import { CountUp } from "../motion/CountUp";
 import { MiniTerminal } from "../viz/MiniTerminal";
 import "./lower/lower.css";
+import { HoverVideo } from "../ui/HoverVideo";
 
 const host = (url: string) =>
   url.replace(/^https?:\/\//, "").replace(/\/$/, "");
@@ -165,6 +166,11 @@ function OpenCta() {
   );
 }
 
+/** Cards with a real screen recording play it on hover. */
+const CARD_VIDEO: Record<string, string> = {
+  runway: "/media/projects/runway/waste-demo.mp4",
+};
+
 function ProjectCard({
   p,
   index,
@@ -200,6 +206,7 @@ function ProjectCard({
           ) : (
             <TypeCard p={p} />
           )}
+          {CARD_VIDEO[p.id] && <HoverVideo src={CARD_VIDEO[p.id]} />}
           <span aria-hidden="true" className="lw-sheen" />
           {page && <OpenCta />}
         </div>
