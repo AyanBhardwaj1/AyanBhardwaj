@@ -58,7 +58,9 @@
 
 - **Fit check** (`FIT <GO>`, on `/cv`): paste a job description and see
   which requirements the site's own projects and roles back up, with links
-  as evidence, and which it doesn't show. Runs in the browser; nothing is
+  as evidence, and which it doesn't show. Only technical requirements are
+  scored (startup experience and leadership are listed, not scored), and a
+  score needs at least three, so a sales or nursing posting doesn't light up. Runs in the browser; nothing is
   sent. `fit <text>` does the same in the terminal, and `fit ask` hands the
   result to ayan-bot. Paste a job description into ayan-bot and it offers to
   hand the whole thing to the Fit check instead.
