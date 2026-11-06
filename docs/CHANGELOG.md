@@ -42,7 +42,7 @@
 ### New pages
 
 - `/terminal`: a command line over the site (`whoami`, `ls projects`,
-  `ls projects ai`, `cat youbank`, `grep pytorch`, `neofetch`, `open resume`,
+  `ls projects ai`, `cat youbank`, `grep pytorch`, `diff youbank runway`, `cv fintech`, `tour`, `neofetch`, `open resume`,
   `fit …`, `ask …`).
 - `/cv`: a web CV generated from the same content, print-ready.
 

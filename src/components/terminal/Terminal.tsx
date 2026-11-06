@@ -121,6 +121,13 @@ const COMMANDS: { name: string; args?: string; help: string }[] = [
     help: "jump to a home section",
   },
   { name: "grep", args: "<word>", help: "search all the work (grep pytorch)" },
+  { name: "diff", args: "<project> <project>", help: "compare two builds" },
+  {
+    name: "cv",
+    args: "[ai|fintech|systems|fullstack|research]",
+    help: "the CV, tailored",
+  },
+  { name: "tour", help: "the 40-second guided tour" },
   { name: "neofetch", help: "the system, at a glance" },
   { name: "history", help: "commands you've run" },
   { name: "clear", help: "clear the screen (Ctrl+L)" },
@@ -660,6 +667,74 @@ export function Terminal({ data }: { data: TerminalData }) {
           ]);
           return;
         }
+        case "diff":
+        case "compare": {
+          const [qa, qb] = rest;
+          const pa = qa ? findProject(qa) : undefined;
+          const pb = qb ? findProject(qb) : undefined;
+          if (!pa || !pb || pa === pb) {
+            print([
+              s(
+                "diff: name two different projects, e.g. diff youbank runway",
+                "muted",
+              ),
+            ]);
+            return;
+          }
+          const norm = (x: string) => x.toLowerCase();
+          const sb = new Set(pb.stack.map(norm));
+          const sa = new Set(pa.stack.map(norm));
+          const shared = pa.stack.filter((x) => sb.has(norm(x)));
+          const onlyA = pa.stack.filter((x) => !sb.has(norm(x)));
+          const onlyB = pb.stack.filter((x) => !sa.has(norm(x)));
+          const w = Math.max(pa.name.length, pb.name.length) + 7;
+          print([
+            s(pa.name, "strong"),
+            s("  vs  ", "muted"),
+            s(pb.name, "strong"),
+          ]);
+          print([s(`--- ${pa.name}`.padEnd(w), "down"), pa.tagline]);
+          print([s(`+++ ${pb.name}`.padEnd(w), "up"), pb.tagline]);
+          print([
+            s("  shared  ".padEnd(w), "muted"),
+            shared.length ? shared.join(" · ") : s("(no overlap)", "muted"),
+          ]);
+          if (onlyA.length)
+            print([s(`- ${pa.name}`.padEnd(w), "down"), onlyA.join(" · ")]);
+          if (onlyB.length)
+            print([s(`+ ${pb.name}`.padEnd(w), "up"), onlyB.join(" · ")]);
+          print([
+            s("  roles   ".padEnd(w), "muted"),
+            `${pa.roles.join(" ") || "–"}  |  ${pb.roles.join(" ") || "–"}`,
+          ]);
+          print([
+            s("  where   ".padEnd(w), "muted"),
+            `${pa.where}  |  ${pb.where}`,
+          ]);
+          return;
+        }
+        case "cv":
+        case "tailor": {
+          const r = arg.toLowerCase().replace(/[^a-z]/g, "");
+          const role = r
+            ? ROLE_IDS.find((x) => x === r || x.startsWith(r))
+            : undefined;
+          if (arg && !role) {
+            print([s(`cv: roles are ${ROLE_IDS.join(", ")}`, "muted")]);
+            return;
+          }
+          const href = role ? `/cv?for=${role}` : "/cv";
+          print([s("opening ", "muted"), a(href, href)]);
+          router.push(href);
+          return;
+        }
+        case "tour":
+          print([
+            s("starting TOUR <GO>… ", "muted"),
+            s("(any key stops it)", "accent"),
+          ]);
+          void import("@/components/fx/tour").then((t) => t.tour());
+          return;
         case "neofetch":
         case "fastfetch": {
           const logo = [
@@ -716,7 +791,9 @@ export function Terminal({ data }: { data: TerminalData }) {
     const pool =
       parts.length <= 1
         ? COMMANDS.map((c) => c.name)
-        : ["cat", "open", "less", "more"].includes(parts[0].toLowerCase())
+        : ["cat", "open", "less", "more", "diff", "compare"].includes(
+              parts[0].toLowerCase(),
+            )
           ? [
               ...data.projects.map((p) => p.id),
               ...(parts[0].toLowerCase() === "open"
@@ -725,11 +802,13 @@ export function Terminal({ data }: { data: TerminalData }) {
             ]
           : ["go", "cd"].includes(parts[0].toLowerCase())
             ? SECTIONS
-            : parts[0].toLowerCase() === "ls"
-              ? parts.length > 2
-                ? ROLE_IDS
-                : ["projects", "exp", "skills"]
-              : [];
+            : ["cv", "tailor"].includes(parts[0].toLowerCase())
+              ? ROLE_IDS
+              : parts[0].toLowerCase() === "ls"
+                ? parts.length > 2
+                  ? ROLE_IDS
+                  : ["projects", "exp", "skills"]
+                : [];
     const last = (parts.at(-1) ?? "").toLowerCase();
     const hits = pool.filter((x) => x.startsWith(last));
     if (hits.length === 1) {
