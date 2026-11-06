@@ -40,6 +40,7 @@ export type TerminalData = {
     code_url: string | null;
     page: string | null;
     stars: number | null;
+    roles: string[];
   }[];
   experience: {
     company: string;
@@ -92,7 +93,11 @@ const BANNER = [
 const COMMANDS: { name: string; args?: string; help: string }[] = [
   { name: "help", help: "this list" },
   { name: "whoami", help: "who Ayan is, in one breath" },
-  { name: "ls", args: "[projects|exp|skills]", help: "list things" },
+  {
+    name: "ls",
+    args: "[projects [role]|exp|skills]",
+    help: "list things (ls projects ai)",
+  },
   { name: "cat", args: "<project>", help: "read a project (try: cat youbank)" },
   { name: "open", args: "<project|resume|github|linkedin|x>", help: "open it" },
   { name: "exp", help: "where he has worked" },
@@ -110,6 +115,8 @@ const COMMANDS: { name: string; args?: string; help: string }[] = [
   { name: "clear", help: "clear the screen (Ctrl+L)" },
   { name: "exit", help: "back to the site" },
 ];
+
+const ROLE_IDS = ["ai", "fintech", "systems", "fullstack", "research"];
 
 const SECTIONS = [
   "about",
@@ -263,7 +270,9 @@ export function Terminal({ data }: { data: TerminalData }) {
           print([s(data.school, "muted")]);
           return;
         case "ls": {
-          const what = (arg || "projects").toLowerCase();
+          const [what = "projects", role = ""] = (arg || "projects")
+            .toLowerCase()
+            .split(/\s+/);
           if (!what.startsWith("proj")) {
             print(
               [s(`ls: ${what}: try projects, exp or skills`, "down")],
@@ -271,7 +280,18 @@ export function Terminal({ data }: { data: TerminalData }) {
             );
             return;
           }
-          data.projects.forEach((p) =>
+          const lens = role.replace(/^--?(role=)?/, "");
+          if (lens && !ROLE_IDS.includes(lens)) {
+            print(
+              [s(`ls: ${lens}: try ${ROLE_IDS.join(", ")}`, "down")],
+              "err",
+            );
+            return;
+          }
+          const list = lens
+            ? data.projects.filter((p) => p.roles.includes(lens))
+            : data.projects;
+          list.forEach((p) =>
             print([
               s((p.code ?? "").padEnd(6), "accent"),
               p.page ? a(p.name, p.page) : s(p.name, "strong"),
@@ -280,7 +300,7 @@ export function Terminal({ data }: { data: TerminalData }) {
           );
           print([
             s(
-              `${data.projects.length} projects. cat <name> to read one.`,
+              `${list.length} projects${lens ? ` for ${lens}` : ""}. cat <name> to read one${lens ? "" : `; ls projects <${ROLE_IDS.join("|")}> to filter`}.`,
               "muted",
             ),
           ]);
@@ -517,7 +537,9 @@ export function Terminal({ data }: { data: TerminalData }) {
           : ["go", "cd"].includes(parts[0].toLowerCase())
             ? SECTIONS
             : parts[0].toLowerCase() === "ls"
-              ? ["projects", "exp", "skills"]
+              ? parts.length > 2
+                ? ROLE_IDS
+                : ["projects", "exp", "skills"]
               : [];
     const last = (parts.at(-1) ?? "").toLowerCase();
     const hits = pool.filter((x) => x.startsWith(last));

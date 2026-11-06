@@ -12,6 +12,7 @@ import {
 import { projectMnemonic, projectRepo } from "@/content/extras";
 import { contributionRanges, githubStats, starsFor } from "@/lib/github";
 import { hasProjectPage } from "@/lib/projects";
+import { roleTags } from "@/lib/roles";
 import { hasResume } from "@/lib/site";
 import { Terminal, type TerminalData } from "@/components/terminal/Terminal";
 
@@ -53,6 +54,7 @@ function data(): TerminalData {
       code_url: p.links.code ?? null,
       page: hasProjectPage(p.id) ? `/projects/${p.id}` : null,
       stars: starsFor(projectRepo[p.id]) ?? null,
+      roles: roleTags(p),
     })),
     experience: experience.map((e) => ({
       company: e.company,
