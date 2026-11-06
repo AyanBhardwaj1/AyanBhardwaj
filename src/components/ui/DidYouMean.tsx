@@ -44,7 +44,10 @@ export function guess(path: string, candidates: Candidate[]) {
     for (const k of c.keys.map(norm))
       for (const w of words) {
         if (w.length < 3 || !k) continue;
-        const d = k.includes(w) || w.includes(k) ? 0.5 : distance(w, k);
+        // Substrings only for real words: "cv" must not match "/profit".
+        const sub =
+          (w.length >= 4 && k.includes(w)) || (k.length >= 4 && w.includes(k));
+        const d = sub ? 0.5 : distance(w, k);
         const limit = Math.max(1, Math.floor(Math.max(w.length, k.length) / 3));
         if (d <= limit && (!best || d < best.d)) best = { c, d };
       }

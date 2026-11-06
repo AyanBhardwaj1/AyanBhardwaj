@@ -5,8 +5,6 @@ import type { FitIndex, FitTerm } from "./fit";
  * then match any pasted text against it. Shared by the web CV and /terminal.
  */
 
-const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
 export type CompiledFit = {
   terms: (FitTerm & { re: RegExp })[];
   missing: { label: string; re: RegExp }[];
@@ -21,16 +19,14 @@ export type FitResult = {
 
 export function compileFit(index: FitIndex): CompiledFit {
   return {
-    terms: index.terms.map((t) => ({ ...t, re: new RegExp(t.jd, "i") })),
+    terms: index.terms.map((t) => ({
+      ...t,
+      re: new RegExp(t.jd, t.cs ? "" : "i"),
+    })),
+    // Built on the server (lib/fit); proper nouns, so case-sensitive.
     missing: index.notOnSite.map((m) => ({
-      label: m,
-      // Short, ambiguous words ("Go") must match exactly, case-sensitively.
-      // Names that start with a symbol (".NET") need no left boundary, so
-      // "ASP.NET" still counts.
-      re: new RegExp(
-        `${/^\w/.test(m) ? "(?<![\\w.])" : ""}${escape(m)}(?![\\w${m.length <= 3 ? "-" : ""}])`,
-        m.length <= 3 ? "" : "i",
-      ),
+      label: m.label,
+      re: new RegExp(m.re),
     })),
   };
 }

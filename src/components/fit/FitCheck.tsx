@@ -47,7 +47,7 @@ export function FitCheck({ index }: { index: FitIndex }) {
       if (jd) {
         sessionStorage.removeItem(FIT_HANDOFF_KEY);
         // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time handoff from sessionStorage
-        setText(jd);
+        setText(jd.slice(0, 8000));
       }
     } catch {
       /* no storage */
@@ -74,6 +74,18 @@ export function FitCheck({ index }: { index: FitIndex }) {
   );
   const total = result?.total ?? 0;
   const role = result ? fitRole(result) : null;
+
+  // Announce the score once typing settles, not on every keystroke.
+  const summary = result
+    ? total
+      ? `${result.hits.length} of ${total} recognised requirements backed by work on this site.`
+      : "No recognisable skills yet."
+    : "";
+  const [said, setSaid] = useState("");
+  useEffect(() => {
+    const t = window.setTimeout(() => setSaid(summary), 700);
+    return () => window.clearTimeout(t);
+  }, [summary]);
   const roleLabel = role ? ROLES.find((r) => r.id === role)?.label : null;
   const pct = result?.pct ?? 0;
 
@@ -149,11 +161,7 @@ export function FitCheck({ index }: { index: FitIndex }) {
       </div>
 
       <p className="sr-only" aria-live="polite">
-        {result
-          ? total
-            ? `${result.hits.length} of ${total} recognised requirements backed by work on this site.`
-            : "No recognisable skills yet."
-          : ""}
+        {said}
       </p>
       <div className="mt-5">
         {result && total === 0 && (

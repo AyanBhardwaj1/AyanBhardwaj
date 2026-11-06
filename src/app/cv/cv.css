@@ -253,24 +253,3 @@
   max-width: 860px;
   margin: 0 auto 16px;
 }
-.cv-projList {
-  display: flex;
-  flex-direction: column;
-}
-.cv-item[data-extra-for] {
-  display: none;
-}
-.cv[data-cv-role="ai"] .cv-item[data-extra-for~="ai"],
-.cv[data-cv-role="fintech"] .cv-item[data-extra-for~="fintech"],
-.cv[data-cv-role="systems"] .cv-item[data-extra-for~="systems"],
-.cv[data-cv-role="fullstack"] .cv-item[data-extra-for~="fullstack"],
-.cv[data-cv-role="research"] .cv-item[data-extra-for~="research"] {
-  display: block;
-}
-.cv[data-cv-role="ai"] .cv-item[data-roles~="ai"],
-.cv[data-cv-role="fintech"] .cv-item[data-roles~="fintech"],
-.cv[data-cv-role="systems"] .cv-item[data-roles~="systems"],
-.cv[data-cv-role="fullstack"] .cv-item[data-roles~="fullstack"],
-.cv[data-cv-role="research"] .cv-item[data-roles~="research"] {
-  order: -1;
-}

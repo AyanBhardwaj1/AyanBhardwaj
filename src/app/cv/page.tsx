@@ -11,7 +11,14 @@ import {
 import { hasProjectPage } from "@/lib/projects";
 import { SITE_URL, hasResume } from "@/lib/site";
 import { PrintButton } from "./PrintButton";
-import { CvTailor } from "./CvTailor";
+import { Suspense } from "react";
+import {
+  CvProjectList,
+  CvProjects,
+  CvTailor,
+  CvTailorPills,
+  type CvProject,
+} from "./CvTailor";
 import { CopyCv } from "./CopyCv";
 import { cvMarkdown } from "@/lib/cv-text";
 import { ROLES, roleTags, type RoleId } from "@/lib/roles";
@@ -49,10 +56,20 @@ export default function CvPage() {
       .forEach((p) =>
         extraFor.set(p.id, [...(extraFor.get(p.id) ?? []), r.id]),
       );
-  const shown = [
+  const items: CvProject[] = [
     ...selected,
     ...projects.filter((p) => extraFor.has(p.id) && !selected.includes(p)),
-  ];
+  ].map((p) => ({
+    id: p.id,
+    name: p.name,
+    tagline: p.tagline,
+    where: p.builtAt ? `Built at ${p.builtAt}` : (p.context ?? ""),
+    description: p.description,
+    stack: p.stack,
+    page: hasProjectPage(p.id) ? `/projects/${p.id}` : null,
+    roles: roleTags(p),
+    extraFor: selected.includes(p) ? null : (extraFor.get(p.id) ?? null),
+  }));
   const contact = [
     { label: links.email.display ?? "", href: links.email.href },
     { label: host(SITE_URL), href: SITE_URL },
@@ -84,7 +101,9 @@ export default function CvPage() {
       </div>
 
       <div className="cv-tailor no-print">
-        <CvTailor />
+        <Suspense fallback={<CvTailorPills role={null} />}>
+          <CvTailor />
+        </Suspense>
       </div>
 
       <div className="cv-sheet cv-fitSheet no-print">
@@ -142,35 +161,9 @@ export default function CvPage() {
           <h2 id="cv-proj" className="cv-h2">
             Selected projects
           </h2>
-          <div className="cv-projList">
-            {shown.map((p) => (
-              <div
-                key={p.id}
-                className="cv-item"
-                data-roles={roleTags(p).join(" ")}
-                {...(extraFor.has(p.id) && !selected.includes(p)
-                  ? { "data-extra-for": extraFor.get(p.id)!.join(" ") }
-                  : {})}
-              >
-                <div className="cv-itemHead">
-                  <h3>
-                    {hasProjectPage(p.id) ? (
-                      <Link href={`/projects/${p.id}`}>{p.name}</Link>
-                    ) : (
-                      p.name
-                    )}
-                    <span className="cv-sep"> · </span>
-                    <span className="cv-sub">{p.tagline}</span>
-                  </h3>
-                  <p className="cv-when">
-                    {p.builtAt ? `Built at ${p.builtAt}` : (p.context ?? "")}
-                  </p>
-                </div>
-                <p className="cv-desc">{p.description}</p>
-                <p className="cv-stack">{p.stack.slice(0, 6).join(" · ")}</p>
-              </div>
-            ))}
-          </div>
+          <Suspense fallback={<CvProjectList items={items} role={null} />}>
+            <CvProjects items={items} />
+          </Suspense>
         </section>
 
         <div className="cv-cols">

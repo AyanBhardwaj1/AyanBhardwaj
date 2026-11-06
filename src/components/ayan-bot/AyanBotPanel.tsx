@@ -344,6 +344,7 @@ export default function AyanBotPanel({
         .map(({ role, content }) => ({ role, content }));
       setMsgs((all) => [...all, user, bot]);
       setInput("");
+      setJd(null);
       setBusy(true);
       setAnnounce("ayan-bot is thinking…");
       const ctrl = new AbortController();
@@ -867,7 +868,10 @@ export default function AyanBotPanel({
             ))}
           </div>
           {jd && (
-            <div className="border-line bg-card text-muted mb-2 flex items-start gap-2 rounded-[10px] border px-3 py-2 text-[12.5px] leading-snug">
+            <div
+              role="status"
+              className="border-line bg-card text-muted mb-2 flex items-start gap-2 rounded-[10px] border px-3 py-2 text-[12.5px] leading-snug"
+            >
               <p className="flex-1">
                 That looks like a job description. Questions stop at{" "}
                 {LIMITS.userChars} characters; the Fit check reads all of it, in

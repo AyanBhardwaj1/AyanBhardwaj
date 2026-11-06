@@ -1,7 +1,9 @@
-// Unit tests for the browser half of the Fit check. Run: npm run test:unit
-// (Node's built-in runner with type stripping; no build needed.)
+// Unit tests for the Fit check, against the real vocabulary in
+// src/lib/fit-terms.ts. Run: npm run test:unit (Node's test runner with type
+// stripping; no build). Evidence is faked: every term is "backed" except Java.
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { gapPattern, NOT_ON_SITE, TERMS } from "../../src/lib/fit-terms.ts";
 import {
   compileFit,
   fitRole,
@@ -10,54 +12,81 @@ import {
   matchFit,
 } from "../../src/lib/fit-match.ts";
 
-const ev = (name: string) => [{ name, href: `/projects/${name}` }];
 const index = {
-  terms: [
-    { id: "python", label: "Python", jd: "\\bpython\\b", evidence: ev("a") },
-    {
-      id: "javascript",
-      label: "JavaScript",
-      jd: "\\bjavascript\\b|(?<![.\\w])js\\b|\\becmascript\\b",
-      evidence: ev("b"),
-    },
-    { id: "nextjs", label: "Next.js", jd: "next\\.?js", evidence: ev("c") },
-    { id: "java", label: "Java", jd: "\\bjava\\b(?!script)", evidence: [] },
-    { id: "llm", label: "LLMs", jd: "\\bllms?\\b", evidence: ev("d") },
-    { id: "rag", label: "RAG", jd: "\\brag\\b", evidence: ev("e") },
-    { id: "react", label: "React", jd: "\\breact\\b", evidence: ev("f") },
-  ],
-  notOnSite: ["Go", "Golang", ".NET", "C#", "Kubernetes", "Vue"],
+  terms: TERMS.map((t) => ({
+    id: t.id,
+    label: t.label,
+    jd: t.jd,
+    ...(t.cs ? { cs: true } : {}),
+    evidence: t.id === "java" ? [] : [{ name: `ev-${t.id}`, href: null }],
+  })),
+  notOnSite: NOT_ON_SITE.map((m) =>
+    typeof m === "string" ? { label: m, re: gapPattern(m) } : m,
+  ),
 };
 const c = compileFit(index);
-const labels = (t: string) => {
+const run = (t: string) => {
   const r = matchFit(c, t);
-  return { hits: r.hits.map((h) => h.label), gaps: r.gaps };
+  return { hits: r.hits.map((h) => h.label), gaps: r.gaps, r };
 };
 
+test("a sales job ad scores nothing", () => {
+  const { hits, gaps } = run(
+    "Account Executive. Join a fast-paced team and take ownership of your pipeline alongside the rest of the go-to-market team. Grow our customer base, track performance against quota, protect our brand image. Philanthropic giving program. Annual performance evaluation. Work autonomously; be a change agent. We partner with an executive search firm. Quantities of leads. Go above and beyond! Swift follow-up and guard rails. Apply: jobs@acme.net",
+  );
+  assert.deepEqual(hits, []);
+  assert.deepEqual(gaps, []);
+});
+
 test("Next.js does not imply JavaScript", () => {
-  assert.deepEqual(labels("Next.js and Node.js").hits, ["Next.js"]);
-  assert.ok(labels("plain JS").hits.includes("JavaScript"));
+  assert.ok(!run("Next.js and Node.js").hits.includes("JavaScript"));
+  assert.ok(run("plain JS").hits.includes("JavaScript"));
 });
 
 test("a term with no evidence is a gap, not silently dropped", () => {
-  const r = labels("Java developer with Python");
-  assert.deepEqual(r.hits, ["Python"]);
-  assert.ok(r.gaps.includes("Java"));
+  const { hits, gaps } = run("Java developer with Python");
+  assert.deepEqual(hits, ["Python"]);
+  assert.ok(gaps.includes("Java"));
 });
 
-test("short names match exactly and case-sensitively", () => {
-  assert.deepEqual(labels("let's go build it").gaps, []);
-  assert.deepEqual(labels("Go services").gaps, ["Go"]);
-  assert.deepEqual(labels("Golang services").gaps, ["Golang"]);
-  assert.deepEqual(labels("Vue.js frontends").gaps, ["Vue"]);
+test("SEC is the regulator, not ops/sec", () => {
+  assert.ok(run("parse SEC filings").hits.includes("SEC / EDGAR / XBRL"));
+  assert.ok(
+    !run("1M ops/sec, every second").hits.includes("SEC / EDGAR / XBRL"),
+  );
 });
 
-test("symbol-led names match inside compounds (ASP.NET)", () => {
-  assert.deepEqual(labels("ASP.NET Core and C#").gaps, [".NET", "C#"]);
+test("gaps are proper nouns in context", () => {
+  assert.deepEqual(run("Go above and beyond").gaps, []);
+  assert.deepEqual(run("Rust, Go, Python").gaps, ["Go"]);
+  assert.deepEqual(run("Go services on Kubernetes").gaps, ["Kubernetes", "Go"]);
+  assert.deepEqual(run("Golang").gaps, ["Go"]);
+  assert.deepEqual(run("swift follow-ups").gaps, []);
+  assert.deepEqual(run("iOS in Swift, SwiftUI").gaps, ["Swift", "iOS"]);
+  assert.deepEqual(run("Ruby on Rails").gaps, ["Ruby", "Rails"]);
+  assert.deepEqual(run("guard Rails of the road").gaps, []);
+  assert.deepEqual(run("ASP.NET Core and C#").gaps, ["C#", ".NET"]);
+  assert.deepEqual(run("mail jobs@acme.net").gaps, []);
+  assert.deepEqual(run("Vue.js frontends").gaps, ["Vue"]);
+});
+
+test("technical context required for soft-looking terms", () => {
+  assert.ok(!run("the rest of the team").hits.includes("APIs / backend"));
+  assert.ok(run("RESTful APIs").hits.includes("APIs / backend"));
+  assert.ok(!run("change agents").hits.includes("AI agents"));
+  assert.ok(run("LLM agents with tool use").hits.includes("AI agents"));
+  assert.ok(
+    !run("executive search firm").hits.includes("Retrieval / RAG / search"),
+  );
+  assert.ok(
+    run("search ranking and embeddings").hits.includes(
+      "Retrieval / RAG / search",
+    ),
+  );
 });
 
 test("percent and totals", () => {
-  const r = matchFit(c, "Python, LLMs and Kubernetes");
+  const { r } = run("Python, LLMs and Kubernetes");
   assert.equal(r.total, 3);
   assert.equal(r.pct, 67);
 });
@@ -65,8 +94,8 @@ test("percent and totals", () => {
 test("fitRole needs two signals and prefers the specific lens on ties", () => {
   assert.equal(fitRole(matchFit(c, "Python only")), null);
   assert.equal(fitRole(matchFit(c, "LLMs and RAG")), "ai");
-  // ai 2 vs fullstack 2 (React, Next.js): ai wins the tie.
   assert.equal(fitRole(matchFit(c, "LLMs, RAG, React, Next.js")), "ai");
+  assert.equal(fitRole(matchFit(c, "React, Next.js, Node.js")), "fullstack");
 });
 
 test("summary lists hits with evidence and the gaps", () => {
@@ -75,7 +104,7 @@ test("summary lists hits with evidence and the gaps", () => {
     "https://x/cv#fit",
   );
   assert.match(s, /1 of 2 recognised requirements/);
-  assert.match(s, /\+ Python: a/);
+  assert.match(s, /\+ Python: ev-python/);
   assert.match(s, /Not shown on the site: Kubernetes/);
 });
 
@@ -89,8 +118,13 @@ test("job description detection", () => {
 });
 
 test("8,000 characters of adversarial text match quickly", () => {
-  const nasty = "a".repeat(4000) + ".".repeat(4000);
-  const t0 = performance.now();
-  matchFit(c, nasty);
-  assert.ok(performance.now() - t0 < 200);
+  for (const nasty of [
+    "a".repeat(4000) + ".".repeat(4000),
+    "Go ".repeat(2600),
+    ", ".repeat(4000),
+  ]) {
+    const t0 = performance.now();
+    matchFit(c, nasty);
+    assert.ok(performance.now() - t0 < 200);
+  }
 });
