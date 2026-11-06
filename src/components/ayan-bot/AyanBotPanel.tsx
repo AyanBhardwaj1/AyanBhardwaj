@@ -1,8 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { LIMITS, type ChatMessage } from "@/lib/ayan-bot/guard";
+import {
+  FIT_HANDOFF_EVENT,
+  FIT_HANDOFF_KEY,
+  looksLikeJobDescription,
+} from "@/lib/fit-match";
 import { BriefMenu } from "./BriefMenu";
 import { BRIEF_PROMPT, followUps, projectsIn, startersFor } from "./derive";
 import { localAnswer } from "./local";
@@ -138,6 +144,9 @@ export default function AyanBotPanel({
 }) {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
+  // A pasted job description: offer the Fit check, which reads all of it
+  // for free, instead of a 500-character question.
+  const [jd, setJd] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [announce, setAnnounce] = useState("");
   const [mode, setMode] = useState<string | null>(null);
@@ -808,6 +817,41 @@ export default function AyanBotPanel({
             void send(input);
           }}
         >
+          {jd && (
+            <div className="border-line bg-card text-muted mb-2 flex items-start gap-2 rounded-[10px] border px-3 py-2 text-[12.5px] leading-snug">
+              <p className="flex-1">
+                That looks like a job description. Questions stop at{" "}
+                {LIMITS.userChars} characters; the Fit check reads all of it, in
+                your browser.{" "}
+                <Link
+                  href="/cv#fit"
+                  className="text-accent underline-offset-4 hover:underline"
+                  onClick={() => {
+                    try {
+                      sessionStorage.setItem(FIT_HANDOFF_KEY, jd);
+                    } catch {
+                      /* the event below still covers /cv itself */
+                    }
+                    window.dispatchEvent(
+                      new CustomEvent(FIT_HANDOFF_EVENT, { detail: jd }),
+                    );
+                    setJd(null);
+                    navigate();
+                  }}
+                >
+                  Run the Fit check →
+                </Link>
+              </p>
+              <button
+                type="button"
+                onClick={() => setJd(null)}
+                aria-label="Dismiss the Fit check suggestion"
+                className="text-muted hover:text-fg -mt-1 -mr-1 grid size-7 shrink-0 place-items-center"
+              >
+                ×
+              </button>
+            </div>
+          )}
           {left === 0 && (
             <p
               id={`${counterId}-zero`}
@@ -847,7 +891,14 @@ export default function AyanBotPanel({
                   ? "Out of messages, refills soon…"
                   : "Ask about Ayan…"
               }
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => {
+                setInput(e.target.value);
+                if (!e.target.value) setJd(null);
+              }}
+              onPaste={(e) => {
+                const t = e.clipboardData.getData("text");
+                if (looksLikeJobDescription(t)) setJd(t.slice(0, 8000));
+              }}
               onKeyDown={(e) => {
                 if (
                   e.key === "Enter" &&

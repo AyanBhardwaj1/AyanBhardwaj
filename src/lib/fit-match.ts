@@ -71,3 +71,16 @@ export function fitSummary(r: FitResult, url: string): string {
       : []),
   ].join("\n");
 }
+
+/** Where a job description waits while ayan-bot hands it to the Fit check. */
+export const FIT_HANDOFF_KEY = "ayan:fit-jd";
+export const FIT_HANDOFF_EVENT = "ayan:fit";
+
+/** A long paste that reads like a role, not a question. */
+export function looksLikeJobDescription(t: string): boolean {
+  if (t.length < 300) return false;
+  const cues = t.match(
+    /responsibilit|requirements?\b|qualifications?|you will|you'll|we're looking|we are looking|years of|nice to have|about the role|what you('ll)? (do|bring)|preferred|benefits|equal opportunity/gi,
+  );
+  return (cues?.length ?? 0) >= 2;
+}

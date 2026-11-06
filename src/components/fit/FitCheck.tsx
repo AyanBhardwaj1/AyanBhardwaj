@@ -1,9 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useDeferredValue, useId, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useId, useMemo, useState } from "react";
 import type { FitIndex } from "@/lib/fit";
-import { compileFit, fitPrompt, fitSummary, matchFit } from "@/lib/fit-match";
+import {
+  compileFit,
+  FIT_HANDOFF_EVENT,
+  FIT_HANDOFF_KEY,
+  fitPrompt,
+  fitSummary,
+  matchFit,
+} from "@/lib/fit-match";
 
 /**
  * Paste a job description; see which of its requirements this site can back
@@ -21,6 +28,32 @@ export function FitCheck({ index }: { index: FitIndex }) {
   const id = useId();
   const [text, setText] = useState("");
   const [copied, setCopied] = useState(false);
+
+  // A job description handed over from ayan-bot (pasted into the chat).
+  useEffect(() => {
+    try {
+      const jd = sessionStorage.getItem(FIT_HANDOFF_KEY);
+      if (jd) {
+        sessionStorage.removeItem(FIT_HANDOFF_KEY);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time handoff from sessionStorage
+        setText(jd);
+      }
+    } catch {
+      /* no storage */
+    }
+    const onFit = (e: Event) => {
+      const jd = (e as CustomEvent<string>).detail;
+      if (typeof jd !== "string") return;
+      try {
+        sessionStorage.removeItem(FIT_HANDOFF_KEY);
+      } catch {
+        /* ignore */
+      }
+      setText(jd.slice(0, 8000));
+    };
+    window.addEventListener(FIT_HANDOFF_EVENT, onFit);
+    return () => window.removeEventListener(FIT_HANDOFF_EVENT, onFit);
+  }, []);
   const jd = useDeferredValue(text);
 
   const compiled = useMemo(() => compileFit(index), [index]);

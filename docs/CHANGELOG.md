@@ -52,7 +52,8 @@
   which requirements the site's own projects and roles back up, with links
   as evidence, and which it doesn't show. Runs in the browser; nothing is
   sent. `fit <text>` does the same in the terminal, and `fit ask` hands the
-  result to ayan-bot.
+  result to ayan-bot. Paste a job description into ayan-bot and it offers to
+  hand the whole thing to the Fit check instead.
 - **Role filter** on the projects section (AI, Fintech, Systems, Full-stack,
   Research).
 - **`draft --to ayan`** in Contact writes a clear first email and opens it in
