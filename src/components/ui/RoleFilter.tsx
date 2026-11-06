@@ -60,12 +60,21 @@ export function RoleFilter({ scope }: { scope: string }) {
             ? `${count} ${count === 1 ? "project matches" : "projects match"}`
             : ""}
         </span>
-        <Link
-          href="/cv#fit"
-          className="text-accent inline-flex min-h-9 items-center underline-offset-4 hover:underline"
-        >
-          Check a job description →
-        </Link>
+        {role ? (
+          <Link
+            href={`/cv?for=${role}`}
+            className="text-accent inline-flex min-h-9 items-center underline-offset-4 hover:underline"
+          >
+            {ROLES.find((r) => r.id === role)?.label} CV →
+          </Link>
+        ) : (
+          <Link
+            href="/cv#fit"
+            className="text-accent inline-flex min-h-9 items-center underline-offset-4 hover:underline"
+          >
+            Check a job description →
+          </Link>
+        )}
       </span>
     </div>
   );
