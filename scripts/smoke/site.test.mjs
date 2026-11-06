@@ -442,6 +442,9 @@ async function terminal(browser) {
     assert(/✓ Python/.test(out), "fit did not back Python");
     assert(/Kubernetes/.test(out), "fit did not list the Kubernetes gap");
   });
+  await check("terminal", "grep finds PyTorch", async () => {
+    assert(await run("grep pytorch", /\d+ match/), "grep printed no matches");
+  });
   await check("terminal", "unknown command", async () => {
     assert(
       await run("frobnicate", /command not found/),

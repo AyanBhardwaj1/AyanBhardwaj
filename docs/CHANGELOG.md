@@ -42,7 +42,8 @@
 ### New pages
 
 - `/terminal`: a command line over the site (`whoami`, `ls projects`,
-  `ls projects ai`, `cat youbank`, `open resume`, `fit …`, `ask …`).
+  `ls projects ai`, `cat youbank`, `grep pytorch`, `neofetch`, `open resume`,
+  `fit …`, `ask …`).
 - `/cv`: a web CV generated from the same content, print-ready.
 
 ### For recruiters
@@ -68,7 +69,7 @@
 
 ### Testing
 
-- `npm run test:smoke`: 65 browser checks against a production build (every
+- `npm run test:smoke`: 66 browser checks against a production build (every
   route renders without errors, metadata and share images, palette,
   terminal, Fit check, ayan-bot in mock mode, reduced motion, keyboard,
   endpoints). It caught `/functions` missing its share

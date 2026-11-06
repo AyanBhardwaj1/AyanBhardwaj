@@ -120,6 +120,8 @@ const COMMANDS: { name: string; args?: string; help: string }[] = [
     args: "<about|projects|contact|…>",
     help: "jump to a home section",
   },
+  { name: "grep", args: "<word>", help: "search all the work (grep pytorch)" },
+  { name: "neofetch", help: "the system, at a glance" },
   { name: "history", help: "commands you've run" },
   { name: "clear", help: "clear the screen (Ctrl+L)" },
   { name: "exit", help: "back to the site" },
@@ -589,6 +591,103 @@ export function Terminal({ data }: { data: TerminalData }) {
         case "echo":
           print([arg]);
           return;
+        case "grep":
+        case "search":
+        case "find": {
+          const q = arg.replace(/^["']|["']$/g, "").trim();
+          if (q.length < 2) {
+            print([s("grep: give it a word, e.g. grep pytorch", "muted")]);
+            return;
+          }
+          const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+          const docs: { name: string; href: string | null; text: string[] }[] =
+            [
+              ...data.projects.map((p) => ({
+                name: p.name,
+                href: p.page ?? p.live,
+                text: [
+                  p.tagline,
+                  p.description,
+                  p.stack.join(", "),
+                  ...p.metrics,
+                ],
+              })),
+              ...data.experience.map((e) => ({
+                name: e.company,
+                href: "/#experience",
+                text: [e.role, e.summary, ...e.bullets],
+              })),
+              ...data.skills.map((g) => ({
+                name: `skills/${g.label.toLowerCase()}`,
+                href: null,
+                text: [g.items.join(", ")],
+              })),
+            ];
+          let shown = 0;
+          let total = 0;
+          for (const d of docs) {
+            const hit = d.text.find((t) => re.test(t));
+            if (!hit) continue;
+            total++;
+            if (shown >= 12) continue;
+            shown++;
+            // A window of context around the first match, match highlighted.
+            const plain = hit.replace(/\*\*/g, "");
+            const at = plain.search(re);
+            const from = Math.max(0, at - 36);
+            const m = plain.slice(at).match(re)?.[0] ?? q;
+            const before = (from ? "…" : "") + plain.slice(from, at);
+            const after = plain.slice(at + m.length, at + m.length + 56);
+            print([
+              d.href ? a(d.name, d.href, /^https?:/.test(d.href)) : s(d.name),
+              s(": ", "muted"),
+              s(before, "muted"),
+              s(m, "accent"),
+              s(
+                after + (at + m.length + 56 < plain.length ? "…" : ""),
+                "muted",
+              ),
+            ]);
+          }
+          print([
+            s(
+              total
+                ? `${total} match${total === 1 ? "" : "es"}${total > shown ? ` (showing ${shown})` : ""}`
+                : `grep: no matches for "${q}". Try ask ${q}`,
+              total ? "muted" : "down",
+            ),
+          ]);
+          return;
+        }
+        case "neofetch":
+        case "fastfetch": {
+          const logo = [
+            "    ▲    ",
+            "   ▲ ▲   ",
+            "  ▲ ▲ ▲  ",
+            " ▲     ▲ ",
+            "▲  ▲▲▲  ▲",
+            "         ",
+          ];
+          const info: Seg[][] = [
+            [s("ayan", "accent"), s("@", "muted"), s("after-hours", "accent")],
+            [s("──────────────────", "muted")],
+            [s("role      ", "accent"), data.role],
+            [s("base      ", "accent"), data.location],
+            [s("school    ", "accent"), data.school],
+            [s("projects  ", "accent"), String(data.projects.length)],
+            [
+              s("github    ", "accent"),
+              `${data.stats.repos} repos · ★ ${data.stats.stars} · ${data.stats.contributions12m} contributions (12m)`,
+            ],
+            [s("langs     ", "accent"), data.stats.languages.join(", ")],
+            [s("shell     ", "accent"), "ayan-sh (type help)"],
+          ];
+          const rows = Math.max(logo.length, info.length);
+          for (let i = 0; i < rows; i++)
+            print([s((logo[i] ?? "").padEnd(12), "up"), ...(info[i] ?? [])]);
+          return;
+        }
         case "interests":
           data.interests.forEach((i) =>
             print([s(i.label.padEnd(18), "accent"), i.line]),
