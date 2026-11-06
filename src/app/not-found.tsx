@@ -95,6 +95,9 @@ export default function NotFound() {
               <span className="text-accent">{s.mnemonic}</span> {s.label}
             </Link>
           ))}
+          <Link href="/terminal" className="pill">
+            <span className="text-accent">TERM</span> Terminal
+          </Link>
         </nav>
       </main>
     </>
