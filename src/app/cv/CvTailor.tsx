@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ROLES, type RoleId } from "@/lib/roles";
+import { TAILOR_EVENT } from "@/lib/fit-match";
 
 /**
  * "Tailor for": moves the projects that fit a role to the top of the CV
@@ -18,6 +19,13 @@ export function CvTailor() {
     if (ROLES.some((r) => r.id === f))
       // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time read of the URL
       setRole(f as RoleId);
+    // The Fit check can ask for a role too.
+    const onTailor = (e: Event) => {
+      const r = (e as CustomEvent<string>).detail;
+      if (ROLES.some((x) => x.id === r)) setRole(r as RoleId);
+    };
+    window.addEventListener(TAILOR_EVENT, onTailor);
+    return () => window.removeEventListener(TAILOR_EVENT, onTailor);
   }, []);
 
   useEffect(() => {

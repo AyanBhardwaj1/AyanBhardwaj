@@ -90,3 +90,55 @@ export function looksLikeJobDescription(t: string): boolean {
   );
   return (cues?.length ?? 0) >= 2;
 }
+
+/** Which CV lens a matched requirement points to (see lib/roles). */
+const TERM_ROLE: Record<
+  string,
+  "ai" | "fintech" | "systems" | "fullstack" | "research"
+> = {
+  ml: "ai",
+  dl: "ai",
+  llm: "ai",
+  rag: "ai",
+  agents: "ai",
+  cv: "ai",
+  gnn: "ai",
+  fintech: "fintech",
+  quant: "fintech",
+  valuation: "fintech",
+  sec: "fintech",
+  trading: "fintech",
+  rust: "systems",
+  cpp: "systems",
+  wasm: "systems",
+  desktop: "systems",
+  perf: "systems",
+  react: "fullstack",
+  nextjs: "fullstack",
+  node: "fullstack",
+  api: "fullstack",
+  frontend: "fullstack",
+  fullstack: "fullstack",
+  postgres: "fullstack",
+  nlp: "research",
+  evals: "research",
+  scraping: "research",
+};
+
+/** The role a job description leans toward, or null if nothing stands out. */
+export function fitRole(r: FitResult) {
+  const n = new Map<string, number>();
+  for (const h of r.hits) {
+    const role = TERM_ROLE[h.id];
+    if (role) n.set(role, (n.get(role) ?? 0) + 1);
+  }
+  // Ties go to the more specific lens; full-stack terms show up everywhere.
+  const rank = ["ai", "fintech", "systems", "research", "fullstack"];
+  const best = [...n.entries()].sort(
+    (a, b) => b[1] - a[1] || rank.indexOf(a[0]) - rank.indexOf(b[0]),
+  )[0];
+  return best && best[1] >= 2 ? (best[0] as (typeof TERM_ROLE)[string]) : null;
+}
+
+/** FitCheck -> CvTailor: "tailor the CV for this role". */
+export const TAILOR_EVENT = "ayan:tailor";

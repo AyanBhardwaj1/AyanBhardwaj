@@ -10,11 +10,14 @@ import {
   useState,
 } from "react";
 import type { FitIndex } from "@/lib/fit";
+import { ROLES } from "@/lib/roles";
 import {
   compileFit,
   FIT_HANDOFF_EVENT,
   FIT_HANDOFF_KEY,
   fitPrompt,
+  fitRole,
+  TAILOR_EVENT,
   fitSummary,
   matchFit,
 } from "@/lib/fit-match";
@@ -70,6 +73,8 @@ export function FitCheck({ index }: { index: FitIndex }) {
     [jd, compiled],
   );
   const total = result?.total ?? 0;
+  const role = result ? fitRole(result) : null;
+  const roleLabel = role ? ROLES.find((r) => r.id === role)?.label : null;
   const pct = result?.pct ?? 0;
 
   const copy = async () => {
@@ -221,6 +226,23 @@ export function FitCheck({ index }: { index: FitIndex }) {
                 >
                   Ask ayan-bot for the strongest examples
                 </button>
+                {role && roleLabel && (
+                  <button
+                    type="button"
+                    className="pill min-h-10"
+                    onClick={() => {
+                      window.dispatchEvent(
+                        new CustomEvent(TAILOR_EVENT, { detail: role }),
+                      );
+                      const h = document.getElementById("cv-proj");
+                      h?.scrollIntoView({ block: "start" });
+                      h?.setAttribute("tabindex", "-1");
+                      h?.focus({ preventScroll: true });
+                    }}
+                  >
+                    Tailor this CV for {roleLabel}
+                  </button>
+                )}
                 <button type="button" onClick={copy} className="pill min-h-10">
                   {copied ? "Copied" : "Copy summary"}
                 </button>
