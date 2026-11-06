@@ -11,6 +11,8 @@ import {
 import { hasProjectPage } from "@/lib/projects";
 import { SITE_URL, hasResume } from "@/lib/site";
 import { PrintButton } from "./PrintButton";
+import { CvTailor } from "./CvTailor";
+import { ROLES, roleTags, type RoleId } from "@/lib/roles";
 import { FitCheck } from "@/components/fit/FitCheck";
 import { fitIndex } from "@/lib/fit";
 import "./cv.css";
@@ -35,6 +37,20 @@ export default function CvPage() {
   const selected = projects.filter((p) =>
     ["featured", "moss", "hackathon"].includes(p.tier),
   );
+  // For each role, up to three more projects that fit it; they only show
+  // when the CV is tailored for that role (see CvTailor and cv.css).
+  const extraFor = new Map<string, RoleId[]>();
+  for (const r of ROLES)
+    projects
+      .filter((p) => !selected.includes(p) && roleTags(p).includes(r.id))
+      .slice(0, 3)
+      .forEach((p) =>
+        extraFor.set(p.id, [...(extraFor.get(p.id) ?? []), r.id]),
+      );
+  const shown = [
+    ...selected,
+    ...projects.filter((p) => extraFor.has(p.id) && !selected.includes(p)),
+  ];
   const contact = [
     { label: links.email.display ?? "", href: links.email.href },
     { label: host(SITE_URL), href: SITE_URL },
@@ -62,6 +78,10 @@ export default function CvPage() {
             </a>
           )}
         </div>
+      </div>
+
+      <div className="cv-tailor no-print">
+        <CvTailor />
       </div>
 
       <div className="cv-sheet cv-fitSheet no-print">
@@ -119,26 +139,35 @@ export default function CvPage() {
           <h2 id="cv-proj" className="cv-h2">
             Selected projects
           </h2>
-          {selected.map((p) => (
-            <div key={p.id} className="cv-item">
-              <div className="cv-itemHead">
-                <h3>
-                  {hasProjectPage(p.id) ? (
-                    <Link href={`/projects/${p.id}`}>{p.name}</Link>
-                  ) : (
-                    p.name
-                  )}
-                  <span className="cv-sep"> · </span>
-                  <span className="cv-sub">{p.tagline}</span>
-                </h3>
-                <p className="cv-when">
-                  {p.builtAt ? `Built at ${p.builtAt}` : (p.context ?? "")}
-                </p>
+          <div className="cv-projList">
+            {shown.map((p) => (
+              <div
+                key={p.id}
+                className="cv-item"
+                data-roles={roleTags(p).join(" ")}
+                {...(extraFor.has(p.id) && !selected.includes(p)
+                  ? { "data-extra-for": extraFor.get(p.id)!.join(" ") }
+                  : {})}
+              >
+                <div className="cv-itemHead">
+                  <h3>
+                    {hasProjectPage(p.id) ? (
+                      <Link href={`/projects/${p.id}`}>{p.name}</Link>
+                    ) : (
+                      p.name
+                    )}
+                    <span className="cv-sep"> · </span>
+                    <span className="cv-sub">{p.tagline}</span>
+                  </h3>
+                  <p className="cv-when">
+                    {p.builtAt ? `Built at ${p.builtAt}` : (p.context ?? "")}
+                  </p>
+                </div>
+                <p className="cv-desc">{p.description}</p>
+                <p className="cv-stack">{p.stack.slice(0, 6).join(" · ")}</p>
               </div>
-              <p className="cv-desc">{p.description}</p>
-              <p className="cv-stack">{p.stack.slice(0, 6).join(" · ")}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </section>
 
         <div className="cv-cols">

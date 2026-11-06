@@ -54,6 +54,8 @@
   sent. `fit <text>` does the same in the terminal, and `fit ask` hands the
   result to ayan-bot. Paste a job description into ayan-bot and it offers to
   hand the whole thing to the Fit check instead.
+- **Tailor the CV** for a role (`/cv?for=fintech`): matching projects first,
+  plus a few more that fit; Print / save as PDF keeps it.
 - **Role filter** on the projects section (AI, Fintech, Systems, Full-stack,
   Research).
 - **`draft --to ayan`** in Contact writes a clear first email and opens it in
@@ -72,7 +74,7 @@
 
 ### Testing
 
-- `npm run test:smoke`: 68 browser checks against a production build (every
+- `npm run test:smoke`: 69 browser checks against a production build (every
   route renders without errors, metadata and share images, palette,
   terminal, Fit check, ayan-bot in mock mode, reduced motion, keyboard,
   endpoints). It caught `/functions` missing its share

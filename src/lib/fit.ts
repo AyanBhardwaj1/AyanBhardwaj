@@ -1,4 +1,4 @@
-import { experience, projects } from "@/content/content";
+import { experience, projects, skills } from "@/content/content";
 import { projectHref } from "./projects";
 
 /**
@@ -303,6 +303,13 @@ const haystacks = [
       ...e.tags,
     ].join(" "),
     weight: 3,
+  })),
+  // Listed skills count last: a claim, not a project, and named as such.
+  ...skills.map((g) => ({
+    name: `Skills (${g.label})`,
+    href: null,
+    text: g.items.join(", "),
+    weight: 0,
   })),
 ];
 

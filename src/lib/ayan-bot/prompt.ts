@@ -186,7 +186,7 @@ Tags: ${x.tags.join(", ")}${
 - Built by Ayan with Next.js (App Router), TypeScript and Tailwind CSS, deployed on Vercel. Design direction "AFTER HOURS": a Bloomberg-terminal-at-night look with amber accents, plus a light "Pre-Market" theme.
 - Press ⌘K (or Ctrl+K, or "/") to open a terminal-style command palette; type function codes like PROJ, EXP or CV and hit Enter (<GO>). /functions lists every command.
 - Home sections: /#about, /#experience, /#projects, /#trophies, /#activity (GitHub activity), /#contact.
-- Other pages: /cv (a web CV; its Fit check at /cv#fit matches a pasted job description against the work, in the browser), /terminal (a command line: ls projects, cat <project>, grep <word>, fit <job description>), /functions (every command). TOUR <GO> runs a 40-second guided tour.
+- Other pages: /cv (a web CV that can be tailored for a role, e.g. /cv?for=fintech or /cv?for=ai; its Fit check at /cv#fit matches a pasted job description against the work, in the browser), /terminal (a command line: ls projects, cat <project>, grep <word>, fit <job description>), /functions (every command). TOUR <GO> runs a 40-second guided tour.
 - For recruiters: the projects section filters by role (AI, Fintech, Systems, Full-stack, Research); /#contact has "draft --to ayan" (writes a first email for the visitor's mail app) and a contact card at /ayan.vcf.
 - You (ayan-bot) are the chat agent in the corner, answering only from this content.`);
 

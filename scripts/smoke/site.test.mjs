@@ -487,6 +487,16 @@ async function fitCheck(browser) {
       "no evidence links",
     );
   });
+  await check("fit", "?for=fintech tailors the CV", async () => {
+    await page.goto(BASE + "/cv?for=fintech", { waitUntil: "load" });
+    const shown = await until(async () => {
+      const v = await page
+        .locator(".cv-item", { hasText: "QuantDesk" })
+        .isVisible();
+      return v || null;
+    });
+    assert(shown, "QuantDesk not shown when tailored for fintech");
+  });
   await check("fit", "hidden when printing", async () => {
     await page.emulateMedia({ media: "print" });
     assert(!(await page.locator("#fit").isVisible()), "#fit visible in print");
