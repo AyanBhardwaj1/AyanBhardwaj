@@ -54,6 +54,11 @@
   font-family: var(--font-mono);
   font-size: 12.5px;
 }
+/* Comfortable tap targets on screen (24px+), compact again in print. */
+.cv-contact a {
+  display: inline-block;
+  padding-block: 4px;
+}
 .cv-contact a,
 .cv-item h3 a {
   text-decoration: underline;
@@ -203,5 +208,8 @@
   .cv-desc,
   .cv-stack {
     display: none;
+  }
+  .cv-contact a {
+    padding-block: 0;
   }
 }
