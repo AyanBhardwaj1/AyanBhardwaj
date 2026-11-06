@@ -51,7 +51,9 @@
 - Terminal niceties: fish-style autosuggestions (→ accepts), history that
   persists on the device (`history -c` clears), and shareable runs:
   `/terminal?run=diff youbank runway` (read-only commands only), with
-  `share` to copy one. Each case study links to `$ cat <slug>`.
+  `share` to copy one. Each case study links to `$ cat <slug>`; `help
+<command>` shows examples; `/functions` lists every terminal command with
+  a runnable example; `rain` and `bell` work here too.
 - `/cv`: a web CV generated from the same content, print-ready.
 
 ### For recruiters
