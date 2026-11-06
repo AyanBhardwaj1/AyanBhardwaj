@@ -43,14 +43,14 @@ const TERMS: Term[] = [
   {
     id: "api",
     label: "APIs / backend",
-    jd: "\\bapis?\\b|\\bbackend\\b|back-end|rest(ful)?\\b|microservices?",
+    jd: "\\bapis?\\b|\\bbackend\\b|back-end|\\brest(ful)?\\b|microservices?",
     ev: "\\bapi|express|fastapi|server|postgres|backend",
   },
   {
     id: "frontend",
     label: "Frontend / UI",
     jd: "front-?end|\\bui\\b|user interface|css|tailwind",
-    ev: "react|next\\.js|tailwind|ui",
+    ev: "react|next\\.js|tailwind|\\bui\\b",
   },
   {
     id: "fullstack",
@@ -62,7 +62,7 @@ const TERMS: Term[] = [
     id: "desktop",
     label: "Desktop apps",
     jd: "desktop|electron|tauri",
-    ev: "tauri|desktop|overlay",
+    ev: "tauri|desktop|\\boverlay",
   },
   {
     id: "extensions",
@@ -100,7 +100,7 @@ const TERMS: Term[] = [
     id: "ml",
     label: "Machine learning",
     jd: "machine learning|\\bml\\b",
-    ev: "pytorch|scikit|model|classifier|neural|graphsage",
+    ev: "pytorch|scikit|classifier|neural|graphsage|machine learning|\\bml\\b",
   },
   {
     id: "dl",
@@ -117,7 +117,7 @@ const TERMS: Term[] = [
   {
     id: "rag",
     label: "Retrieval / RAG / search",
-    jd: "\\brag\\b|retrieval|semantic search|vector|embedding|search",
+    jd: "\\brag\\b|retrieval|semantic search|vector|embedding|\\bsearch",
     ev: "retrieval|semantic|search|rerank|moss|embedding",
   },
   {
@@ -130,13 +130,13 @@ const TERMS: Term[] = [
     id: "nlp",
     label: "NLP",
     jd: "\\bnlp\\b|natural language",
-    ev: "nlp|language|benchmark|qa",
+    ev: "\\bnlp\\b|natural language|language model|\\bqa\\b",
   },
   {
     id: "cv",
     label: "Computer vision",
-    jd: "computer vision|opencv|image",
-    ev: "opencv|vision|face|scene",
+    jd: "computer vision|opencv|\\bimages?\\b",
+    ev: "opencv|vision|\\bfaces?\\b|\\bscenes?\\b",
   },
   {
     id: "evals",
@@ -148,32 +148,32 @@ const TERMS: Term[] = [
     id: "gnn",
     label: "Graph ML",
     jd: "graph neural|\\bgnn\\b|graph ml",
-    ev: "graphsage|pytorch geometric|graph",
+    ev: "graphsage|pytorch geometric|graph neural|\\bgnn",
   },
   // Finance
   {
     id: "fintech",
     label: "Fintech",
     jd: "fintech|financial (services|technology)|banking|payments",
-    ev: "finance|fintech|sec|edgar|deal desk|cash",
+    ev: "finance|fintech|\\bsec\\b|edgar|deal desk|cash",
   },
   {
     id: "quant",
     label: "Quant / risk models",
     jd: "\\bquant|risk model|\\bvar\\b|volatility|garch|monte carlo|derivatives",
-    ev: "garch|\\bvar\\b|monte carlo|volatility|quant|risk",
+    ev: "garch|\\bvar\\b|monte carlo|volatility|\\bquant|\\brisk\\b",
   },
   {
     id: "valuation",
     label: "Valuation / DCF",
-    jd: "valuation|\\bdcf\\b|financial model|investment banking|private equity|m&a",
-    ev: "dcf|valuation|lbo|wacc|comps|m&a",
+    jd: "\\bvaluation|\\bdcf\\b|financial model|investment banking|private equity|m&a",
+    ev: "\\bdcf\\b|\\bvaluation|\\blbo\\b|\\bwacc\\b|\\bcomps\\b|m&a",
   },
   {
     id: "sec",
     label: "SEC / EDGAR / XBRL",
     jd: "\\bsec\\b|edgar|xbrl|10-k|filings",
-    ev: "sec|edgar|xbrl|10-k",
+    ev: "\\bsec\\b|edgar|xbrl|10-k",
   },
   {
     id: "trading",
@@ -185,7 +185,7 @@ const TERMS: Term[] = [
   {
     id: "testing",
     label: "Testing",
-    jd: "testing|unit tests?|tdd|test coverage|qa\\b",
+    jd: "testing|unit tests?|\\btdd\\b|test coverage|\\bqa\\b",
     ev: "unit tests|tests|hypothesis|property test",
   },
   {
@@ -216,7 +216,7 @@ const TERMS: Term[] = [
     id: "leadership",
     label: "Leadership",
     jd: "leadership|lead(ing)? (a )?team|mentor|ownership",
-    ev: "founded|founder|led|members|adopted by",
+    ev: "founded|founder|\\bled\\b|\\bmembers\\b|adopted by",
   },
   {
     id: "product",
