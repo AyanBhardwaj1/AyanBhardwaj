@@ -497,6 +497,17 @@ async function fitCheck(browser) {
     });
     assert(shown, "QuantDesk not shown when tailored for fintech");
   });
+  await check("fit", "a shared #fit= link shows the result", async () => {
+    await page.goto(BASE + "/cv#fit=python,rust,react|Kubernetes", {
+      waitUntil: "load",
+    });
+    const t = await until(async () => {
+      const x = await page.locator("#fit").innerText();
+      return /A shared result/.test(x) ? x : null;
+    });
+    assert(t, "no shared-result note");
+    assert(/3 of 4 technical requirements/.test(t), "wrong shared numbers");
+  });
   await check("fit", "hidden when printing", async () => {
     await page.emulateMedia({ media: "print" });
     assert(!(await page.locator("#fit").isVisible()), "#fit visible in print");
@@ -643,6 +654,14 @@ async function endpoints() {
     assert(codes.length > 20, `found only ${codes.length} codes`);
     const dup = codes.filter((c, i) => codes.indexOf(c) !== i);
     assert(!dup.length, `duplicate codes: ${dup.join(", ")}`);
+  });
+  await check("endpoints", "/functions lists terminal commands", async () => {
+    const html = await (await fetch(BASE + "/functions")).text();
+    assert(/id="fn-terminal"/.test(html), "no /terminal section");
+    assert(
+      html.includes("/terminal?run=diff%20youbank%20runway"),
+      "no runnable diff example",
+    );
   });
   await check("endpoints", "sitemap lists /terminal and /cv", async () => {
     const b = await (await fetch(BASE + "/sitemap.xml")).text();
