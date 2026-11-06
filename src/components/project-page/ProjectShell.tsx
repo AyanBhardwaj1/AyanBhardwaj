@@ -53,6 +53,8 @@ import {
   ShareButton,
 } from "./ProjectExtras";
 import { related } from "@/lib/related";
+import { links } from "@/content/content";
+import { hasResume } from "@/lib/site";
 import { CaseKeys } from "./CaseKeys";
 import "./shell.css";
 
@@ -220,6 +222,33 @@ export function ProjectFooter({
       <nav aria-label="More projects" className="container-page py-12 md:py-16">
         <CaseKeys prev={`/projects/${prev.id}`} next={`/projects/${next.id}`} />
         <RelatedWork id={slug} exclude={[next.id]} />
+        {/* For a convinced reader: a way to act, right where they finish. */}
+        <p className="t-label text-muted mb-8 flex flex-wrap items-center gap-x-5 gap-y-1">
+          <span>Hiring?</span>
+          <a
+            href={links.email.href}
+            className="text-accent inline-flex min-h-9 items-center underline-offset-4 hover:underline"
+          >
+            Email Ayan
+          </a>
+          {hasResume && (
+            <a
+              href={links.resume.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-fg inline-flex min-h-9 items-center underline-offset-4 hover:underline"
+            >
+              Résumé ↗
+              <span className="sr-only"> (PDF, opens in a new tab)</span>
+            </a>
+          )}
+          <Link
+            href="/cv#fit"
+            className="hover:text-fg inline-flex min-h-9 items-center underline-offset-4 hover:underline"
+          >
+            Check a job description →
+          </Link>
+        </p>
         <div className="mb-8">
           <AskChips
             name={current.name}

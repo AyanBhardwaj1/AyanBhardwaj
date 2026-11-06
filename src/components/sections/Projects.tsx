@@ -233,6 +233,12 @@ function ProjectCard({
           </ul>
           <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-3">
             <StatusDot live={!!p.links.live} />
+            {page && (
+              // The title is the card's link; this just says where it goes.
+              <span aria-hidden="true" className="lw-case t-label text-muted">
+                Case study <span className="text-accent">→</span>
+              </span>
+            )}
             <ProjectLinks p={p} />
           </div>
         </div>

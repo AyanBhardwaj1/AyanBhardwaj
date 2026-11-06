@@ -174,8 +174,9 @@
 }
 
 @media print {
+  /* One page on Letter and A4, tailored or not (smoke-checked). */
   @page {
-    margin: 11mm 13mm;
+    margin: 9mm 12mm;
   }
   :root,
   html,
@@ -193,17 +194,40 @@
     border: 0;
     box-shadow: none;
     background: #fff;
-    font-size: 9.6pt;
-    line-height: 1.32;
+    font-size: 8.7pt;
+    line-height: 1.24;
   }
   .cv-h2 {
-    margin-top: 9pt;
+    margin-top: 7pt;
   }
   .cv-item {
-    margin-top: 5pt;
+    margin-top: 3.5pt;
   }
   .cv-summary {
-    margin-top: 8pt;
+    margin-top: 6pt;
+  }
+  .cv-skills > div {
+    grid-template-columns: 7.5rem 1fr;
+    gap: 8px;
+    margin-top: 1pt;
+  }
+  .cv-name {
+    font-size: 24pt;
+  }
+  .cv-head {
+    padding-bottom: 8pt;
+  }
+  .cv-contact {
+    font-size: 8.5pt;
+    gap: 0;
+  }
+  /* Tailoring puts the matching projects first; on paper keep the top 8. */
+  section[aria-labelledby="cv-proj"] > .cv-item:nth-of-type(n + 9) {
+    display: none;
+  }
+  .cv-foot {
+    font-size: 7pt;
+    margin-top: 6pt;
   }
   .cv-desc,
   .cv-stack {

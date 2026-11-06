@@ -519,6 +519,23 @@ async function fitCheck(browser) {
     assert(t, "no shared-result note");
     assert(/3 of 4 technical requirements/.test(t), "wrong shared numbers");
   });
+  await check(
+    "fit",
+    "the CV prints on one page (Letter, A4, tailored)",
+    async () => {
+      for (const path of ["/cv", "/cv?for=fintech"]) {
+        await page.goto(BASE + path, { waitUntil: "load" });
+        await page.waitForTimeout(400);
+        for (const format of ["Letter", "A4"]) {
+          const pdf = await page.pdf({ format, printBackground: true });
+          const pages = (
+            pdf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? []
+          ).length;
+          assert(pages === 1, `${path} prints ${pages} pages on ${format}`);
+        }
+      }
+    },
+  );
   await check("fit", "hidden when printing", async () => {
     await page.emulateMedia({ media: "print" });
     assert(!(await page.locator("#fit").isVisible()), "#fit visible in print");
