@@ -163,7 +163,7 @@
 }
 .cv-foot {
   margin-top: 24px;
-  color: var(--fg-dim);
+  color: var(--fg-muted);
   font-family: var(--font-mono);
   font-size: 11px;
 }
