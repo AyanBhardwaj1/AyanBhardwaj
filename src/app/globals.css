@@ -1060,6 +1060,17 @@ html:not(.js) .section-rule::after {
 .nav-dock[data-hidden="true"]:not(:focus-within) .nav-pill {
   pointer-events: none;
 }
+/* Phones: on the hero the pill would sit on the call-to-action buttons, so
+   it waits until you scroll past them. */
+@media (max-width: 767.98px) {
+  .nav-dock[data-at-top="true"]:not(:focus-within) {
+    opacity: 0;
+    transform: translateY(calc(100% + 24px));
+  }
+  .nav-dock[data-at-top="true"]:not(:focus-within) .nav-pill {
+    pointer-events: none;
+  }
+}
 .nav-pill {
   transition: width 360ms var(--ease-expo);
 }
@@ -1741,9 +1752,11 @@ html:not(.js) .section-rule::after {
 .hx-hero {
   --hero-size: clamp(40px, 13vw, 196px);
 }
+/* From tablets up the name also scales with height, so the headline and
+   buttons make the first view on a 1280x720 laptop (smoke-checked). */
 @media (min-width: 768px) {
   .hx-hero {
-    --hero-size: clamp(40px, min(13vw, 19vh), 196px);
+    --hero-size: clamp(40px, min(13vw, 13vh), 196px);
   }
 }
 

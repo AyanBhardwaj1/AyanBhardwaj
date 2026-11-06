@@ -29,6 +29,9 @@ export function NavPill({ items }: { items: NavItem[] }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<string | null>(null);
   const [hidden, setHidden] = useState(false);
+  /** Still on the hero: on phones the pill waits below it (CSS), so it never
+   *  covers the hero's buttons. Starts true in the server HTML: no flash. */
+  const [atTop, setAtTop] = useState(true);
   const menuId = useId();
   const ref = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -68,6 +71,7 @@ export function NavPill({ items }: { items: NavItem[] }) {
         anchorY = lastY;
       }
       lastY = y;
+      setAtTop(y < window.innerHeight * 0.55);
       if (y < PINNED_ZONE) setHidden(false);
       else if (Math.abs(y - anchorY) > INTENT) setHidden(dir > 0);
     };
@@ -75,6 +79,7 @@ export function NavPill({ items }: { items: NavItem[] }) {
       if (!frame) frame = requestAnimationFrame(update);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
+    update();
     return () => {
       cancelAnimationFrame(frame);
       window.removeEventListener("scroll", onScroll);
@@ -91,6 +96,15 @@ export function NavPill({ items }: { items: NavItem[] }) {
       delete root.dataset.navHidden;
     };
   }, [isHidden]);
+  // ...and whether we're still on the hero (phones keep the bot launcher off
+  // the hero's buttons too). The head script sets it before first paint.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.dataset.navAtTop = String(atTop && !open);
+    return () => {
+      delete root.dataset.navAtTop;
+    };
+  }, [atTop, open]);
 
   useEffect(() => {
     if (!open) return;
@@ -118,6 +132,7 @@ export function NavPill({ items }: { items: NavItem[] }) {
     <div
       className="nav-dock no-print pointer-events-none fixed inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-50 flex justify-start px-4 md:top-12 md:bottom-auto md:justify-center"
       data-hidden={isHidden ? "true" : "false"}
+      data-at-top={atTop && !open ? "true" : "false"}
     >
       <div
         ref={ref}

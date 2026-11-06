@@ -113,13 +113,13 @@ export function Hero({
     <section
       id="top"
       aria-label="Introduction"
-      className="hx-hero relative isolate flex min-h-svh flex-col pt-16 md:pt-[clamp(7.5rem,15vh,9rem)]"
+      className="hx-hero relative isolate flex min-h-svh flex-col pt-16 md:pt-[clamp(7rem,13vh,9rem)]"
     >
       <HeroField />
       <Konami />
       <div className="container-page relative flex flex-1 flex-col items-center text-center">
         <p
-          className="hx-rise t-label text-muted mb-5 text-balance md:mb-10"
+          className="hx-rise t-label text-muted mb-5 text-balance md:mb-[min(2.5rem,3.5vh)]"
           style={rise(0)}
         >
           <span className="text-accent">{"//"}</span> SWE + AI · CS &amp;
@@ -135,12 +135,12 @@ export function Hero({
         </h1>
 
         <div
-          className="relative z-10 mt-5 flex justify-center sm:-mt-[0.06em] md:-mt-[0.32em]"
+          className="relative z-10 mt-4 flex justify-center sm:mt-[0.08em]"
           style={{ fontSize: "var(--hero-size)" }}
         >
           <Spark className="hx-glyph absolute top-[-0.2em] left-[-1.4em] hidden size-[0.42em] md:block" />
           <Candles className="hx-glyph hx-glyph-b absolute right-[-1.5em] bottom-[0.6em] hidden size-[0.5em] md:block" />
-          <figure className="hx-portrait group border-line-strong bg-card relative w-[clamp(144px,min(20vw,27vh),260px)] overflow-hidden rounded-xl border text-base">
+          <figure className="hx-portrait group border-line-strong bg-card relative w-[clamp(108px,min(30vw,17vh),144px)] overflow-hidden rounded-xl border text-base md:w-[clamp(128px,min(15vw,19vh),230px)]">
             <Image
               src={headshot.src}
               alt={headshot.alt}
@@ -170,17 +170,22 @@ export function Hero({
         </div>
 
         <p
-          className="hx-rise t-lead mt-7 max-w-[24ch] text-balance md:mt-[min(3.5rem,5vh)]"
+          className="hx-rise t-lead mt-5 max-w-[24ch] text-balance md:mt-[min(2.5rem,3vh)]"
           style={rise(420)}
         >
           {profile.headline}
         </p>
         <p className="hx-rise text-muted mt-4 max-w-[52ch]" style={rise(500)}>
-          <span className="md:hidden">{profile.subheadlineShort}</span>
-          <span className="hidden md:inline">{profile.subheadline}</span>
+          {/* The short line on phones and on short laptop screens. */}
+          <span className="md:hidden [@media(max-height:800px)]:inline">
+            {profile.subheadlineShort}
+          </span>
+          <span className="hidden md:inline [@media(max-height:800px)]:hidden">
+            {profile.subheadline}
+          </span>
         </p>
         <div
-          className="hx-rise mt-6 grid w-full max-w-[22rem] grid-cols-2 gap-2 sm:mt-8 sm:flex sm:w-auto sm:max-w-none sm:flex-wrap sm:justify-center sm:gap-3"
+          className="hx-rise mt-5 grid w-full max-w-[22rem] grid-cols-2 gap-2 sm:mt-6 sm:flex sm:w-auto sm:max-w-none sm:flex-wrap sm:justify-center sm:gap-3"
           style={rise(580)}
         >
           <a

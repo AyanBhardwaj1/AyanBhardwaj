@@ -37,6 +37,15 @@
     right: 9px;
   }
 }
+/* Phones, on the home hero: off the call-to-action buttons until you scroll. */
+@media (max-width: 767px) {
+  html[data-nav-at-top="true"]
+    .ab-launcher:not([data-open]):not(:focus-visible) {
+    transform: translateY(calc(100% + 24px + env(safe-area-inset-bottom)));
+    opacity: 0;
+    pointer-events: none;
+  }
+}
 /* Mirrors the nav pill: tucks away while scrolling down, returns on up. */
 @media (max-width: 767px) and (prefers-reduced-motion: no-preference) {
   html[data-nav-hidden="true"]
