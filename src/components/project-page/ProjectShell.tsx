@@ -176,8 +176,16 @@ export function ProjectFooter({
   return (
     <footer {...themeAttr} className="bg-bg border-line border-t">
       <nav aria-label="More projects" className="container-page py-12 md:py-16">
-        <div className="mb-6">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
           <Explored slug={slug} />
+          <Link
+            href={`/terminal?run=${encodeURIComponent(`cat ${slug}`)}`}
+            className="t-label text-muted hover:text-fg inline-flex min-h-9 items-center"
+          >
+            <span className="text-accent">$&nbsp;</span>cat {slug}
+            <span className="sr-only"> in the terminal</span>
+            <span aria-hidden="true">&nbsp;→</span>
+          </Link>
         </div>
         {/* Next project: a large teaser. Its name shares a view-transition
             name with the next page's h1, so it morphs into the title. */}

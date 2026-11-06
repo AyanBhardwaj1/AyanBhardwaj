@@ -940,7 +940,8 @@ export function Terminal({ data }: { data: TerminalData }) {
     "whoami",
     "ls projects",
     "cat youbank",
-    "stats",
+    "neofetch",
+    "diff youbank runway",
     "contact",
   ];
 
