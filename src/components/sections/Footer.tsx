@@ -70,6 +70,10 @@ export function Footer({ hasResume }: { hasResume: boolean }) {
           <Link href="/terminal" className="link text-fg">
             Open the terminal
           </Link>
+          {" · "}
+          <Link href="/cv" className="link text-fg">
+            One-page CV
+          </Link>
         </p>
       </div>
       <div
