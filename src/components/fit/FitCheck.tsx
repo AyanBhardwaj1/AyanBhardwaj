@@ -56,7 +56,14 @@ matching engine in C++ or Rust, with Python research tooling. Monte Carlo,
 volatility and risk models; options pricing. Nice to have: Kafka, AWS.`,
 ];
 
-export function FitCheck({ index }: { index: FitIndex }) {
+export function FitCheck({
+  index,
+  email,
+}: {
+  index: FitIndex;
+  /** Where "Email Ayan about this role" writes to (empty hides it). */
+  email?: string;
+}) {
   const id = useId();
   const [text, setText] = useState("");
   const [sampleAt, setSampleAt] = useState(0);
@@ -161,6 +168,33 @@ export function FitCheck({ index }: { index: FitIndex }) {
   const pct = result?.pct ?? 0;
 
   const [linked, setLinked] = useState(false);
+
+  // A first email with the result (never the posting): the score, what
+  // matched, and the shareable link. Written for the visitor to edit.
+  const [origin, setOrigin] = useState("");
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- browser-only value after mount
+    setOrigin(window.location.origin);
+  }, []);
+  const mailBody = result
+    ? [
+        "Hi Ayan,",
+        "",
+        `I ran your Fit check on a role we're hiring for: ${result.hits.length} of ${result.total} technical requirements backed by your work (${result.hits
+          .slice(0, 6)
+          .map((h) => h.label)
+          .join(", ")}${result.hits.length > 6 ? ", …" : ""}).`,
+        ...(result.gaps.length
+          ? [`Not on your site yet: ${result.gaps.join(", ")}.`]
+          : []),
+        "",
+        `The result: ${origin}/cv#fit=${encodeFit(result)}`,
+        "",
+        "Would you be open to a conversation?",
+        "",
+        "Best,",
+      ].join("\n")
+    : "";
   const copyLink = async () => {
     if (!result) return;
     try {
@@ -446,6 +480,16 @@ export function FitCheck({ index }: { index: FitIndex }) {
                 >
                   {linked ? "Link copied" : "Copy link"}
                 </button>
+                {email && result.scored && (
+                  <a
+                    className="pill min-h-10"
+                    href={`mailto:${email}?subject=${encodeURIComponent(
+                      `A role that fits${roleLabel ? ` (${roleLabel})` : ""}`,
+                    )}&body=${encodeURIComponent(mailBody)}`}
+                  >
+                    Email Ayan about this role
+                  </a>
+                )}
                 <span className="sr-only" aria-live="polite">
                   {copied ? "Fit summary copied to the clipboard." : ""}
                   {linked

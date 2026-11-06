@@ -1,5 +1,19 @@
 # Changelog
 
+## After launch (Nov 6, 2026)
+
+- **Related work** at the end of each case study: the most similar builds,
+  ranked by shared tools, category, where they were built and role lens,
+  with the reason shown. `cat <project>` in the terminal lists them too.
+- **Case-study navigation**: `[` / `]` step to the previous / next case
+  study; the explored tracker (and, for returning visitors, the home page)
+  points to one you haven't opened yet.
+- **Fit check**: three sample postings (AI fintech, frontend, quant), and
+  "Email Ayan about this role", which opens your mail app with the score,
+  what matched and the shareable result link (never the posting).
+- **Testing**: `npm run test:prod` runs the smoke checks against the live
+  site after each deploy (skipping ayan-bot, so no credits are spent).
+
 ## feat/breathtaking (Nov 6, 2026)
 
 ### ayan-bot: spend caps and security

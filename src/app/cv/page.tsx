@@ -101,7 +101,7 @@ export default function CvPage() {
       </div>
 
       <div className="cv-sheet cv-fitSheet no-print">
-        <FitCheck index={fitIndex()} />
+        <FitCheck index={fitIndex()} email={links.email.display ?? ""} />
       </div>
 
       <article className="cv-sheet">
