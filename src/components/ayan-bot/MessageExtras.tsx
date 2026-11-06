@@ -186,6 +186,8 @@ export function UsageMeter({ left }: { left: number }) {
 export function ListenButton({ text }: { text: string }) {
   const [speaking, setSpeaking] = useState(false);
   const [supported, setSupported] = useState(false);
+  /** This button's identity, so only its own unmount cancels its speech. */
+  const [me] = useState(() => ({}));
 
   useEffect(() => {
     // Only offer it when the browser actually has a voice to speak with
@@ -196,10 +198,12 @@ export function ListenButton({ text }: { text: string }) {
     synth?.addEventListener("voiceschanged", check);
     return () => {
       synth?.removeEventListener("voiceschanged", check);
-      if ("speechSynthesis" in window && speakingRef.owner === text)
+      if ("speechSynthesis" in window && speakingRef.owner === me) {
         window.speechSynthesis.cancel();
+        speakingRef.owner = null;
+      }
     };
-  }, [text]);
+  }, [me]);
 
   if (!supported) return null;
 
@@ -221,8 +225,11 @@ export function ListenButton({ text }: { text: string }) {
     const u = new SpeechSynthesisUtterance(spoken);
     u.lang = "en-US";
     u.rate = 1.03;
-    u.onend = u.onerror = () => setSpeaking(false);
-    speakingRef.owner = text;
+    u.onend = u.onerror = () => {
+      setSpeaking(false);
+      if (speakingRef.owner === me) speakingRef.owner = null;
+    };
+    speakingRef.owner = me;
     synth.speak(u);
     setSpeaking(true);
   };
@@ -257,4 +264,4 @@ export function ListenButton({ text }: { text: string }) {
 }
 
 /** Which answer is currently being spoken (so unmounting one stops it). */
-const speakingRef: { owner: string | null } = { owner: null };
+const speakingRef: { owner: object | null } = { owner: null };

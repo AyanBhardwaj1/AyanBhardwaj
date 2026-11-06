@@ -70,9 +70,10 @@ export const viewport: Viewport = {
 
 // Runs before paint: marks JS as available (reveal start states) and applies a saved theme, so there is no flash.
 // Also applies the site's own "reduce motion" switch (MOTION <GO>): it marks
-// <html data-motion="reduce"> and makes prefers-reduced-motion queries answer
-// "reduce", so every animation (CSS and JS) takes its reduced path.
-const themeScript = `(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")d.setAttribute("data-theme",t);if(localStorage.getItem("motion")==="reduce"){d.setAttribute("data-motion","reduce");var mm=window.matchMedia.bind(window);window.matchMedia=function(q){if(/prefers-reduced-motion/.test(q)){var m=/:\\s*reduce/.test(q);var n=function(){};return{matches:m,media:q,onchange:null,addEventListener:n,removeEventListener:n,addListener:n,removeListener:n,dispatchEvent:function(){return false}}}return mm(q)}}}catch(e){}})()`;
+// <html data-motion="reduce"> and makes matchMedia evaluate any
+// prefers-reduced-motion feature as "reduce" (the rest of the query is still
+// evaluated for real), so every JS effect takes its reduced path.
+const themeScript = `(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")d.setAttribute("data-theme",t);if(localStorage.getItem("motion")==="reduce"){d.setAttribute("data-motion","reduce");var mm=window.matchMedia.bind(window);window.matchMedia=function(q){return mm(String(q).replace(/\\(\\s*prefers-reduced-motion(\\s*:\\s*reduce)?\\s*\\)/g,"(min-width: 0px)").replace(/\\(\\s*prefers-reduced-motion\\s*:\\s*no-preference\\s*\\)/g,"(min-width: 999999px)"))}}}catch(e){}})()`;
 
 /**
  * With the site's reduce-motion switch on, rewrite our own stylesheets so
@@ -81,7 +82,7 @@ const themeScript = `(function(){var d=document.documentElement;d.classList.add(
  * "no-preference" one false (Tailwind's motion-reduce: variants included).
  * Runs for sheets present now and for lazily loaded ones. No-op otherwise.
  */
-const motionScript = `(function(){try{if(localStorage.getItem("motion")!=="reduce")return}catch(e){return}var R=/\\(\\s*prefers-reduced-motion\\s*:\\s*reduce\\s*\\)/g,N=/\\(\\s*prefers-reduced-motion\\s*:\\s*no-preference\\s*\\)/g;function fix(l){for(var i=0;i<l.length;i++){var r=l[i];if(r.media&&r.cssRules){var t=r.media.mediaText,u=t.replace(R,"(min-width: 0px)").replace(N,"(min-width: 999999px)");if(u!==t)r.media.mediaText=u}if(r.cssRules)fix(r.cssRules)}}function sheet(s){try{if(s)fix(s.cssRules)}catch(e){}}function all(){for(var j=0;j<document.styleSheets.length;j++)sheet(document.styleSheets[j])}all();new MutationObserver(function(ms){ms.forEach(function(m){m.addedNodes.forEach(function(n){if(n.tagName==="LINK"){n.addEventListener("load",function(){sheet(n.sheet)});sheet(n.sheet)}else if(n.tagName==="STYLE")sheet(n.sheet)})})}).observe(document.documentElement,{childList:true,subtree:true});document.addEventListener("DOMContentLoaded",all);window.addEventListener("load",all)})()`;
+const motionScript = `(function(){try{if(localStorage.getItem("motion")!=="reduce")return}catch(e){return}var R=/\\(\\s*prefers-reduced-motion\\s*:\\s*reduce\\s*\\)/g,N=/\\(\\s*prefers-reduced-motion\\s*:\\s*no-preference\\s*\\)/g;function fix(l){for(var i=0;i<l.length;i++){var r=l[i];if(r.media&&r.cssRules){var t=r.media.mediaText,u=t.replace(R,"(min-width: 0px)").replace(N,"(min-width: 999999px)");if(u!==t)r.media.mediaText=u}if(r.cssRules)fix(r.cssRules)}}function sheet(s){try{if(s)fix(s.cssRules)}catch(e){}}function all(){for(var j=0;j<document.styleSheets.length;j++)sheet(document.styleSheets[j])}all();new MutationObserver(function(ms){ms.forEach(function(m){m.addedNodes.forEach(function(n){if(n.tagName==="LINK"){n.addEventListener("load",function(){sheet(n.sheet)});sheet(n.sheet)}else if(n.tagName==="STYLE")sheet(n.sheet)})})}).observe(document.head,{childList:true});document.addEventListener("DOMContentLoaded",all);window.addEventListener("load",all)})()`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

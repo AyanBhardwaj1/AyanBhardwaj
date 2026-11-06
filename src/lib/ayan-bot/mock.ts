@@ -7,7 +7,7 @@ import { REFUSAL } from "./guard";
  */
 
 const ON_TOPIC =
-  /\b(ayan|bhardwaj|he|him|his|ayan-bot|bot|moss|koyal|unt|youbank|mycelium|jarvis|mossjarvis|thread|sentry|studyoverlay|convos|syllabus|duet|dejavu|walk-free|walkfree|runway|oncosense|stack|quantdesk|dynasty|hackathons?|projects?|built|build|work|job|intern(ship)?s?|experience|skills?|stack|csb|ut|austin|honors|school|education|contact|email|hire|hiring|resume|cv|linkedin|github|awards?|mavs|mavericks|interests?|hobbies|site|website|hi|hello|hey)\b/i;
+  /\b(ayan|bhardwaj|he|him|his|ayan-bot|bot|moss|koyal|unt|youbank|mycelium|jarvis|mossjarvis|thread|sentry|studyoverlay|convos|syllabus|duet|dejavu|walk-free|walkfree|runway|oncosense|stack|quantdesk|dynasty|hackathons?|projects?|built|build|work|job|intern(ship)?s?|experience|skills?|stack|csb|ut|austin|honors|school|education|contact|email|hire|hiring|resume|cv|linkedin|github|awards?|mavs|mavericks|interests?|hobbies|site|website|palette|terminal|hi|hello|hey)\b/i;
 
 const OFF_TOPIC =
   /\b(homework|essay|capital of|weather|recipe|politic\w*|election|president|leetcode|debug|write (me )?(a|an|some) (code|function|script|program|poem)|stock (tip|pick)s?|bitcoin)\b/i;
@@ -35,6 +35,29 @@ export function brief(text: string): string | null {
 - Thread and Sentry: memory and collision warnings for coding agents
 
 77 GitHub stars combined, plus 100+ stars driven to the core repo. <GO>`;
+
+  if (/koyal/.test(q))
+    return `At **Koyal AI (YC F25)**, an agentic AI filmmaking platform, Ayan was one of the first interns (AI Engineering and CRM, May to Sept 2025):
+- Built OpenCV scene classification across 300+ video scenes, cutting manual review time by 70%
+- Integrated an emotion classifier mapping 48 emotions to 6 core categories (95% lip-sync accuracy) and worked on a production face-swap pipeline
+- Grew the waitlist to 500+ alongside the founders
+
+<GO>`;
+
+  if (/\bai work\b|\bai projects?\b|show (his|ayan'?s) ai/.test(q))
+    return `The AI work, quickly:
+- [YouBank](/projects/youbank): hybrid retrieval with cross-encoder reranking (recall@5 from 0.85 to 0.97) and a GraphSAGE model for M&A link prediction
+- [mossJARVIS](/projects/mossjarvis) and [Mycelium](/projects/mycelium): local semantic memory on Moss's SDK, sub-10ms retrieval
+- [OncoSense](/projects/oncosense): a tiny neural network running on a wearable band
+- Koyal AI: computer vision for a video pipeline
+
+<GO>`;
+
+  if (/look at first|start with|where (should|do) i start/.test(q))
+    return `Start with [YouBank](/projects/youbank), the AI deal desk he's building now. Then [mossJARVIS](/projects/mossjarvis) or [Mycelium](/projects/mycelium) for the Moss work, and [Runway](/projects/runway) for a hackathon build. <GO>`;
+
+  if (/palette|⌘k|ctrl\+k|terminal/.test(q))
+    return `Press **⌘K** (or Ctrl+K, or "/") anywhere and type a function code, then Enter: PROJ for projects, EXP for experience, CV for the résumé, TOUR for a 40-second tour, TERM for a full terminal, ASK to talk to me. [Every command](/functions) is listed on one page. <GO>`;
 
   if (/hackathon/.test(q))
     return `Three builds worth your time:

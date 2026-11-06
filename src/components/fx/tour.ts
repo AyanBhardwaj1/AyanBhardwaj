@@ -83,7 +83,7 @@ export function tour() {
 }
 
 /** Called on the home page: resumes a tour requested from another page. */
-export function resumeTourIfPending() {
+export function resumeTourIfPending(): () => void {
   let pending = false;
   try {
     pending = sessionStorage.getItem(PENDING) === "1";
@@ -91,7 +91,9 @@ export function resumeTourIfPending() {
   } catch {
     /* ignore */
   }
-  if (pending) window.setTimeout(start, 900);
+  if (!pending) return () => {};
+  const t = window.setTimeout(start, 900);
+  return () => window.clearTimeout(t);
 }
 
 function start() {
@@ -124,6 +126,7 @@ function start() {
 
   let i = 0;
   let timer = 0;
+  let arm = 0;
   const behavior: ScrollBehavior = reduced() ? "auto" : "smooth";
 
   const show = () => {
@@ -149,6 +152,9 @@ function start() {
 
   const onUser = (e: Event) => {
     if (e.target instanceof Node && card.contains(e.target)) return;
+    // A tour button's own click toggles the tour off (see tour()).
+    if (e.target instanceof Element && e.target.closest("[data-tour-trigger]"))
+      return;
     stop();
   };
   const onKey = (e: KeyboardEvent) => {
@@ -163,6 +169,7 @@ function start() {
 
   function stop() {
     window.clearTimeout(timer);
+    window.clearTimeout(arm);
     window.removeEventListener("wheel", onUser, true);
     window.removeEventListener("touchstart", onUser, true);
     window.removeEventListener("pointerdown", onUser, true);
@@ -174,7 +181,7 @@ function start() {
 
   stopBtn.addEventListener("click", stop);
   // Listen from the next tick, so the click/Enter that started us doesn't stop us.
-  window.setTimeout(() => {
+  arm = window.setTimeout(() => {
     window.addEventListener("wheel", onUser, { capture: true, passive: true });
     window.addEventListener("touchstart", onUser, {
       capture: true,

@@ -207,5 +207,9 @@ export function pageContext(page: string | null): string {
   }
   if (page === "functions")
     return "\n\n# CONTEXT\nThe visitor is on the /functions page (the command directory).";
+  if (page === "cv")
+    return "\n\n# CONTEXT\nThe visitor is reading /cv, the web CV built from the dossier (experience, selected projects, education, skills). 'This page' means the CV.";
+  if (page === "terminal")
+    return "\n\n# CONTEXT\nThe visitor is in /terminal, the site's command line (whoami, ls projects, cat <project>, ask). 'This page' means the terminal.";
   return "";
 }

@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PROJECT_PAGES, type ProjectSlug } from "@/lib/projects";
+import {
+  PROJECT_PAGES,
+  hasProjectPage,
+  type ProjectSlug,
+} from "@/lib/projects";
 
 /**
  * Small client islands for the project shell:
@@ -18,11 +22,15 @@ function readExplored(): string[] {
   try {
     const raw = localStorage.getItem(KEY);
     const arr = raw ? (JSON.parse(raw) as unknown) : [];
-    return Array.isArray(arr)
-      ? arr.filter((x): x is string =>
-          (PROJECT_PAGES as readonly string[]).includes(String(x)),
-        )
-      : [];
+    if (!Array.isArray(arr)) return [];
+    // Known project slugs only, each once.
+    return [
+      ...new Set(
+        arr.filter(
+          (x): x is string => typeof x === "string" && hasProjectPage(x),
+        ),
+      ),
+    ];
   } catch {
     return [];
   }
