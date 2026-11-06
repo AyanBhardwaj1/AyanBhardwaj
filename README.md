@@ -52,7 +52,7 @@ No environment variables are required. ayan-bot (the chat agent) runs in a free 
 | `npm run typecheck`    | Generate Next.js route types, then `tsc --noEmit`                      |
 | `npm run format`       | Format everything with Prettier                                        |
 | `npm run format:check` | Check formatting without writing                                       |
-| `npm run test:smoke`   | 72 browser checks on a production build (`build` first)                |
+| `npm run test:smoke`   | 75 browser checks on a production build (`build` first)                |
 | `npm run test:prod`    | The smoke checks against the live site (skips ayan-bot, so no credits) |
 | `npm run test:unit`    | Fit check and terminal-link unit tests (Node's test runner, no build)  |
 | `npm run test:bot`     | ayan-bot route against local fakes, no credits spent                   |

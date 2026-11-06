@@ -115,7 +115,7 @@ export function ProjectShell({
       <div aria-hidden="true" className="h-0" />
       <header
         {...themeAttr}
-        className="bg-bg/85 border-line sticky top-0 z-50 border-b backdrop-blur-md"
+        className="bg-bg/[0.97] border-line sticky top-0 z-50 border-b backdrop-blur-md"
       >
         <div className="container-page flex h-12 items-center justify-between gap-4">
           <Link

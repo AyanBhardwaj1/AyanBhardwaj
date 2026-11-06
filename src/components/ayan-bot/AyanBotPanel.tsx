@@ -851,6 +851,18 @@ export default function AyanBotPanel({
             className="text-muted mb-2 flex items-center gap-1 px-1 font-mono text-[10px] tracking-wide"
           >
             <span className="mr-1">answer for:</span>
+            <button
+              type="button"
+              aria-pressed={audience === null}
+              onClick={() => audience && pickAudience(audience)}
+              className={`min-h-6 rounded-full border px-2 uppercase transition-colors ${
+                audience === null
+                  ? "border-accent text-accent"
+                  : "hover:text-fg border-transparent"
+              }`}
+            >
+              anyone
+            </button>
             {AUDIENCES.map((a) => (
               <button
                 key={a}
@@ -962,7 +974,7 @@ export default function AyanBotPanel({
                   void send(input);
                 }
               }}
-              className="placeholder:text-dim [field-sizing:content] max-h-28 min-h-9 flex-1 resize-none bg-transparent py-1.5 font-mono text-[14px] leading-6 outline-none focus-visible:outline-none"
+              className="placeholder:text-dim [field-sizing:content] max-h-28 min-h-9 flex-1 resize-none bg-transparent py-1.5 font-mono text-[16px] leading-6 outline-none focus-visible:outline-none md:text-[14px]"
             />
             {busy ? (
               <button
@@ -994,7 +1006,10 @@ export default function AyanBotPanel({
             className="text-muted mt-1.5 flex min-h-4 items-center gap-3 px-1 font-mono text-[10px] tracking-wide"
           >
             <span className="min-w-0 truncate">
-              Answers only about Ayan · AI can be wrong
+              <span className="hidden sm:inline">
+                Answers only about Ayan ·{" "}
+              </span>
+              AI can be wrong
             </span>
             <span className="ml-auto flex shrink-0 items-center gap-3">
               {remaining < 120 && (

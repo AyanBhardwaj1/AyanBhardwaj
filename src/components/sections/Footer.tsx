@@ -53,8 +53,8 @@ export function Footer({ hasResume }: { hasResume: boolean }) {
         <div>
           <h2 className="t-label text-muted mb-4">/Colophon</h2>
           <p className="t-data text-muted">
-            Archivo, Plex Mono, Instrument Serif · Next.js on Vercel · Last
-            updated {formatDay(dataAsOf)}
+            Archivo, Plex Mono, Instrument Serif · Next.js on Vercel · GitHub
+            data as of {formatDay(dataAsOf)}
           </p>
           <p className="t-data text-muted mt-3">
             {ui.footer.line} {ui.footer.smallPrint}

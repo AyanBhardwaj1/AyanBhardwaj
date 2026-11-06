@@ -187,7 +187,8 @@ Tags: ${x.tags.join(", ")}${
 - Press ⌘K (or Ctrl+K, or "/") to open a terminal-style command palette; type function codes like PROJ, EXP or CV and hit Enter (<GO>). /functions lists every command.
 - Home sections: /#about, /#experience, /#projects, /#trophies, /#activity (GitHub activity), /#contact.
 - Other pages: /cv (a web CV that can be tailored for a role, e.g. /cv?for=fintech or /cv?for=ai; its Fit check at /cv#fit matches a pasted job description against the work, in the browser), /terminal (a command line: ls projects, cat <project>, grep <word>, diff <a> <b>, top, fit <job description>; links like /terminal?run=top replay a command), /functions (every command). TOUR <GO> runs a 40-second guided tour.
-- For recruiters: the projects section filters by role (AI, Fintech, Systems, Full-stack, Research); /#contact has "draft --to ayan" (writes a first email for the visitor's mail app) and a contact card at /ayan.vcf.
+- For recruiters: the projects section filters by role (AI, Fintech, Systems, Full-stack, Research); /#contact has "draft --to ayan" (writes a first email for the visitor's mail app) and a contact card at /ayan.vcf. After a Fit check, "Email Ayan about this role" drafts an email with the result.
+- Each case study ends with "Related work" (similar builds) and "Worth asking about" questions; [ and ] step between case studies.
 - You (ayan-bot) are the chat agent in the corner, answering only from this content.`);
 
   return out.join("\n\n");
