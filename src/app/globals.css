@@ -1849,3 +1849,27 @@ html[data-motion="reduce"] ::after {
     bottom: calc(5rem + env(safe-area-inset-bottom));
   }
 }
+
+/* "What are you hiring for?": matches stay lit, the rest step back. */
+#projects[data-role] [data-roles] {
+  transition:
+    opacity 300ms var(--ease-expo),
+    filter 300ms var(--ease-expo);
+}
+#projects[data-role="ai"] [data-roles]:not([data-roles~="ai"]),
+#projects[data-role="fintech"] [data-roles]:not([data-roles~="fintech"]),
+#projects[data-role="systems"] [data-roles]:not([data-roles~="systems"]),
+#projects[data-role="fullstack"] [data-roles]:not([data-roles~="fullstack"]),
+#projects[data-role="research"] [data-roles]:not([data-roles~="research"]) {
+  opacity: 0.32;
+  filter: grayscale(0.8);
+}
+#projects[data-role="ai"] .lw-card[data-roles~="ai"],
+#projects[data-role="fintech"] .lw-card[data-roles~="fintech"],
+#projects[data-role="systems"] .lw-card[data-roles~="systems"],
+#projects[data-role="fullstack"] .lw-card[data-roles~="fullstack"],
+#projects[data-role="research"] .lw-card[data-roles~="research"] {
+  box-shadow:
+    0 0 0 1px var(--accent),
+    var(--shadow-card);
+}

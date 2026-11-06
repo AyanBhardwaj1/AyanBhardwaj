@@ -1,4 +1,6 @@
 import Image from "next/image";
+import { roleAttr } from "@/lib/roles";
+import { RoleFilter } from "../ui/RoleFilter";
 import Link from "next/link";
 import { ViewTransition } from "react";
 import { projects, ui, type Project } from "@/content/content";
@@ -186,6 +188,7 @@ function ProjectCard({
     <Reveal delay={(index % 2) * 0.08} className="h-full">
       <article
         id={`project-${p.id}`}
+        data-roles={roleAttr(p)}
         data-glow=""
         data-tilt=""
         className="lw-card card group relative flex h-full flex-col p-2"
@@ -292,6 +295,7 @@ function MossSdkGroup({ apps }: { apps: Project[] }) {
             <li
               key={p.id}
               id={`project-${p.id}`}
+              data-roles={roleAttr(p)}
               data-glow=""
               style={{ "--i": i } as React.CSSProperties}
               className="lw-row border-line grid gap-2 border-b px-5 py-5 last:border-b-0 md:grid-cols-12 md:items-baseline md:gap-6 md:px-8"
@@ -416,10 +420,13 @@ export function Projects() {
           }
         />
 
+        <RoleFilter scope="projects" />
+
         {/* Featured: YouBank */}
         <Reveal>
           <article
             id="project-youbank"
+            data-roles={roleAttr(youbank)}
             data-glow=""
             className="lw-card card relative overflow-hidden p-2"
           >
@@ -562,6 +569,7 @@ export function Projects() {
               <li
                 key={p.id}
                 id={`project-${p.id}`}
+                data-roles={roleAttr(p)}
                 data-inview=""
                 className="lw-row lw-self border-line grid gap-2 border-b py-5 md:grid-cols-12 md:items-baseline md:gap-6 md:px-3"
               >
