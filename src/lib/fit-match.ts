@@ -144,12 +144,35 @@ const TERM_ROLE: Record<
 };
 
 /** The role a job description leans toward, or null if nothing stands out. */
-export function fitRole(r: FitResult) {
+/** A lens the posting's own title names ("…, AI Products (Fintech)"). */
+const TITLE_ROLE: [
+  RegExp,
+  "ai" | "fintech" | "systems" | "fullstack" | "research",
+][] = [
+  [/\b(fintech|finance|financial|quant(itative)?|trading)\b/i, "fintech"],
+  [/\b(full[- ]?stack|front[- ]?end|web)\b/i, "fullstack"],
+  [/\b(research(er)?|scientist)\b/i, "research"],
+  [/\b(systems|infrastructure|platform|performance)\b/i, "systems"],
+  [/\b(ai|ml|machine learning|llm|nlp)\b/i, "ai"],
+];
+
+export function fitRole(r: FitResult, text = "") {
   const n = new Map<string, number>();
   for (const h of r.hits) {
     const role = TERM_ROLE[h.id];
     if (role) n.set(role, (n.get(role) ?? 0) + 1);
   }
+  // The job title, when it names a lens the work backs, wins: a "Software
+  // Engineer, AI Products (Fintech)" role is tailored for Fintech. The most
+  // specific mention counts (the parenthesised one, else the last).
+  const title = text.split("\n", 1)[0] ?? "";
+  const named = TITLE_ROLE.map(([re, role]) => ({
+    role,
+    at: title.search(re),
+  }))
+    .filter((x) => x.at >= 0 && (n.get(x.role) ?? 0) >= 1)
+    .sort((a, b) => b.at - a.at)[0];
+  if (named && (n.get(named.role) ?? 0) + 1 >= 2) return named.role;
   // Ties go to the more specific lens; full-stack terms show up everywhere.
   const rank = ["ai", "fintech", "systems", "research", "fullstack"];
   const best = [...n.entries()].sort(

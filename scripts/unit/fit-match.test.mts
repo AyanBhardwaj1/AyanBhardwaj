@@ -229,3 +229,16 @@ test("a shared result round-trips without the posting's text", () => {
   assert.equal(decodeFit(c, "nonsense|%E0%A4%A"), null);
   assert.equal(decodeFit(c, "not-a-term|Not A Tool"), null);
 });
+
+test("the posting's title picks the lens when the work backs it", () => {
+  const ai =
+    "Software Engineer, AI Products (Fintech)\nLLM agents and RAG over SEC filings for investment teams; Python.";
+  assert.equal(fitRole(matchFit(c, ai), ai), "fintech");
+  const q =
+    "Quantitative Developer\nLow-latency trading systems in C++ and Rust; Monte Carlo; volatility.";
+  assert.equal(fitRole(matchFit(c, q), q), "fintech");
+  const fe = "Frontend Engineer\nReact, Next.js and TypeScript; REST APIs.";
+  assert.equal(fitRole(matchFit(c, fe), fe), "fullstack");
+  // Without a title, ties still go to the more specific lens.
+  assert.equal(fitRole(matchFit(c, "LLMs, RAG, React, Next.js")), "ai");
+});

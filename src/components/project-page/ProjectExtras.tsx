@@ -57,7 +57,12 @@ export function AskChips({
     metrics.find((x) => /%|ms\b|ns\b/.test(x)) ??
     null;
   const delta = m?.match(/^(.*?)\s*([\d.]+)\s*→\s*([\d.]+)$/);
-  const picks = stack.filter((x) => !/^(TypeScript|JavaScript)$/.test(x));
+  // Languages aren't choices worth asking about, and Next.js already is React.
+  const picks = stack.filter(
+    (x) =>
+      !/^(TypeScript|JavaScript)$/.test(x) &&
+      !(x === "React" && stack.some((y) => /^Next\.js/.test(y))),
+  );
   const qs = [
     delta
       ? `${name}: how did ${delta[1]} go from ${delta[2]} to ${delta[3]}?`
