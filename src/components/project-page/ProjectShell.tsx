@@ -39,6 +39,7 @@ import { JsonLd, projectJsonLd } from "@/lib/jsonld";
 import {
   getProject,
   PROJECT_PAGES,
+  projectHref,
   prevNext,
   type ProjectSlug,
 } from "@/lib/projects";
@@ -51,7 +52,41 @@ import {
   Explored,
   ShareButton,
 } from "./ProjectExtras";
+import { related } from "@/lib/related";
 import "./shell.css";
+
+/** "Related work": the most similar builds, by role lens and stack. */
+function RelatedWork({ id, exclude }: { id: string; exclude: string[] }) {
+  const items = related(id, { exclude });
+  if (!items.length) return null;
+  return (
+    <section aria-labelledby="related-work" className="mb-10">
+      <h2 id="related-work" className="t-label text-muted mb-3">
+        Related work
+      </h2>
+      <ul className="grid gap-2 sm:grid-cols-3">
+        {items.map(({ project: p, why }) => (
+          <li key={p.id}>
+            <Link
+              href={projectHref(p.id)}
+              className="border-line hover:border-accent group block h-full rounded-[12px] border p-4 transition-colors"
+            >
+              <span className="text-fg group-hover:text-accent block font-medium transition-colors">
+                {p.name}
+              </span>
+              <span className="text-muted mt-1 block text-[14px]">
+                {p.tagline}
+              </span>
+              {why && (
+                <span className="t-label text-muted mt-3 block">{why}</span>
+              )}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
 
 export function ProjectShell({
   slug,
@@ -182,6 +217,7 @@ export function ProjectFooter({
   return (
     <footer {...themeAttr} className="bg-bg border-line border-t">
       <nav aria-label="More projects" className="container-page py-12 md:py-16">
+        <RelatedWork id={slug} exclude={[next.id]} />
         <div className="mb-8">
           <AskChips
             name={current.name}
