@@ -7,9 +7,12 @@ import {
   useEffect,
   useId,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
+import type { FitIndex } from "@/lib/fit";
+import { compileFit, fitPrompt, matchFit } from "@/lib/fit-match";
 import "./terminal.css";
 
 /**
@@ -67,6 +70,7 @@ export type TerminalData = {
     contributions12m: number;
     languages: string[];
   };
+  fit: FitIndex;
 };
 
 type Seg =
@@ -106,6 +110,11 @@ const COMMANDS: { name: string; args?: string; help: string }[] = [
   { name: "stats", help: "public GitHub numbers" },
   { name: "contact", help: "how to reach him" },
   { name: "ask", args: "<question>", help: "ask ayan-bot anything about Ayan" },
+  {
+    name: "fit",
+    args: "<job description>",
+    help: "paste a role, see what his work backs up",
+  },
   {
     name: "go",
     args: "<about|projects|contact|…>",
@@ -166,6 +175,8 @@ export function Terminal({ data }: { data: TerminalData }) {
   const [hIdx, setHIdx] = useState<number | null>(null);
   const [hint, setHint] = useState("");
   const idRef = useRef(1000);
+  const fit = useMemo(() => compileFit(data.fit), [data.fit]);
+  const lastFit = useRef<string | null>(null);
   const logRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -240,7 +251,15 @@ export function Terminal({ data }: { data: TerminalData }) {
   const run = useCallback(
     (raw: string) => {
       const line = raw.trim();
-      print([s("ayan@after-hours", "accent"), s(":~$ ", "muted"), line], "cmd");
+      print(
+        [
+          s("ayan@after-hours", "accent"),
+          s(":~$ ", "muted"),
+          // A pasted job description shouldn't flood the screen.
+          line.length > 160 ? `${line.slice(0, 157)}…` : line,
+        ],
+        "cmd",
+      );
       if (!line) return;
       setHist((h) => (h.at(-1) === line ? h : [...h.slice(-49), line]));
       const [cmdRaw, ...rest] = line.split(/\s+/);
@@ -439,6 +458,74 @@ export function Terminal({ data }: { data: TerminalData }) {
             }),
           );
           return;
+        case "fit": {
+          if (!arg) {
+            print([
+              s("fit: paste a job description after it, e.g. ", "muted"),
+              s("fit Python, React, LLM agents, SQL, Kubernetes", "accent"),
+            ]);
+            print([
+              s("full version with evidence cards: ", "muted"),
+              a("/cv#fit", "/cv#fit"),
+            ]);
+            return;
+          }
+          if (arg.toLowerCase() === "ask") {
+            if (!lastFit.current) {
+              print([s("fit ask: run fit <job description> first.", "muted")]);
+              return;
+            }
+            print([
+              s("handing that to ayan-bot… ", "muted"),
+              s("(panel opening)", "accent"),
+            ]);
+            window.dispatchEvent(
+              new CustomEvent("ayan-bot:open", {
+                detail: { prompt: lastFit.current },
+              }),
+            );
+            return;
+          }
+          const r = matchFit(fit, arg);
+          if (!r.total) {
+            print([
+              s(
+                "fit: no recognisable skills in that. Paste more of the role.",
+                "muted",
+              ),
+            ]);
+            return;
+          }
+          const filled = Math.round(r.pct / 5);
+          print([
+            s(`${r.hits.length}/${r.total} backed  `, "strong"),
+            s("█".repeat(filled), "up"),
+            s("░".repeat(20 - filled), "muted"),
+            s(`  ${r.pct}%`, "muted"),
+          ]);
+          r.hits.forEach((h) => {
+            const ev: Seg[] = [];
+            h.evidence.slice(0, 3).forEach((e, i) => {
+              if (i) ev.push(s(" · ", "muted"));
+              ev.push(e.href ? a(e.name, e.href) : e.name);
+            });
+            print([s("  ✓ ", "up"), s(h.label.padEnd(28)), ...ev]);
+          });
+          if (r.gaps.length)
+            print([
+              s("  ✗ ", "down"),
+              s("not on this site: ", "muted"),
+              r.gaps.join(", "),
+            ]);
+          lastFit.current = r.hits.length ? fitPrompt(r) : null;
+          if (r.hits.length)
+            print([
+              s("next: ", "muted"),
+              s("fit ask", "accent"),
+              s(" to have ayan-bot point to the strongest examples", "muted"),
+            ]);
+          return;
+        }
         case "go":
         case "cd": {
           const sec = SECTIONS.find((x) =>
@@ -519,7 +606,7 @@ export function Terminal({ data }: { data: TerminalData }) {
         }
       }
     },
-    [data, findProject, hist, print, projectCard, router],
+    [data, findProject, fit, hist, print, projectCard, router],
   );
 
   const complete = () => {

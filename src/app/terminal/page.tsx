@@ -10,6 +10,7 @@ import {
   skills,
 } from "@/content/content";
 import { projectMnemonic, projectRepo } from "@/content/extras";
+import { fitIndex } from "@/lib/fit";
 import { contributionRanges, githubStats, starsFor } from "@/lib/github";
 import { hasProjectPage } from "@/lib/projects";
 import { roleTags } from "@/lib/roles";
@@ -81,6 +82,7 @@ function data(): TerminalData {
       contributions12m: last12.total,
       languages: githubStats.languages,
     },
+    fit: fitIndex(),
   };
 }
 
