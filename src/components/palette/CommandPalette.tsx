@@ -76,7 +76,7 @@ const HELP_LINES = [
   "↑ ↓ to move · Enter to run · Tab to complete · Esc to close",
   "shortcuts: ⌘K / Ctrl+K anywhere · / or ? to open · j / k next and previous section · KEYS <GO> for type-to-open",
   "ayan-bot: ⌘J / Ctrl+J · select any text on the page to ask about it",
-  "case studies: F1–F8 jump between sections on YouBank · 'Ask about' in the bar",
+  "case studies: [ and ] for previous / next · F1–F8 jump between sections on YouBank · 'Ask about' in the bar",
   "new here? TOUR <GO> for a 40-second guided tour · TERM <GO> opens the terminal",
   "hiring? FIT <GO>: paste a job description, see what his work backs up",
   "easter eggs exist. try: whoami, latency, mavs, sudo hire ayan, RAIN, BELL, ↑↑↓↓←→←→BA",

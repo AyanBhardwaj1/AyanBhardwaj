@@ -53,6 +53,7 @@ import {
   ShareButton,
 } from "./ProjectExtras";
 import { related } from "@/lib/related";
+import { CaseKeys } from "./CaseKeys";
 import "./shell.css";
 
 /** "Related work": the most similar builds, by role lens and stack. */
@@ -217,6 +218,7 @@ export function ProjectFooter({
   return (
     <footer {...themeAttr} className="bg-bg border-line border-t">
       <nav aria-label="More projects" className="container-page py-12 md:py-16">
+        <CaseKeys prev={`/projects/${prev.id}`} next={`/projects/${next.id}`} />
         <RelatedWork id={slug} exclude={[next.id]} />
         <div className="mb-8">
           <AskChips
