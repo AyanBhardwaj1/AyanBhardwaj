@@ -71,7 +71,7 @@ export function brief(text: string): string | null {
     return `**CSB** is UT Austin's joint honors degree in computer science and business: a B.S. in Computer Science plus a B.B.A. through Canfield Business Honors, earned together in one small honors cohort. That's why Ayan writes the code and reads the 10-K.`;
 
   if (/contact|email|hire|hiring|reach|resume|cv/.test(q))
-    return `Fastest line in: email [ayan.bhardwaj@utexas.edu](mailto:ayan.bhardwaj@utexas.edu). You can also find him on [GitHub](https://github.com/AyanBhardwaj1) or press ⌘K and type CV. <GO>`;
+    return `Fastest line in: email [ayan.bhardwaj@utexas.edu](mailto:ayan.bhardwaj@utexas.edu). Save his [contact card](/ayan.vcf), find him on [GitHub](https://github.com/AyanBhardwaj1), or, if you're hiring, paste the role into the [Fit check](/cv#fit) to see what his work backs up. <GO>`;
 
   if (/youbank/.test(q))
     return `[YouBank](/projects/youbank) is the AI deal desk Ayan is building: cited analysis from SEC filings, 35+ terminal functions and 328 tools on EDGAR and XBRL data, and an email agent that has to earn the right to send on its own. <GO>`;

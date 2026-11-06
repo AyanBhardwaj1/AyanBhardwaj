@@ -16,7 +16,7 @@ function safeHref(raw: string): { href: string; internal: boolean } | null {
   if (href.startsWith("/") && !href.startsWith("//"))
     return {
       href,
-      internal: !/\.(pdf|txt|json)$/i.test(href.split(/[?#]/)[0]),
+      internal: !/\.(pdf|txt|json|vcf|md|xml)$/i.test(href.split(/[?#]/)[0]),
     };
   if (href.startsWith("#")) return { href, internal: false };
   try {
