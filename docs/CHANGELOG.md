@@ -46,8 +46,12 @@
 ### New pages
 
 - `/terminal`: a command line over the site (`whoami`, `ls projects`,
-  `ls projects ai`, `cat youbank`, `grep pytorch`, `diff youbank runway`, `cv fintech`, `tour`, `neofetch`, `open resume`,
+  `ls projects ai`, `cat youbank`, `grep pytorch`, `diff youbank runway`, `top`, `cv fintech`, `tour`, `neofetch`, `open resume`,
   `fit …`, `ask …`).
+- Terminal niceties: fish-style autosuggestions (→ accepts), history that
+  persists on the device (`history -c` clears), and shareable runs:
+  `/terminal?run=diff youbank runway` (read-only commands only), with
+  `share` to copy one. Each case study links to `$ cat <slug>`.
 - `/cv`: a web CV generated from the same content, print-ready.
 
 ### For recruiters
@@ -58,7 +62,7 @@
   sent. `fit <text>` does the same in the terminal, and `fit ask` hands the
   result to ayan-bot. Paste a job description into ayan-bot and it offers to
   hand the whole thing to the Fit check instead.
-- **Tailor the CV** for a role (`/cv?for=fintech`): matching projects first,
+- **Tailor the CV** for a role (`/cv?for=fintech`, or `CVFN <GO>`, `CVAI`…): matching projects first,
   plus a few more that fit; Print / save as PDF keeps it.
 - **Copy as text** on `/cv` (also served at `/cv.md`): the CV as Markdown
   for application forms and recruiter notes.
