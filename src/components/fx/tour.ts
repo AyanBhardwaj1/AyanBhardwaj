@@ -38,7 +38,7 @@ const STEPS: Step[] = [
   {
     sel: "#projects",
     title: "Built at Moss, and beyond",
-    line: "10 open-source apps on Moss's semantic search SDK, plus hackathon builds and research.",
+    line: "10 open-source apps on Moss's semantic search SDK, plus hackathon builds and research. Filter by the role you're hiring for.",
   },
   {
     sel: "#trophies",
@@ -53,7 +53,7 @@ const STEPS: Step[] = [
   {
     sel: "#contact",
     title: "Let's build something",
-    line: "Email is fastest. Or press ⌘J and ask ayan-bot anything about his work.",
+    line: "Email is fastest. Hiring? FIT <GO> checks a job description against his work, or press ⌘J to ask ayan-bot.",
     ms: 5200,
   },
 ];
