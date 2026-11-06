@@ -128,6 +128,7 @@ const COMMANDS: { name: string; args?: string; help: string }[] = [
     help: "the CV, tailored",
   },
   { name: "tour", help: "the 40-second guided tour" },
+  { name: "top", help: "most-used tech across every build" },
   { name: "neofetch", help: "the system, at a glance" },
   { name: "share", help: "copy a link that replays your last command" },
   { name: "history", args: "[-c]", help: "commands you've run (-c clears)" },
@@ -787,6 +788,48 @@ export function Terminal({ data }: { data: TerminalData }) {
               .then(() => print([s("copied ", "up"), a(path, path)]), shown);
           return;
         }
+        case "top":
+        case "htop": {
+          // Count each technology once per project ("Next.js 15" and
+          // "Tauri 2" fold into their names).
+          const count = new Map<string, { n: number; names: string[] }>();
+          for (const p of data.projects)
+            for (const t of new Set(
+              p.stack.map((x) => x.replace(/\s+\d+(\.\d+)*$/, "").trim()),
+            )) {
+              const c = count.get(t) ?? { n: 0, names: [] };
+              c.n++;
+              c.names.push(p.name);
+              count.set(t, c);
+            }
+          const rows = [...count.entries()]
+            .sort((x, y) => y[1].n - x[1].n || x[0].localeCompare(y[0]))
+            .slice(0, 12);
+          const max = rows[0]?.[1].n ?? 1;
+          print([
+            s(
+              `top · ${data.projects.length} builds · technologies by projects`,
+              "muted",
+            ),
+          ]);
+          rows.forEach(([t, c]) =>
+            print([
+              s(t.slice(0, 18).padEnd(19), "accent"),
+              s(
+                "█"
+                  .repeat(Math.max(1, Math.round((c.n / max) * 24)))
+                  .padEnd(24),
+                "up",
+              ),
+              s(` ${String(c.n).padStart(2)}`, "strong"),
+              s(
+                `  ${c.names.slice(0, 3).join(", ")}${c.n > 3 ? "…" : ""}`,
+                "muted",
+              ),
+            ]),
+          );
+          return;
+        }
         case "neofetch":
         case "fastfetch": {
           const logo = [
@@ -850,6 +893,8 @@ export function Terminal({ data }: { data: TerminalData }) {
     if (!cmd) return;
     const head = cmd.split(/\s+/)[0].toLowerCase();
     const SAFE = [
+      "top",
+      "htop",
       "help",
       "whoami",
       "ls",
