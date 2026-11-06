@@ -46,7 +46,9 @@ the common questions from free canned briefs and makes no model calls.
 cross-site`, or whose `Origin` isn't this site, are refused (403).
 2. **Shape and size**: JSON only, 16 KB body cap, 500-character messages,
    12 messages of history, control/zero-width/bidi characters stripped, NFKC
-   normalised.
+   normalised. The only other fields that reach the instructions are `page`
+   (a known page key, else ignored) and `audience` (exactly `recruiter` or
+   `engineer`, else ignored); each adds one fixed, server-written line.
 3. **Proof-of-work ticket**: `POST /api/ayan-bot/challenge` issues an
    HMAC-signed ticket bound to a salted hash of the visitor's IP and user
    agent, valid 5 minutes, usable once. The browser solves it in the
