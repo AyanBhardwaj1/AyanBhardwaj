@@ -13,7 +13,8 @@
     "data:refresh": "node scripts/fetch-github-data.mjs src/data",
     "check:leaks": "node scripts/check-leaks.mjs",
     "postbuild": "node scripts/check-leaks.mjs",
-    "test:bot": "bash scripts/ayan-bot-e2e/run.sh"
+    "test:bot": "bash scripts/ayan-bot-e2e/run.sh",
+    "test:smoke": "bash scripts/smoke/run.sh"
   },
   "dependencies": {
     "cmdk": "^1.1.1",
