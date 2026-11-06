@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { HeroField } from "@/components/fx/HeroField";
 import type { Metadata } from "next";
-import { ui } from "@/content/content";
+import { projects, ui } from "@/content/content";
+import { projectHref } from "@/lib/projects";
+import { DidYouMean, type Candidate } from "@/components/ui/DidYouMean";
 import { sections } from "@/content/extras";
 import { StatusBar } from "@/components/StatusBar";
 
@@ -14,6 +16,26 @@ export const metadata: Metadata = {
 const SUGGEST = sections.filter((s) =>
   ["projects", "experience", "contact"].includes(s.id),
 );
+
+const CANDIDATES: Candidate[] = [
+  ...projects.map((p) => ({
+    href: projectHref(p.id),
+    label: p.name,
+    keys: [p.id, p.name],
+  })),
+  ...sections.map((s) => ({
+    href: `/#${s.id}`,
+    label: s.label,
+    keys: [s.id, s.label],
+  })),
+  { href: "/cv", label: "Web CV", keys: ["cv", "resume", "fit"] },
+  { href: "/terminal", label: "Terminal", keys: ["terminal", "term", "shell"] },
+  {
+    href: "/functions",
+    label: "Function directory",
+    keys: ["functions", "help", "commands"],
+  },
+];
 
 /** A delisted ticker: the price chart falls off a cliff, then a way home. */
 export default function NotFound() {
@@ -85,6 +107,7 @@ export default function NotFound() {
             ▍
           </span>
         </p>
+        <DidYouMean candidates={CANDIDATES} />
         <nav
           aria-label="Suggested pages"
           className="hx-rise mt-10 flex flex-wrap gap-3"
