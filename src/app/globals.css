@@ -1886,3 +1886,13 @@ html[data-motion="reduce"] ::after {
     0 0 0 1px var(--accent),
     var(--shadow-card);
 }
+
+/* MobileFold: closed on phones until asked for; always open from md up. */
+@media (max-width: 767.98px) {
+  .mobile-fold:not([data-open]) > .mobile-fold-body {
+    display: none;
+  }
+  .mobile-fold[data-open] > .mobile-fold-body {
+    margin-top: 16px;
+  }
+}

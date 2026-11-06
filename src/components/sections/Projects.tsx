@@ -22,6 +22,7 @@ import { CountUp } from "../motion/CountUp";
 import { MiniTerminal } from "../viz/MiniTerminal";
 import "./lower/lower.css";
 import { HoverVideo } from "../ui/HoverVideo";
+import { MobileFold } from "../ui/MobileFold";
 
 const host = (url: string) =>
   url.replace(/^https?:\/\//, "").replace(/\/$/, "");
@@ -575,7 +576,10 @@ export function Projects() {
               <span className="md:hidden">Tap a project to open it</span>
             </p>
           </div>
-          <ConstellationIsland data={constellation} />
+          {/* On phones it's a third list of the same projects: folded. */}
+          <MobileFold label="the knowledge graph">
+            <ConstellationIsland data={constellation} />
+          </MobileFold>
         </div>
 
         {/* More work */}
