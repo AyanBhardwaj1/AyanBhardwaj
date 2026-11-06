@@ -219,3 +219,18 @@
     font-size: 13px;
   }
 }
+
+/* Boot screen: server-rendered, then staggered in (never hidden: the first
+   frame already shows it faintly, so it paints immediately). */
+@media (prefers-reduced-motion: no-preference) {
+  .tm-boot {
+    animation: tm-boot 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--i, 0) * 55ms);
+  }
+}
+@keyframes tm-boot {
+  from {
+    opacity: 0.12;
+    transform: translateY(4px);
+  }
+}

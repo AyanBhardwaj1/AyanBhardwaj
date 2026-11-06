@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   useCallback,
-  useEffect,
   useId,
   useLayoutEffect,
   useRef,
@@ -76,6 +75,8 @@ type Line = {
   id: number;
   segs: Seg[];
   kind?: "cmd" | "out" | "err" | "banner";
+  /** Part of the boot screen (staggered in with CSS). */
+  boot?: boolean;
 };
 
 const BANNER = [
@@ -124,15 +125,39 @@ const s = (
 ): Seg => ({ t, tone });
 const a = (t: string, href: string, ext = false): Seg => ({ t, href, ext });
 
+function bootLines(data: TerminalData): Line[] {
+  const rows: [Seg[], Line["kind"]][] = [
+    ...BANNER.map((b): [Seg[], Line["kind"]] => [[s(b, "accent")], "banner"]),
+    [[s(`${data.name} · ${data.role} · ${data.location}`, "strong")], "out"],
+    [[s(data.headline, "muted")], "out"],
+    [[""], "out"],
+    [
+      [
+        "Type ",
+        s("help", "accent"),
+        " to see commands, ",
+        s("ls projects", "accent"),
+        " to start, or ",
+        s("ask", "accent"),
+        " to talk to ayan-bot. Tab completes, ↑/↓ walks history.",
+      ],
+      "out",
+    ],
+  ];
+  return rows.map(([segs, kind], id) => ({ id, segs, kind, boot: true }));
+}
+
 export function Terminal({ data }: { data: TerminalData }) {
   const router = useRouter();
   const inputId = useId();
-  const [lines, setLines] = useState<Line[]>([]);
+  // Boot banner and MOTD are the first render (server HTML), so the page
+  // paints at once; CSS staggers them in (see .tm-boot).
+  const [lines, setLines] = useState<Line[]>(() => bootLines(data));
   const [value, setValue] = useState("");
   const [hist, setHist] = useState<string[]>([]);
   const [hIdx, setHIdx] = useState<number | null>(null);
   const [hint, setHint] = useState("");
-  const idRef = useRef(0);
+  const idRef = useRef(1000);
   const logRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -170,48 +195,6 @@ export function Terminal({ data }: { data: TerminalData }) {
     },
     [data.projects],
   );
-
-  // Boot: banner and a short MOTD.
-  useEffect(() => {
-    const reduce = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    const boot: [Seg[], Line["kind"]][] = [
-      ...BANNER.map((b): [Seg[], Line["kind"]] => [[s(b, "accent")], "banner"]),
-      [[s(`${data.name} · ${data.role} · ${data.location}`, "strong")], "out"],
-      [[s(data.headline, "muted")], "out"],
-      [[""], "out"],
-      [
-        [
-          "Type ",
-          s("help", "accent"),
-          " to see commands, ",
-          s("ls projects", "accent"),
-          " to start, or ",
-          s("ask", "accent"),
-          " to talk to ayan-bot. Tab completes, ↑/↓ walks history.",
-        ],
-        "out",
-      ],
-    ];
-    if (reduce) {
-      const t = window.setTimeout(
-        () => boot.forEach(([segs, kind]) => print(segs, kind)),
-        0,
-      );
-      return () => {
-        window.clearTimeout(t);
-        setLines([]);
-      };
-    }
-    const timers = boot.map(([segs, kind], i) =>
-      window.setTimeout(() => print(segs, kind), 60 * i),
-    );
-    return () => {
-      timers.forEach(clearTimeout);
-      setLines([]);
-    };
-  }, [data, print]);
 
   // Keep the newest output in view.
   useLayoutEffect(() => {
@@ -637,7 +620,10 @@ export function Terminal({ data }: { data: TerminalData }) {
         {lines.map((l) => (
           <p
             key={l.id}
-            className={`tm-line tm-${l.kind ?? "out"}`}
+            className={`tm-line tm-${l.kind ?? "out"}${l.boot ? "tm-boot" : ""}`}
+            style={
+              l.boot ? ({ "--i": l.id } as React.CSSProperties) : undefined
+            }
             aria-hidden={l.kind === "banner" ? true : undefined}
           >
             {l.segs.map((g, i) =>
