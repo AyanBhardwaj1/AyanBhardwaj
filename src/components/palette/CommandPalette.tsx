@@ -74,8 +74,11 @@ const HELP_LINES = [
   "or type words to search projects and experience, on-device",
   "or ASK <question> to ask ayan-bot",
   "↑ ↓ to move · Enter to run · Tab to complete · Esc to close",
-  "shortcuts: ⌘K / Ctrl+K anywhere · / to open · KEYS <GO> for type-to-open",
-  "easter eggs exist. try: whoami, latency, mavs, sudo hire ayan, RAIN, BELL",
+  "shortcuts: ⌘K / Ctrl+K anywhere · / or ? to open · KEYS <GO> for type-to-open",
+  "ayan-bot: ⌘J / Ctrl+J · select any text on the page to ask about it",
+  "case studies: F1–F8 jump between sections on YouBank · 'Ask about' in the bar",
+  "prefer a shell? TERM <GO> opens the terminal (whoami, ls, cat youbank)",
+  "easter eggs exist. try: whoami, latency, mavs, sudo hire ayan, RAIN, BELL, ↑↑↓↓←→←→BA",
 ];
 
 export default function CommandPalette({
