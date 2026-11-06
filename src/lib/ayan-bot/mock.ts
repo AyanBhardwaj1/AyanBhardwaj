@@ -26,6 +26,8 @@ export function brief(text: string): string | null {
   const q = text.toLowerCase();
   if (!isMockOnTopic(q)) return null;
 
+  if (/recruiter brief|30-second brief/.test(q)) return recruiterBrief(q);
+
   if (/\bmoss\b/.test(q))
     return `At **Moss (YC F25)** Ayan shipped **10 open-source apps** on Moss's WebAssembly semantic search SDK, all with sub-10ms on-device retrieval:
 - [mossJARVIS](/projects/mossjarvis): an Iron Man-style desktop HUD with a second brain
@@ -54,11 +56,77 @@ export function brief(text: string): string | null {
   return null;
 }
 
+/** The recruiter brief, optionally tilted toward a role. Facts from content.ts. */
+function recruiterBrief(q: string): string {
+  const head = `**30-second brief:** Ayan Bhardwaj is a software engineer in UT Austin's **CSB Honors** program (a CS + Business dual degree), ex-Moss and Koyal AI (both YC F25).`;
+  const close = `Next step: email [ayan.bhardwaj@utexas.edu](mailto:ayan.bhardwaj@utexas.edu). <GO>`;
+  if (/software engineering|\bswe\b/.test(q))
+    return `${head}
+- **Moss:** shipped 10 open-source apps in TypeScript and Rust with sub-10ms on-device retrieval, plus the OpenRouter integration layer reused across all 10 and adopted by 5 other interns
+- **[YouBank](/projects/youbank):** Next.js, TypeScript and a Rust/Tauri desktop app, with 1,000+ unit tests
+- **QuantDesk:** a Rust matching engine at 1.88M ops/sec
+
+${close}`;
+  if (/\bai\b|machine learning|\bml\b/.test(q))
+    return `${head}
+- **[YouBank](/projects/youbank):** hybrid retrieval with cross-encoder reranking (recall@5 from 0.85 to 0.97) and a GraphSAGE model for M&A link prediction
+- **Koyal AI:** OpenCV scene classification across 300+ video scenes, cutting manual review by 70%
+- **[mossJARVIS](/projects/mossjarvis):** a desktop assistant with local long-term memory on Moss
+
+${close}`;
+  if (/fintech|financ/.test(q))
+    return `${head}
+- **[YouBank](/projects/youbank):** an AI deal desk with 328 tools on EDGAR and XBRL data, and GARCH, VaR and credit-risk models written from scratch
+- **[Runway](/projects/runway):** a startup's zero-cash date, with a 1,000-path Monte Carlo range
+- **Advanced Equities:** founded a financial-literacy nonprofit that grew to 200+ members and ran a $15,000 live portfolio
+
+${close}`;
+  return `${head}
+- **Moss:** shipped 10 open-source apps on a WebAssembly semantic search SDK, sub-10ms retrieval, 77 GitHub stars combined
+- **Koyal AI:** computer vision for an AI filmmaking platform, cutting manual scene review by 70%
+- **Now:** building [YouBank](/projects/youbank), an AI deal desk with 328 tools on SEC data
+- **Leadership:** founded a financial-literacy nonprofit that grew to 200+ members
+
+${close}`;
+}
+
+/** Mock-only project replies, so dev mode shows project cards and follow-ups. */
+const MOCK_PROJECTS: [RegExp, string][] = [
+  [
+    /walk-?free/,
+    `[Walk-Free](/projects/walk-free) colors every street by modeled feels-like temperature, with shade ray-traced against OpenStreetMap buildings and trees. Built at Meta's Global AI Developer Hackathon in React, three.js and MapLibre.`,
+  ],
+  [
+    /\brunway\b/,
+    `[Runway](/projects/runway) reads a startup's bank feed and works out the zero-cash date with tested arithmetic, plus a 1,000-path Monte Carlo range. The LLM never does the math.`,
+  ],
+  [
+    /oncosense/,
+    `[OncoSense](/projects/oncosense) is an optical arm band built at MIT Lincoln Laboratory: LEDs, a 10-channel spectral sensor and a ~480-parameter network running on the band itself.`,
+  ],
+  [
+    /\bstack\b(?!\?)/,
+    `[Stack](/projects/stack) is a Notion-style workspace that sets itself up from your major, built with React, Vite and BlockNote.`,
+  ],
+  [
+    /mycelium/,
+    `[Mycelium](/projects/mycelium) is a Chrome extension that remembers ideas instead of URLs, with sub-10ms warm search in WebAssembly. One of the 10 apps he shipped at Moss.`,
+  ],
+  [
+    /jarvis/,
+    `[mossJARVIS](/projects/mossjarvis) is an Iron Man-style HUD with a second brain: Moss handles memory locally, OpenRouter handles generation, Tauri makes it an always-on-top overlay.`,
+  ],
+];
+
 export function mockReply(text: string): string {
   const q = text.toLowerCase();
   if (!isMockOnTopic(q)) return REFUSAL;
   const b = brief(q);
   if (b) return `${b} (mock mode)`;
+  for (const [re, reply] of MOCK_PROJECTS)
+    if (re.test(q)) return `${reply} (mock mode)`;
+  if (q.startsWith("explain this from ayan's site"))
+    return `Good catch. That line is from Ayan's site; with the live model I'd unpack it in context. Short version: it's about his work, and [YouBank](/projects/youbank) is a good place to start. (mock mode)`;
   return `I'm **ayan-bot**, running in mock mode right now. Ayan is a software engineer in UT Austin's CSB Honors program, ex-Moss and Koyal AI (both YC F25), and he's building [YouBank](/projects/youbank): an AI research desk with 328 tools on SEC data. Ask me about his projects, his work, or how to reach him.`;
 }
 

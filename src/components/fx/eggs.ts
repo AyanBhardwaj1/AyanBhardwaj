@@ -102,7 +102,7 @@ export function rain() {
   const hint = document.createElement("p");
   hint.className = "fx-rain-hint";
   hint.innerHTML =
-    '<span class="fx-toast-k">▲ AYAN</span> it’s raining tickers · <kbd>Esc</kbd> to close';
+    '<span class="fx-toast-k">▲ AYAN</span> ticker rain · <kbd>Esc</kbd> / tap to close';
   wrap.appendChild(hint);
   const live = document.createElement("p");
   live.className = "sr-only";
@@ -132,7 +132,7 @@ export function rain() {
     const size = 10 + depth * 9;
     const sym = SYMBOLS[(Math.random() * SYMBOLS.length) | 0];
     const r = Math.random();
-    const dir = r < 0.66 ? "▲" : r < 0.82 ? "▼" : "·";
+    const dir = r < 0.7 ? "▲" : r < 0.86 ? "▼" : "·";
     const price = (20 + Math.random() * 480).toFixed(2);
     drops.push({
       x: Math.random() * W,
@@ -141,11 +141,16 @@ export function rain() {
       size,
       alpha: 0.35 + depth * 0.65,
       text: `${sym} ${dir}${price}`,
+      // Mostly amber; a little green and red, the way a real tape reads.
       color:
-        dir === "▲" && Math.random() < 0.45 ? up : dir === "▼" ? down : accent,
+        dir === "▲" && Math.random() < 0.2
+          ? up
+          : dir === "▼" && Math.random() < 0.5
+            ? down
+            : accent,
     });
   };
-  const density = Math.round(Math.min(140, (W * H) / 9000));
+  const density = Math.round(Math.min(140, (W * H) / 11000));
   for (let i = 0; i < density * 0.6; i++)
     spawn(Math.random() * H * 0.9 - H * 0.3);
 
@@ -162,11 +167,7 @@ export function rain() {
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     const t = now - t0;
-    // Fade previous frames toward transparent: motion trails.
-    ctx.globalCompositeOperation = "destination-out";
-    ctx.fillStyle = "rgba(0,0,0,0.28)";
-    ctx.fillRect(0, 0, W, H);
-    ctx.globalCompositeOperation = "source-over";
+    ctx.clearRect(0, 0, W, H);
     if (t < T_RAIN && drops.length < density) {
       const n = Math.ceil(density * dt * 1.4);
       for (let i = 0; i < n; i++) spawn();
@@ -178,6 +179,15 @@ export function rain() {
         drops.splice(i, 1);
         continue;
       }
+      // A thin streak above each quote reads as a falling drop.
+      const len = d.v * 0.22;
+      const top = d.y - d.size - len;
+      const g = ctx.createLinearGradient(0, top, 0, d.y - d.size);
+      g.addColorStop(0, "rgba(0,0,0,0)");
+      g.addColorStop(1, d.color);
+      ctx.globalAlpha = d.alpha * 0.55;
+      ctx.fillStyle = g;
+      ctx.fillRect(d.x, top, 1, len);
       ctx.globalAlpha = d.alpha;
       ctx.fillStyle = d.color;
       ctx.font = `500 ${d.size.toFixed(1)}px ${mono}`;
@@ -298,7 +308,7 @@ export function bell() {
     });
   }
 
-  const DURATION = 2600;
+  const DURATION = 3000;
   let t0 = 0;
   let last = 0;
   const tick = (now: number) => {
@@ -320,10 +330,12 @@ export function bell() {
       ctx.stroke();
     }
 
-    const fade = t > DURATION - 700 ? Math.max(0, (DURATION - t) / 700) : 1;
+    const fade = t > DURATION - 900 ? Math.max(0, (DURATION - t) / 900) : 1;
     for (const p of ps) {
       p.vx *= Math.pow(0.35, dt);
-      p.vy = p.vy * Math.pow(0.55, dt) + 900 * dt;
+      // Confetti, not rocks: strong drag, a gentle terminal speed, flutter.
+      p.vy = p.vy * Math.pow(0.3, dt) + 380 * dt;
+      p.vx += Math.sin(t / 260 + p.rot * 3) * 30 * dt;
       p.x += p.vx * dt;
       p.y += p.vy * dt;
       p.rot += p.vr * dt;

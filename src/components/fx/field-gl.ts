@@ -131,6 +131,23 @@ export function startField(host: HTMLElement, { onFail }: Opts): () => void {
     onFail();
     return () => {};
   }
+  // Some software rasterizers slip past the caveat flag: skip those too.
+  // (localStorage "fx:gl" = "force" overrides, for testing in headless.)
+  let force = false;
+  try {
+    force = localStorage.getItem("fx:gl") === "force";
+  } catch {
+    /* storage blocked */
+  }
+  const info = gl.getExtension("WEBGL_debug_renderer_info");
+  const renderer = info
+    ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL))
+    : "";
+  if (!force && /swiftshader|llvmpipe|softpipe|software/i.test(renderer)) {
+    gl.getExtension("WEBGL_lose_context")?.loseContext();
+    onFail();
+    return () => {};
+  }
   gl.getExtension("OES_standard_derivatives");
 
   const compile = (type: number, src: string) => {
@@ -216,6 +233,19 @@ export function startField(host: HTMLElement, { onFail }: Opts): () => void {
   let shown = false;
   let lost = false;
   const FRAME = 1000 / 45;
+  let probing = true;
+  let probeStart = 0;
+  let probeFrames = 0;
+  const resetProbe = () => {
+    probeStart = 0;
+    probeFrames = 0;
+  };
+  const fail = () => {
+    lost = true;
+    stop();
+    canvas.removeAttribute("data-on");
+    onFail();
+  };
 
   const frame = (now: number) => {
     raf = 0;
@@ -232,6 +262,17 @@ export function startField(host: HTMLElement, { onFail }: Opts): () => void {
       gl.uniform2f(uM, cur.x, cur.y);
       gl.uniform1f(uPull, cur.pull);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
+      // Watchdog: if the GPU can't hold ~15 fps over the first 2.5 s of
+      // visible time, bow out to the static gradient.
+      if (probing && !force) {
+        if (!probeStart) probeStart = now;
+        probeFrames++;
+        const span = now - probeStart;
+        if (span > 2500) {
+          probing = false;
+          if ((probeFrames * 1000) / span < 15) return fail();
+        }
+      }
       if (!shown) {
         shown = true;
         // Fade in after the first real frame lands.
@@ -253,6 +294,7 @@ export function startField(host: HTMLElement, { onFail }: Opts): () => void {
     visible = e.isIntersecting;
     if (visible) {
       last = performance.now();
+      resetProbe();
       schedule();
     } else stop();
   });
@@ -261,6 +303,7 @@ export function startField(host: HTMLElement, { onFail }: Opts): () => void {
     if (document.hidden) stop();
     else {
       last = performance.now();
+      resetProbe();
       schedule();
     }
   };
@@ -275,10 +318,7 @@ export function startField(host: HTMLElement, { onFail }: Opts): () => void {
   const onScheme = () => readTheme();
   const onLost = (e: Event) => {
     e.preventDefault();
-    lost = true;
-    stop();
-    canvas.removeAttribute("data-on");
-    onFail();
+    fail();
   };
 
   document.addEventListener("visibilitychange", onVis);

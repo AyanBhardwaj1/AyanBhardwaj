@@ -1515,7 +1515,7 @@ html:not(.js) .section-rule::after {
   /* Static fallback, and the base the shader draws over. */
   background: radial-gradient(
     ellipse 62% 46% at 50% 30%,
-    color-mix(in oklab, var(--accent-glow) 55%, transparent),
+    color-mix(in oklab, var(--accent-glow) 35%, transparent),
     transparent 72%
   );
   /* Fade toward every edge; quietest at the bottom, under the ticker. */
@@ -1577,7 +1577,7 @@ html:not(.js) .section-rule::after {
   justify-content: center;
   color: var(--accent);
   font-family: var(--font-mono);
-  font-size: 0.74em;
+  font-size: 0.68em;
   font-weight: 400;
   letter-spacing: 0;
 }
