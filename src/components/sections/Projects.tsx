@@ -563,7 +563,10 @@ export function Projects() {
           <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
             <h3 className="t-h3">Every project, as a knowledge graph</h3>
             <p className="t-data text-muted">
-              Drag a star · links stretch · click to open
+              <span className="hidden md:inline">
+                Drag a star · links stretch · click to open
+              </span>
+              <span className="md:hidden">Tap a project to open it</span>
             </p>
           </div>
           <ConstellationIsland data={constellation} />

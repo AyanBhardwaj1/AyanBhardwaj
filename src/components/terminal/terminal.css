@@ -235,6 +235,11 @@
        bottom-right (padding would only add room at the scroll end). */
     margin-right: 68px;
   }
+  /* 16px or iOS zooms the page when the field is tapped. */
+  .tm-input,
+  .tm-ghost {
+    font-size: 16px;
+  }
   .tm-shell {
     height: 100dvh;
     border-radius: 0;

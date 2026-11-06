@@ -130,7 +130,7 @@ function bootLines(data: TerminalData): Line[] {
         s("ls projects", "accent"),
         " to start, or ",
         s("ask", "accent"),
-        " to talk to ayan-bot. Tab completes, ↑/↓ walks history.",
+        " to talk to ayan-bot. On a keyboard, Tab completes and ↑/↓ walks history.",
       ],
       "out",
     ],

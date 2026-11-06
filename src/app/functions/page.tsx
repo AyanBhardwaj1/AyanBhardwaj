@@ -33,8 +33,8 @@ export default function FunctionsPage() {
       <h1 className="t-h2 mt-8">Function directory</h1>
       <p className="text-muted mt-4 max-w-[60ch]">
         Press <kbd className="chip">⌘K</kbd> (or <kbd className="chip">/</kbd>)
-        anywhere on the site and type a code, then Enter. Single-key shortcuts
-        can be turned off with{" "}
+        anywhere on the site, or tap the search button in the top bar, and type
+        a code, then Enter. Single-key shortcuts can be turned off with{" "}
         <span className="t-data text-accent">KEYS &lt;GO&gt;</span>.
       </p>
       <div className="mt-6">

@@ -579,6 +579,48 @@ async function reducedMotion(browser) {
 
 // 7. Keyboard focus ---------------------------------------------------------
 
+// First screen: the hero's buttons are visible and nothing covers them.
+async function firstScreen(browser) {
+  for (const [name, opts] of [
+    [
+      "iPhone 390x664",
+      { viewport: { width: 390, height: 664 }, isMobile: true, hasTouch: true },
+    ],
+    ["laptop 1280x720", { viewport: { width: 1280, height: 720 } }],
+    ["laptop 1440x900", { viewport: { width: 1440, height: 900 } }],
+  ]) {
+    await check(
+      "first screen",
+      `hero buttons visible and tappable @ ${name}`,
+      async () => {
+        const ctx = await newContext(browser, {
+          ...opts,
+          reducedMotion: "reduce",
+        });
+        const page = await ctx.newPage();
+        await page.goto(BASE + "/", { waitUntil: "load" });
+        await page.waitForTimeout(800);
+        const bad = await page.evaluate(() =>
+          [...document.querySelectorAll("#top a.pill")]
+            .map((a) => {
+              const r = a.getBoundingClientRect();
+              if (r.top < 0 || r.bottom > innerHeight)
+                return `${a.textContent.trim()} off screen`;
+              for (const x of [r.left + 8, r.left + r.width / 2, r.right - 8]) {
+                const hit = document.elementFromPoint(x, r.top + r.height / 2);
+                if (!a.contains(hit)) return `${a.textContent.trim()} covered`;
+              }
+              return null;
+            })
+            .filter(Boolean),
+        );
+        await ctx.close();
+        assert(!bad.length, bad.join("; "));
+      },
+    );
+  }
+}
+
 async function keyboard(browser) {
   const ctx = await newContext(browser);
   const page = await ctx.newPage();
@@ -698,6 +740,7 @@ try {
   await terminal(browser);
   await fitCheck(browser);
   await reducedMotion(browser);
+  await firstScreen(browser);
   await keyboard(browser);
   await endpoints();
 } catch (e) {

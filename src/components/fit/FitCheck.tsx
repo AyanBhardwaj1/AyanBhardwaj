@@ -212,7 +212,10 @@ export function FitCheck({
     if (!result) return;
     try {
       await navigator.clipboard.writeText(
-        fitSummary(result, `${window.location.origin}/cv#fit`),
+        fitSummary(
+          result,
+          `${window.location.origin}/cv#fit=${encodeFit(result)}`,
+        ),
       );
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1600);
@@ -266,7 +269,7 @@ export function FitCheck({
         }}
         placeholder="Paste the role here…"
         spellCheck={false}
-        className="border-line-strong bg-bg text-fg placeholder:text-dim focus-visible:border-accent mt-2 w-full resize-y rounded-[10px] border px-3 py-2 font-mono text-[13px] focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]/40 focus-visible:outline-none"
+        className="border-line-strong bg-bg text-fg placeholder:text-dim focus-visible:border-accent mt-2 w-full resize-y rounded-[10px] border px-3 py-2 font-mono text-[16px] focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]/40 focus-visible:outline-none md:text-[13px]"
       />
       <div className="mt-2 flex flex-wrap gap-2">
         <button
