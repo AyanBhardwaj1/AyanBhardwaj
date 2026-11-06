@@ -18,7 +18,7 @@
   description" on the hero, a Fit check item in the nav, "Case study →" on
   project cards and a Hiring line at the end of each case study.
 - **Phones**: on `/cv` the CV comes first and the Fit check follows; the
-  home page's knowledge graph folds behind "Show the knowledge graph" (it
+  home page's knowledge graph folds behind "Show all 26 projects" (it
   was a third list of the same projects), about 2,600px shorter.
 - **Testing**: `npm run test:prod` runs the smoke checks against the live
   site after each deploy (skipping ayan-bot, so no credits are spent).
