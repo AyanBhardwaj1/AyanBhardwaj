@@ -208,6 +208,16 @@ export const commands: Command[] = [
     href: "/functions#rain",
   },
   {
+    id: "link.terminal",
+    mnemonic: "TERM",
+    title: "Open the terminal",
+    hint: "whoami, ls projects, cat youbank, ask …",
+    group: "Fun",
+    keywords: ["terminal", "shell", "cli", "command line", "console", "bash"],
+    action: { type: "route", href: "/terminal" },
+    href: "/terminal",
+  },
+  {
     id: "fun.bell",
     mnemonic: "BELL",
     title: "Ring the closing bell",

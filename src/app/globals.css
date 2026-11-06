@@ -1568,10 +1568,10 @@ html:not(.js) .section-rule::after {
   white-space: nowrap;
 }
 .dx-real [data-c] {
-  transition: color 260ms var(--ease-out);
+  transition: opacity 260ms var(--ease-out);
 }
 .dx-real [data-h] {
-  color: transparent;
+  opacity: 0;
   transition: none;
 }
 /* The overlay clone: same box and wrapping as the real text, no ink of its
