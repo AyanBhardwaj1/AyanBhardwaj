@@ -479,7 +479,7 @@ async function fitCheck(browser) {
     await page.getByRole("button", { name: "Try a sample" }).click();
     const summary = await until(async () => {
       const t = await page.locator("#fit").innerText();
-      return /\d+ of \d+ recognised requirements/.test(t) ? t : null;
+      return /\d+ of \d+ technical requirements/.test(t) ? t : null;
     });
     assert(summary, "no fit summary after the sample");
     assert(

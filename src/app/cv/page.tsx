@@ -20,9 +20,9 @@ import {
   CvTailoredNote,
   type CvProject,
 } from "./CvTailor";
-import { CopyCv } from "./CopyCv";
-import { cvMarkdown } from "@/lib/cv-text";
-import { ROLES, roleTags, type RoleId } from "@/lib/roles";
+import { CopyCv, CopyCvTailored } from "./CopyCv";
+import { cvMarkdown, cvSelection } from "@/lib/cv-text";
+import { ROLES, roleTags } from "@/lib/roles";
 import { FitCheck } from "@/components/fit/FitCheck";
 import { fitIndex } from "@/lib/fit";
 import "./cv.css";
@@ -44,19 +44,12 @@ const host = (u: string) => u.replace(/^https?:\/\//, "").replace(/\/$/, "");
 const plain = (t: string) => t.replace(/\*\*/g, "");
 
 export default function CvPage() {
-  const selected = projects.filter((p) =>
-    ["featured", "moss", "hackathon"].includes(p.tier),
-  );
-  // For each role, up to three more projects that fit it; they only show
-  // when the CV is tailored for that role (see CvTailor and cv.css).
-  const extraFor = new Map<string, RoleId[]>();
-  for (const r of ROLES)
-    projects
-      .filter((p) => !selected.includes(p) && roleTags(p).includes(r.id))
-      .slice(0, 3)
-      .forEach((p) =>
-        extraFor.set(p.id, [...(extraFor.get(p.id) ?? []), r.id]),
-      );
+  const { selected, extraFor } = cvSelection();
+  // The CV as text, untailored and for each role (Copy as text follows ?for=).
+  const texts: Record<string, string> = Object.fromEntries([
+    ["", cvMarkdown()],
+    ...ROLES.map((r) => [r.id, cvMarkdown(r.id)]),
+  ]);
   const items: CvProject[] = [
     ...selected,
     ...projects.filter((p) => extraFor.has(p.id) && !selected.includes(p)),
@@ -86,7 +79,9 @@ export default function CvPage() {
         </Link>
         <div className="flex flex-wrap gap-2">
           <PrintButton />
-          <CopyCv text={cvMarkdown()} />
+          <Suspense fallback={<CopyCv text={texts[""]} />}>
+            <CopyCvTailored texts={texts} />
+          </Suspense>
           {hasResume && (
             <a
               href={links.resume.href}

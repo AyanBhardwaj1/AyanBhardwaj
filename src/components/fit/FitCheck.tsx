@@ -76,11 +76,16 @@ export function FitCheck({ index }: { index: FitIndex }) {
   const role = result ? fitRole(result) : null;
 
   // Announce the score once typing settles, not on every keystroke.
-  const summary = result
-    ? total
-      ? `${result.hits.length} of ${total} recognised requirements backed by work on this site.`
-      : "No recognisable skills yet."
-    : "";
+  const headline = !result
+    ? ""
+    : !total
+      ? result.soft.length
+        ? "No technical requirements recognised yet."
+        : "No recognisable skills yet."
+      : result.scored
+        ? `${result.hits.length} of ${total} technical requirements backed by work on this site`
+        : `${total} technical requirement${total === 1 ? "" : "s"} recognised, too few to score. Paste more of the role.`;
+  const summary = headline ? `${headline}.`.replace(/\.\.$/, ".") : "";
   const [said, setSaid] = useState("");
   useEffect(() => {
     const t = window.setTimeout(() => setSaid(summary), 700);
@@ -164,43 +169,56 @@ export function FitCheck({ index }: { index: FitIndex }) {
         {said}
       </p>
       <div className="mt-5">
-        {result && total === 0 && (
+        {result && total === 0 && result.soft.length === 0 && (
           <p className="text-muted">
             No recognisable skills yet. Paste more of the role (requirements,
             stack, responsibilities).
           </p>
         )}
-        {result && total > 0 && (
+        {result && (total > 0 || result.soft.length > 0) && (
           <>
             <div className="flex flex-wrap items-center gap-4">
-              {/* A market-style gauge: the arc sweeps to the share backed. */}
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 120 84"
-                className="cv-gauge h-[84px] w-[120px] shrink-0"
-                style={{ "--p": pct } as React.CSSProperties}
+              {/* A market-style gauge: the arc sweeps to the share backed.
+                  Only with enough technical requirements to mean something. */}
+              {result.scored && (
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 120 84"
+                  className="cv-gauge h-[84px] w-[120px] shrink-0"
+                  style={{ "--p": pct } as React.CSSProperties}
+                >
+                  <path
+                    d="M10 60 A50 50 0 0 1 110 60"
+                    pathLength={100}
+                    className="cv-gaugeTrack"
+                  />
+                  <path
+                    d="M10 60 A50 50 0 0 1 110 60"
+                    pathLength={100}
+                    className="cv-gaugeFill"
+                  />
+                  <g className="cv-gaugeNeedle">
+                    <line x1="60" y1="60" x2="60" y2="24" />
+                    <circle cx="60" cy="60" r="3.5" />
+                  </g>
+                  <text
+                    x="60"
+                    y="81"
+                    textAnchor="middle"
+                    className="cv-gaugeNum"
+                  >
+                    {pct}%
+                  </text>
+                </svg>
+              )}
+              <p
+                className={
+                  result.scored
+                    ? "text-fg max-w-[30ch] font-semibold"
+                    : "text-muted"
+                }
               >
-                <path
-                  d="M10 60 A50 50 0 0 1 110 60"
-                  pathLength={100}
-                  className="cv-gaugeTrack"
-                />
-                <path
-                  d="M10 60 A50 50 0 0 1 110 60"
-                  pathLength={100}
-                  className="cv-gaugeFill"
-                />
-                <g className="cv-gaugeNeedle">
-                  <line x1="60" y1="60" x2="60" y2="24" />
-                  <circle cx="60" cy="60" r="3.5" />
-                </g>
-                <text x="60" y="81" textAnchor="middle" className="cv-gaugeNum">
-                  {pct}%
-                </text>
-              </svg>
-              <p className="text-fg max-w-[30ch] font-semibold">
-                {result.hits.length} of {total} recognised requirements backed
-                by work on this site
+                {headline}
               </p>
             </div>
             <ul className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -233,6 +251,18 @@ export function FitCheck({ index }: { index: FitIndex }) {
                 </li>
               ))}
             </ul>
+            {result.soft.length > 0 && (
+              <p className="text-muted mt-4 text-[14px]">
+                <span className="text-fg font-medium">Also, not scored: </span>
+                {result.soft
+                  .map(
+                    (t) =>
+                      `${t.label} (${t.evidence.map((e) => e.name).join(", ")})`,
+                  )
+                  .join("; ")}
+                .
+              </p>
+            )}
             {result.gaps.length > 0 && (
               <p className="text-muted mt-4 text-[14px]">
                 <span className="text-fg font-medium">

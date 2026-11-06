@@ -878,7 +878,7 @@ export default function AyanBotPanel({
                 your browser.{" "}
                 <Link
                   href="/cv#fit"
-                  className="text-accent underline-offset-4 hover:underline"
+                  className="text-accent underline underline-offset-4"
                   onClick={() => {
                     try {
                       sessionStorage.setItem(FIT_HANDOFF_KEY, jd);

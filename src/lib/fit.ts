@@ -15,6 +15,7 @@ export type FitTerm = {
   label: string;
   jd: string;
   cs?: boolean;
+  soft?: boolean;
   evidence: { name: string; href: string | null }[];
 };
 /** notOnSite carries ready regex sources (case-sensitive). */
@@ -84,17 +85,24 @@ const haystacks = [
  */
 export function fitIndex(): FitIndex {
   const terms = TERMS.map((t) => {
-    const re = new RegExp(t.ev ?? t.jd, t.cs ? "" : "i");
-    const evidence = haystacks
-      .filter((h) => re.test(h.text))
-      .sort((a, b) => b.weight - a.weight)
+    const re = new RegExp(t.ev ?? t.jd, t.cs ? "g" : "gi");
+    const hits = (text: string) => text.match(re)?.length ?? 0;
+    const found = haystacks
+      .map((h) => ({ h, n: hits(h.text) }))
+      .filter((x) => x.n > 0)
+      // Weightier work first; ties go to the one that says it more.
+      .sort((a, b) => b.h.weight - a.h.weight || b.n - a.n);
+    // Listed skills only count when the work itself doesn't show it.
+    const work = found.filter((x) => x.h.weight > 0);
+    const evidence = (work.length >= 2 ? work : found)
       .slice(0, 4)
-      .map((h) => ({ name: h.name, href: h.href }));
+      .map(({ h }) => ({ name: h.name, href: h.href }));
     return {
       id: t.id,
       label: t.label,
       jd: t.jd,
       ...(t.cs ? { cs: true } : {}),
+      ...(t.soft ? { soft: true } : {}),
       evidence,
     };
   });

@@ -10,11 +10,20 @@ export type CompiledFit = {
   missing: { label: string; re: RegExp }[];
 };
 
+/** Fewer technical requirements than this: list them, but don't score. */
+export const MIN_SCORED = 3;
+
 export type FitResult = {
+  /** Technical requirements with evidence (the score counts these). */
   hits: FitTerm[];
+  /** Soft matches (startup, leadership): shown, never scored. */
+  soft: FitTerm[];
   gaps: string[];
+  /** Technical requirements recognised (hits + gaps). */
   total: number;
   pct: number;
+  /** Enough technical requirements to make a score meaningful. */
+  scored: boolean;
 };
 
 export function compileFit(index: FitIndex): CompiledFit {
@@ -33,17 +42,21 @@ export function compileFit(index: FitIndex): CompiledFit {
 
 export function matchFit(c: CompiledFit, text: string): FitResult {
   const found = c.terms.filter((t) => t.re.test(text));
-  const hits = found.filter((t) => t.evidence.length > 0);
+  const tech = found.filter((t) => !t.soft);
+  const hits = tech.filter((t) => t.evidence.length > 0);
+  const soft = found.filter((t) => t.soft && t.evidence.length > 0);
   const gaps = [
-    ...found.filter((t) => !t.evidence.length).map((t) => t.label),
+    ...tech.filter((t) => !t.evidence.length).map((t) => t.label),
     ...c.missing.filter((m) => m.re.test(text)).map((m) => m.label),
   ];
   const total = hits.length + gaps.length;
   return {
     hits,
+    soft,
     gaps,
     total,
     pct: total ? Math.round((hits.length / total) * 100) : 0,
+    scored: total >= MIN_SCORED,
   };
 }
 
@@ -63,9 +76,11 @@ export function fitPrompt(r: FitResult): string {
 export function fitSummary(r: FitResult, url: string): string {
   return [
     `Ayan Bhardwaj: fit check (${url})`,
-    `${r.hits.length} of ${r.total} recognised requirements backed by work on the site.`,
+    r.scored
+      ? `${r.hits.length} of ${r.total} technical requirements backed by work on the site.`
+      : `${r.total} technical requirement${r.total === 1 ? "" : "s"} recognised: too few to score.`,
     "",
-    ...r.hits.map(
+    ...[...r.hits, ...r.soft].map(
       (h) => `+ ${h.label}: ${h.evidence.map((e) => e.name).join(", ")}`,
     ),
     ...(r.gaps.length

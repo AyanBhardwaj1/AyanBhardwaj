@@ -15,6 +15,8 @@ export type Term = {
   jd: string;
   ev?: string;
   cs?: true;
+  /** Shown when matched, but not counted in the score (not a skill). */
+  soft?: true;
 };
 
 export const TERMS: Term[] = [
@@ -45,18 +47,18 @@ export const TERMS: Term[] = [
     id: "fastapi",
     label: "FastAPI / Python APIs",
     jd: "fastapi|\\bflask\\b|\\bdjango\\b",
-    ev: "fastapi|\\bexpress\\b|rest api",
+    ev: "fastapi|\\bflask\\b|\\bdjango\\b",
   },
   {
     id: "api",
     label: "APIs / backend",
-    jd: "\\bapis?\\b|\\bbackend\\b|back-end|\\brest(ful)? apis?\\b|\\brestful\\b|microservices?",
+    jd: "\\b(rest(ful)?|graphql|grpc|web|public|internal|backend|http) apis?\\b|\\bapi (design|development|integrations?|endpoints?)\\b|\\bbuild(ing)? apis?\\b|\\bbackend\\b|back-end|\\brestful\\b|microservices?",
     ev: "\\bexpress\\b|fastapi|\\bserver\\b|backend|rest api",
   },
   {
     id: "frontend",
     label: "Frontend / UI",
-    jd: "front-?end|\\bui\\b|user interfaces?|\\bcss\\b|tailwind",
+    jd: "front-?end|\\bui (engineering|engineers?|components?|development|frameworks?)\\b|\\bui/ux\\b|web interfaces?|\\bcss\\b|tailwind",
     ev: "\\breact\\b|next\\.js|tailwind|\\bui\\b",
   },
   {
@@ -106,7 +108,7 @@ export const TERMS: Term[] = [
   {
     id: "ml",
     label: "Machine learning",
-    jd: "machine learning|\\bml\\b",
+    jd: "machine learning|\\bml\\b|scikit-learn|\\bsklearn\\b|predictive model(s|ing)?|classification models?",
     ev: "pytorch|scikit|classifier|neural|graphsage|machine learning|\\bml\\b",
   },
   {
@@ -148,7 +150,7 @@ export const TERMS: Term[] = [
   {
     id: "evals",
     label: "Evals / benchmarks",
-    jd: "\\bevals?\\b|(model|llm|ai) evaluations?|benchmark(s|ing)?\\b",
+    jd: "\\bevals?\\b|(model|llm|ai) evaluations?|(ml|model|llm|ai) benchmarks?|benchmark (datasets?|suites?)",
     ev: "\\bevals?\\b|\\bevaluat|benchmark|recall@|ablation",
   },
   {
@@ -161,13 +163,13 @@ export const TERMS: Term[] = [
   {
     id: "fintech",
     label: "Fintech",
-    jd: "fintech|financial (services|technology)|\\bbanking\\b|\\bpayments\\b",
+    jd: "fintech|financial (services|technology|software|data)|banking (software|platforms?|technology)|payments? (infrastructure|systems|platforms?|processing|apis?)",
     ev: "fintech|\\bfinancial\\b|edgar|deal desk|\\bcash\\b|portfolio",
   },
   {
     id: "quant",
     label: "Quant / risk models",
-    jd: "\\bquant(itative)?\\b|risk model|\\bvar\\b|volatility|garch|monte carlo|derivatives|options pricing",
+    jd: "\\bquants?\\b|quantitative (finance|research(er)?|analyst|developer|trading|models?|strateg(y|ies))|risk model|\\bvar\\b|volatility|garch|monte carlo|derivatives|options pricing",
     ev: "garch|\\bvar\\b|monte carlo|volatility|\\bquant|\\brisk\\b",
   },
   {
@@ -206,7 +208,7 @@ export const TERMS: Term[] = [
   {
     id: "cloud",
     label: "Cloud / deploys",
-    jd: "\\bcloud\\b|\\bvercel\\b|serverless|deployments?\\b|\\bci/cd\\b",
+    jd: "cloud (infrastructure|platforms?|services|computing|native|deployments?)|\\bvercel\\b|serverless|\\bci/cd\\b|production deployments?|deploy(ing)? to production",
     ev: "vercel|\\bmodal\\b|cloudflare|deploy",
   },
   {
@@ -221,6 +223,7 @@ export const TERMS: Term[] = [
     jd: "\\bstartups?\\b|early[- ]stage|founding (engineer|team)|0 to 1|zero to one",
     // YC and early-team evidence, not products made *for* startups.
     ev: "\\byc\\b|y combinator|first interns?|one of the first",
+    soft: true,
   },
   {
     id: "leadership",
@@ -228,6 +231,7 @@ export const TERMS: Term[] = [
     jd: "\\bleadership\\b|lead(ing)? (a )?team|\\bmentor(ing|ship)?\\b",
     // "founded"/"founder", not "the founders" a product is built for.
     ev: "\\bfounded\\b|\\bfounder\\b|\\bpresident\\b|\\bcaptain\\b",
+    soft: true,
   },
 ];
 
@@ -256,7 +260,14 @@ export const NOT_ON_SITE: (string | { label: string; re: string })[] = [
   "iOS",
   "Android",
   "Scala",
-  "Apache Spark",
+  // Not Meta's "Muse Spark", which is on the site.
+  { label: "Apache Spark", re: "Apache Spark|PySpark|(?<!Muse )\\bSpark\\b" },
+  "Databricks",
+  "Tableau",
+  "Power BI",
+  "Looker",
+  "TensorFlow",
+  "XGBoost",
   "Kafka",
   "Airflow",
   "dbt",

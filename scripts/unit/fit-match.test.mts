@@ -18,6 +18,7 @@ const index = {
     label: t.label,
     jd: t.jd,
     ...(t.cs ? { cs: true } : {}),
+    ...(t.soft ? { soft: true } : {}),
     evidence: t.id === "java" ? [] : [{ name: `ev-${t.id}`, href: null }],
   })),
   notOnSite: NOT_ON_SITE.map((m) =>
@@ -100,10 +101,10 @@ test("fitRole needs two signals and prefers the specific lens on ties", () => {
 
 test("summary lists hits with evidence and the gaps", () => {
   const s = fitSummary(
-    matchFit(c, "Python and Kubernetes"),
+    matchFit(c, "Python, React, Rust and Kubernetes"),
     "https://x/cv#fit",
   );
-  assert.match(s, /1 of 2 recognised requirements/);
+  assert.match(s, /3 of 4 technical requirements backed/);
   assert.match(s, /\+ Python: ev-python/);
   assert.match(s, /Not shown on the site: Kubernetes/);
 });
@@ -127,4 +128,45 @@ test("8,000 characters of adversarial text match quickly", () => {
     matchFit(c, nasty);
     assert.ok(performance.now() - t0 < 200);
   }
+});
+
+test("non-tech postings don't score (QA cases)", () => {
+  const ae = run(
+    "Account Executive: you'll sell cloud software and payments solutions. Startup experience and leadership in a team setting are a plus. Beat benchmarks every quarter. Our UI makes demos easy.",
+  );
+  assert.deepEqual(ae.hits, []);
+  assert.equal(ae.r.scored, false);
+  assert.deepEqual(
+    ae.r.soft.map((t) => t.label),
+    ["Startup experience", "Leadership"],
+  );
+  const pm = run(
+    "Product Manager, Payments: own our API products, partner with engineering, SQL a plus, leadership required.",
+  );
+  assert.equal(pm.r.scored, false);
+  const rn = run(
+    "Registered Nurse. Cloud-based patient records. Night shifts.",
+  );
+  assert.deepEqual(rn.hits, []);
+});
+
+test("soft matches are listed but never scored", () => {
+  const { r } = run("Python, React and Rust at an early-stage startup");
+  assert.equal(r.total, 3);
+  assert.equal(r.pct, 100);
+  assert.deepEqual(
+    r.soft.map((t) => t.label),
+    ["Startup experience"],
+  );
+});
+
+test("data-science wording", () => {
+  const ds = run(
+    "Data Scientist: Python, SQL, scikit-learn, XGBoost, Tableau, Spark or Databricks; quantitative background.",
+  );
+  assert.ok(ds.hits.includes("Machine learning"));
+  assert.ok(!ds.hits.includes("Quant / risk models"));
+  for (const g of ["XGBoost", "Tableau", "Apache Spark", "Databricks"])
+    assert.ok(ds.gaps.includes(g), g);
+  assert.ok(!run("Meta's Muse Spark plans it").gaps.includes("Apache Spark"));
 });

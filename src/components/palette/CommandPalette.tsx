@@ -420,8 +420,12 @@ export default function CommandPalette({
 
         {log.length > 0 && (
           <div
+            role="log"
             aria-live="polite"
-            className="border-line-strong max-h-40 space-y-1 overflow-y-auto border-b px-4 py-3 text-[0.8125rem]"
+            aria-label="Palette output"
+            // Focusable so keyboard users can scroll long output (HELP).
+            tabIndex={0}
+            className="border-line-strong max-h-[min(42vh,20rem)] space-y-1 overflow-y-auto border-b px-4 py-3 text-[0.8125rem] focus-visible:ring-2 focus-visible:ring-[color:var(--accent)] focus-visible:outline-none focus-visible:ring-inset"
           >
             {log.map((l) => (
               <p

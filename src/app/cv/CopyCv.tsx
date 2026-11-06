@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useCvRole } from "./CvTailor";
 
 /** Copies the CV as Markdown (rendered into the page, so no fetch is needed). */
 export function CopyCv({ text }: { text: string }) {
@@ -28,4 +29,10 @@ export function CopyCv({ text }: { text: string }) {
       </span>
     </>
   );
+}
+
+/** Copy as text that follows the tailoring in the URL (?for=). */
+export function CopyCvTailored({ texts }: { texts: Record<string, string> }) {
+  const role = useCvRole();
+  return <CopyCv text={texts[role ?? ""] ?? texts[""]} />;
 }

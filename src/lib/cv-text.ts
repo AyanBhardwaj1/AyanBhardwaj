@@ -7,18 +7,51 @@ import {
   skills,
 } from "@/content/content";
 import { SITE_URL } from "./site";
+import { ROLES, roleTags, type RoleId } from "./roles";
+import type { Project } from "@/content/content";
 
 /** Strip **markdown bold** used in a few content strings. */
 const plain = (t: string) => t.replace(/\*\*/g, "");
 
 /**
- * The CV as Markdown, from the same content as /cv: for pasting into an
- * application form or recruiter notes, and served at /cv.md.
+ * The CV's projects: the selected ones, plus for each role up to three more
+ * that fit it (shown only when the CV is tailored for that role).
  */
-export function cvMarkdown(): string {
+export function cvSelection() {
   const selected = projects.filter((p) =>
     ["featured", "moss", "hackathon"].includes(p.tier),
   );
+  const extraFor = new Map<string, RoleId[]>();
+  for (const r of ROLES)
+    projects
+      .filter((p) => !selected.includes(p) && roleTags(p).includes(r.id))
+      .slice(0, 3)
+      .forEach((p) =>
+        extraFor.set(p.id, [...(extraFor.get(p.id) ?? []), r.id]),
+      );
+  return { selected, extraFor };
+}
+
+/** Project order for a role: matching selected, then extras, then the rest. */
+export function cvOrder(role: RoleId | null): Project[] {
+  const { selected, extraFor } = cvSelection();
+  if (!role) return selected;
+  return [
+    ...selected.filter((p) => roleTags(p).includes(role)),
+    ...projects.filter(
+      (p) => !selected.includes(p) && extraFor.get(p.id)?.includes(role),
+    ),
+    ...selected.filter((p) => !roleTags(p).includes(role)),
+  ];
+}
+
+/**
+ * The CV as Markdown, from the same content as /cv: for pasting into an
+ * application form or recruiter notes, and served at /cv.md.
+ */
+export function cvMarkdown(role: RoleId | null = null): string {
+  const selected = cvOrder(role);
+  const label = ROLES.find((r) => r.id === role)?.label;
   return [
     `# ${profile.name}`,
     `${profile.role} · ${profile.location}`,
@@ -59,7 +92,9 @@ export function cvMarkdown(): string {
     "## Skills",
     ...skills.map((g) => `- ${g.label}: ${g.items.join(", ")}`),
     "",
-    `Generated from ${SITE_URL}/cv`,
+    label
+      ? `Tailored for ${label} roles: ${SITE_URL}/cv?for=${role}`
+      : `Generated from ${SITE_URL}/cv`,
     "",
   ].join("\n");
 }

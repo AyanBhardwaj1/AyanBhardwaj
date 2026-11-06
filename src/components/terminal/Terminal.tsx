@@ -138,6 +138,44 @@ const COMMANDS: { name: string; args?: string; help: string }[] = [
 
 const HIST_KEY = "ayan:term-history";
 
+/**
+ * Commands a shared link (?run=) may replay: read-only ones. Never ask
+ * (credits), fit ask, open/cv/tour/exit (navigation) or history -c.
+ */
+const LINK_SAFE = new Set([
+  "help",
+  "whoami",
+  "ls",
+  "cat",
+  "less",
+  "more",
+  "exp",
+  "experience",
+  "skills",
+  "awards",
+  "stats",
+  "contact",
+  "grep",
+  "search",
+  "find",
+  "diff",
+  "compare",
+  "neofetch",
+  "interests",
+  "fit",
+  "history",
+  "top",
+  "htop",
+]);
+function linkSafe(cmd: string): boolean {
+  const [head, ...rest] = cmd.trim().split(/\s+/);
+  const h = head.toLowerCase();
+  if (!LINK_SAFE.has(h)) return false;
+  if (h === "fit" && /^ask\b/i.test(rest.join(" "))) return false;
+  if (h === "history" && rest.length) return false;
+  return true;
+}
+
 const ROLE_IDS = ["ai", "fintech", "systems", "fullstack", "research"];
 
 const SECTIONS = [
@@ -186,6 +224,7 @@ export function Terminal({ data }: { data: TerminalData }) {
   const [value, setValue] = useState("");
   const [hist, setHist] = useState<string[]>([]);
   const histLoaded = useRef(false);
+  const [histReady, setHistReady] = useState(false);
 
   // History survives visits, on this device only. Long lines (a pasted job
   // description) are never written down.
@@ -201,6 +240,7 @@ export function Terminal({ data }: { data: TerminalData }) {
       /* no storage or bad JSON: start fresh */
     }
     histLoaded.current = true;
+    setHistReady(true);
   }, []);
   useEffect(() => {
     if (!histLoaded.current) return;
@@ -530,7 +570,7 @@ export function Terminal({ data }: { data: TerminalData }) {
           }
           const r = matchFit(fit, arg);
           lastFit.current = r.hits.length ? fitPrompt(r) : null;
-          if (!r.total) {
+          if (!r.total && !r.soft.length) {
             print([
               s(
                 "fit: no recognisable skills in that. Paste more of the role.",
@@ -540,19 +580,33 @@ export function Terminal({ data }: { data: TerminalData }) {
             return;
           }
           const filled = Math.round(r.pct / 5);
-          print([
-            s(`${r.hits.length}/${r.total} backed  `, "strong"),
-            s("█".repeat(filled), "up"),
-            s("░".repeat(20 - filled), "muted"),
-            s(`  ${r.pct}%`, "muted"),
-          ]);
-          r.hits.forEach((h) => {
+          print(
+            r.scored
+              ? [
+                  s(`${r.hits.length}/${r.total} backed  `, "strong"),
+                  s("█".repeat(filled), "up"),
+                  s("░".repeat(20 - filled), "muted"),
+                  s(`  ${r.pct}%`, "muted"),
+                ]
+              : [
+                  s(
+                    `${r.total} technical requirement${r.total === 1 ? "" : "s"} recognised: too few to score. Paste more of the role.`,
+                    "muted",
+                  ),
+                ],
+          );
+          [...r.hits, ...r.soft].forEach((h) => {
             const ev: Seg[] = [];
             h.evidence.slice(0, 3).forEach((e, i) => {
               if (i) ev.push(s(" · ", "muted"));
               ev.push(e.href ? a(e.name, e.href) : e.name);
             });
-            print([s("  ✓ ", "up"), s(h.label.padEnd(28)), ...ev]);
+            print([
+              s("  ✓ ", "up"),
+              s(h.label.padEnd(28)),
+              ...ev,
+              ...(h.soft ? [s("  (not scored)", "muted")] : []),
+            ]);
           });
           if (r.gaps.length)
             print([
@@ -778,6 +832,15 @@ export function Terminal({ data }: { data: TerminalData }) {
             print([s("share: run something first, then share it.", "muted")]);
             return;
           }
+          if (!linkSafe(last)) {
+            print([
+              s(
+                `share: "${last.slice(0, 40)}" can't run from a link (only read-only commands do). Try top, grep or diff.`,
+                "muted",
+              ),
+            ]);
+            return;
+          }
           const url = `${window.location.origin}/terminal?run=${encodeURIComponent(last)}`;
           const path = url.slice(window.location.origin.length);
           const shown = () => print([s("copy this: ", "muted"), a(path, path)]);
@@ -884,43 +947,26 @@ export function Terminal({ data }: { data: TerminalData }) {
   // can't spend ayan-bot credits or send anyone elsewhere.
   const ranLink = useRef(false);
   useEffect(() => {
-    if (ranLink.current) return;
+    // Wait for saved history, so ?run=history shows it.
+    if (!histReady || ranLink.current) return;
     ranLink.current = true;
     const cmd = new URLSearchParams(window.location.search)
       .get("run")
       ?.trim()
       .slice(0, 400);
     if (!cmd) return;
-    const head = cmd.split(/\s+/)[0].toLowerCase();
-    const SAFE = [
-      "top",
-      "htop",
-      "help",
-      "whoami",
-      "ls",
-      "cat",
-      "less",
-      "more",
-      "exp",
-      "experience",
-      "skills",
-      "awards",
-      "stats",
-      "contact",
-      "grep",
-      "search",
-      "find",
-      "diff",
-      "compare",
-      "neofetch",
-      "interests",
-      "fit",
-      "history",
-    ];
-    if (!SAFE.includes(head) || /^fit\s+ask\b/i.test(cmd)) return;
+    if (!linkSafe(cmd)) {
+      print([
+        s(
+          `link skipped: "${cmd.slice(0, 60)}" can't run from a link. Type it to run it.`,
+          "muted",
+        ),
+      ]);
+      return;
+    }
     // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time replay of a shared command
     run(cmd);
-  }, [run]);
+  }, [run, print, histReady]);
 
   /** Tab completion. Returns false when there is nothing to complete. */
   const complete = (): boolean => {
@@ -967,11 +1013,18 @@ export function Terminal({ data }: { data: TerminalData }) {
 
   // Fish-style autosuggestion: the newest history entry (or a command) that
   // starts with what's typed, shown dim after the caret; → or End accepts.
+  // Hidden once the typed text scrolls the input (narrow screens): the
+  // ghost layer doesn't scroll, so it could be accepted while invisible.
+  const [overflowing, setOverflowing] = useState(false);
+  useLayoutEffect(() => {
+    const el = inputRef.current;
+    setOverflowing(!!el && el.scrollWidth > el.clientWidth + 1);
+  }, [value]);
   const suggestion = (() => {
-    if (!value || value.length > 60 || hIdx !== null) return "";
+    if (!value || value.length > 60 || hIdx !== null || overflowing) return "";
     const v = value.toLowerCase();
     const pool = [
-      ...[...hist].reverse(),
+      ...[...hist].reverse().filter((h) => h.length <= 80),
       ...COMMANDS.map((c) => c.name),
       "ls projects",
       "cat youbank",
