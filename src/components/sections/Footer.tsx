@@ -72,7 +72,7 @@ export function Footer({ hasResume }: { hasResume: boolean }) {
           </Link>
           {" · "}
           <Link href="/cv" className="link text-fg">
-            One-page CV
+            Web CV
           </Link>
         </p>
       </div>

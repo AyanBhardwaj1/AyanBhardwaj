@@ -209,8 +209,9 @@
     padding: 0;
   }
   .tm-quick {
-    /* Room for the ayan-bot button docked bottom-right. */
-    padding-right: 76px;
+    /* Keep the visible strip clear of the ayan-bot button docked
+       bottom-right (padding would only add room at the scroll end). */
+    margin-right: 68px;
   }
   .tm-shell {
     height: 100dvh;

@@ -52,7 +52,8 @@ function inline(
     if (m[1] !== undefined) {
       out.push(
         <strong key={k} className="text-fg font-semibold">
-          {m[1]}
+          {/* Bold can wrap links and code ("**[YouBank](/projects/youbank)**"). */}
+          {inline(m[1], k, onNavigate)}
         </strong>,
       );
     } else if (m[2] !== undefined) {

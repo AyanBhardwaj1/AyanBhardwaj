@@ -175,7 +175,12 @@ export default function AyanBotPanel({
   // Focus the input when the panel opens; Esc closes from anywhere.
   useEffect(() => {
     if (!open) return;
-    const t = requestAnimationFrame(() => inputRef.current?.focus());
+    // Fine pointers get the composer focused; on touch that would raise the
+    // keyboard over the starters, so wait for a tap.
+    const t = requestAnimationFrame(() => {
+      if (window.matchMedia("(pointer: fine)").matches)
+        inputRef.current?.focus();
+    });
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape" || e.defaultPrevented) return;
       // Leave Esc to the ⌘K palette when it's open on top.

@@ -15,12 +15,12 @@ import "./cv.css";
 
 export const metadata: Metadata = {
   title: "CV",
-  description: `${profile.name}'s CV on one page: experience, selected projects, skills and education, generated from the same content as the site.`,
+  description: `${profile.name}'s CV: experience, selected projects, skills and education, generated from the same content as the site.`,
   alternates: { canonical: "/cv" },
   openGraph: {
     url: "/cv",
     title: `CV · ${profile.name}`,
-    description: `${profile.name}'s CV on one page: experience, selected projects, skills and education.`,
+    description: `${profile.name}'s CV: experience, selected projects, skills and education.`,
   },
 };
 
@@ -155,7 +155,8 @@ export default function CvPage() {
             <ul className="cv-bullets">
               {awards.map((a) => (
                 <li key={a.id}>
-                  <span className="cv-strong">{a.title}</span>, {a.org}
+                  <span className="cv-strong">{a.title}</span>,{" "}
+                  {a.title === a.org ? (a.role ?? a.org) : a.org}
                 </li>
               ))}
             </ul>

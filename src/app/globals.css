@@ -1453,6 +1453,8 @@ html:not(.js) .section-rule::after {
     background: #fff !important;
     color: #111 !important;
     font-size: 11pt;
+    /* The theme fade would still be mid-transition when printing starts. */
+    transition: none !important;
   }
   .rails::before,
   .rails::after,

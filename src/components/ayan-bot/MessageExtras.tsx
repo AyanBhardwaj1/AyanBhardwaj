@@ -188,9 +188,14 @@ export function ListenButton({ text }: { text: string }) {
   const [supported, setSupported] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- feature detection after mount
-    setSupported("speechSynthesis" in window);
+    // Only offer it when the browser actually has a voice to speak with
+    // (voices can arrive late, hence voiceschanged).
+    const synth = "speechSynthesis" in window ? window.speechSynthesis : null;
+    const check = () => setSupported(!!synth && synth.getVoices().length > 0);
+    check();
+    synth?.addEventListener("voiceschanged", check);
     return () => {
+      synth?.removeEventListener("voiceschanged", check);
       if ("speechSynthesis" in window && speakingRef.owner === text)
         window.speechSynthesis.cancel();
     };

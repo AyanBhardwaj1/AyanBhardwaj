@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   useCallback,
+  useEffect,
   useId,
   useLayoutEffect,
   useRef,
@@ -195,6 +196,12 @@ export function Terminal({ data }: { data: TerminalData }) {
     },
     [data.projects],
   );
+
+  // Ready to type on desktop; on touch, wait for a tap (no surprise keyboard).
+  useEffect(() => {
+    if (window.matchMedia("(pointer: fine)").matches)
+      inputRef.current?.focus({ preventScroll: true });
+  }, []);
 
   // Keep the newest output in view.
   useLayoutEffect(() => {
@@ -620,7 +627,13 @@ export function Terminal({ data }: { data: TerminalData }) {
         {lines.map((l) => (
           <p
             key={l.id}
-            className={`tm-line tm-${l.kind ?? "out"}${l.boot ? "tm-boot" : ""}`}
+            className={[
+              "tm-line",
+              `tm-${l.kind ?? "out"}`,
+              l.boot ? "tm-boot" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
             style={
               l.boot ? ({ "--i": l.id } as React.CSSProperties) : undefined
             }

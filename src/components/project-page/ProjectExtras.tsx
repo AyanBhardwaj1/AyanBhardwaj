@@ -64,22 +64,26 @@ export function Explored({ slug }: { slug: ProjectSlug }) {
   useEffect(() => {
     const prev = readExplored();
     const next = prev.includes(slug) ? prev : [...prev, slug];
-    try {
-      localStorage.setItem(KEY, JSON.stringify(next));
-    } catch {
-      /* private mode: just don't remember */
-    }
+    const total = PROJECT_PAGES.length;
+    const save = () => {
+      try {
+        localStorage.setItem(KEY, JSON.stringify(next));
+      } catch {
+        /* private mode: just don't remember */
+      }
+    };
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reads browser-only storage after mount
     setSeen(next);
-    const total = PROJECT_PAGES.length;
     if (next.length === total && prev.length === total - 1) {
-      // Just completed the set: ring the bell once, after the page settles.
-      const t = window.setTimeout(
-        () => void import("@/components/fx/eggs").then((m) => m.bell()),
-        900,
-      );
+      // Just completed the set. Save it together with the bell, so leaving
+      // the page early can't record completion without ever ringing.
+      const t = window.setTimeout(() => {
+        save();
+        void import("@/components/fx/eggs").then((m) => m.bell());
+      }, 900);
       return () => window.clearTimeout(t);
     }
+    save();
   }, [slug]);
 
   if (!seen) return null;

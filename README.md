@@ -22,7 +22,7 @@ Source for my personal developer portfolio: who I am, what I've built, and how t
 - **⌘K command palette** with Bloomberg-style codes (`PROJ`, `EXP`, `CV`, `TERM`, `MOTION`, `RAIN`, `BELL`, `ASK …`); `/functions` lists them all.
 - **ayan-bot**, a grounded chat agent about Ayan: page-aware starters, inline project cards, follow-ups, a recruiter brief, copy and read-aloud, "select text → ask", ⌘J. Hard spend caps and layered defenses: see [docs/AYAN-BOT.md](docs/AYAN-BOT.md).
 - **`/terminal`**: a command line over the site (`whoami`, `ls projects`, `cat youbank`, `ask …`).
-- **`/cv`**: a one-page web CV generated from the same content, print-ready.
+- **`/cv`**: a web CV generated from the same content, print-ready.
 - **Accessibility**: keyboard first, axe-clean, `MOTION <GO>` turns animations down site-wide, reduced-motion respected everywhere.
 - **Share cards and SEO**: branded Open Graph images per page, JSON-LD, sitemap, `llms.txt`, `resume.json`.
 

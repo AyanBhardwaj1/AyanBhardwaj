@@ -1,4 +1,4 @@
-/* /cv: a one-page CV, readable on screen, clean on paper. */
+/* /cv: a web CV, readable on screen, clean on paper. */
 .cv {
   min-height: 100dvh;
   padding: clamp(16px, 4vw, 48px) var(--gutter) 64px;
@@ -170,7 +170,14 @@
 
 @media print {
   @page {
-    margin: 12mm 14mm;
+    margin: 11mm 13mm;
+  }
+  :root,
+  html,
+  body {
+    color-scheme: light !important;
+    background: #fff !important;
+    transition: none !important;
   }
   .cv {
     padding: 0;
@@ -181,13 +188,20 @@
     border: 0;
     box-shadow: none;
     background: #fff;
-    font-size: 10.5pt;
-    line-height: 1.38;
+    font-size: 9.6pt;
+    line-height: 1.32;
   }
   .cv-h2 {
-    margin-top: 12pt;
+    margin-top: 9pt;
   }
-  .cv-desc {
+  .cv-item {
+    margin-top: 5pt;
+  }
+  .cv-summary {
+    margin-top: 8pt;
+  }
+  .cv-desc,
+  .cv-stack {
     display: none;
   }
 }

@@ -13,7 +13,8 @@ import "./selection.css";
  */
 
 const MIN = 8;
-const MAX = 200;
+// Long selections are fine: the prompt quotes a trimmed excerpt.
+const MAX = 1200;
 const EXPLAIN = "Explain this from Ayan's site: ";
 const EST_W = 136;
 const EST_H = 36;
