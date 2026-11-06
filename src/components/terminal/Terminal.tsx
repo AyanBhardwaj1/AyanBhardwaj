@@ -150,6 +150,8 @@ export function Terminal({ data }: { data: TerminalData }) {
   // History survives visits, on this device only. Long lines (a pasted job
   // description) are never written down.
   useEffect(() => {
+    // Once per mount, even when Strict Mode replays effects in dev.
+    if (histLoaded.current) return;
     try {
       const raw = JSON.parse(localStorage.getItem(HIST_KEY) ?? "[]");
       if (Array.isArray(raw)) {
