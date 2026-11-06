@@ -17,6 +17,7 @@ import {
   CvProjects,
   CvTailor,
   CvTailorPills,
+  CvTailoredNote,
   type CvProject,
 } from "./CvTailor";
 import { CopyCv } from "./CopyCv";
@@ -210,6 +211,9 @@ export default function CvPage() {
 
         <footer className="cv-foot">
           Generated from the content of {host(SITE_URL)}. Always current.
+          <Suspense fallback={null}>
+            <CvTailoredNote host={host(SITE_URL)} />
+          </Suspense>
         </footer>
       </article>
     </main>

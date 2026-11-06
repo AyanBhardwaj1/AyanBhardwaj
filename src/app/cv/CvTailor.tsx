@@ -79,6 +79,19 @@ export function CvTailor() {
   );
 }
 
+/** In the footer (and so in a printed PDF): which version this is. */
+export function CvTailoredNote({ host }: { host: string }) {
+  const role = useCvRole();
+  const label = ROLES.find((r) => r.id === role)?.label;
+  if (!role || !label) return null;
+  return (
+    <>
+      {" "}
+      Tailored for {label} roles: {host}/cv?for={role}
+    </>
+  );
+}
+
 export type CvProject = {
   id: string;
   name: string;
