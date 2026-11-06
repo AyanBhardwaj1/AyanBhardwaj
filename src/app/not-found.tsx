@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HeroField } from "@/components/fx/HeroField";
 import type { Metadata } from "next";
 import { ui } from "@/content/content";
 import { sections } from "@/content/extras";
@@ -21,8 +22,10 @@ export default function NotFound() {
       <StatusBar />
       <main
         id="main"
-        className="container-page relative flex min-h-svh flex-col justify-center pt-20 pb-16"
+        className="container-page relative isolate flex min-h-svh flex-col justify-center pt-20 pb-16"
       >
+        {/* The hero's after-hours field, quietly behind the 404. */}
+        <HeroField />
         <p
           className="hx-rise t-data text-down"
           style={{ "--d": "0ms" } as React.CSSProperties}
