@@ -177,3 +177,79 @@ export function UsageMeter({ left }: { left: number }) {
     </span>
   );
 }
+
+/**
+ * Reads an answer aloud with the browser's speech synthesis (no microphone,
+ * nothing leaves the device). Hidden where speech synthesis isn't available.
+ * Starting one answer stops any other.
+ */
+export function ListenButton({ text }: { text: string }) {
+  const [speaking, setSpeaking] = useState(false);
+  const [supported, setSupported] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- feature detection after mount
+    setSupported("speechSynthesis" in window);
+    return () => {
+      if ("speechSynthesis" in window && speakingRef.owner === text)
+        window.speechSynthesis.cancel();
+    };
+  }, [text]);
+
+  if (!supported) return null;
+
+  const toggle = () => {
+    const synth = window.speechSynthesis;
+    if (speaking) {
+      synth.cancel();
+      setSpeaking(false);
+      return;
+    }
+    synth.cancel();
+    // Links read as their labels; drop markdown symbols and <GO> flourishes.
+    const spoken = text
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+      .replace(/<GO>/g, "")
+      .replace(/[*_`#>]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    const u = new SpeechSynthesisUtterance(spoken);
+    u.lang = "en-US";
+    u.rate = 1.03;
+    u.onend = u.onerror = () => setSpeaking(false);
+    speakingRef.owner = text;
+    synth.speak(u);
+    setSpeaking(true);
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      aria-pressed={speaking}
+      className="text-muted hover:text-fg hover:bg-card inline-flex min-h-8 items-center gap-1.5 rounded-[7px] px-2 font-mono text-[10.5px] tracking-wider uppercase transition-colors"
+    >
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 16 16"
+        className={`size-3.5 ${speaking ? "text-accent" : ""}`}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M2.5 6v4h2.5l3.5 3V3L5 6z" />
+        {speaking ? (
+          <path d="M11 6.5 13.5 9M13.5 6.5 11 9" />
+        ) : (
+          <path d="M10.5 5.5a3.5 3.5 0 0 1 0 5M12.5 3.5a6.5 6.5 0 0 1 0 9" />
+        )}
+      </svg>
+      <span>{speaking ? "Stop" : "Listen"}</span>
+    </button>
+  );
+}
+
+/** Which answer is currently being spoken (so unmounting one stops it). */
+const speakingRef: { owner: string | null } = { owner: null };

@@ -69,7 +69,10 @@ export const viewport: Viewport = {
 };
 
 // Runs before paint: marks JS as available (reveal start states) and applies a saved theme, so there is no flash.
-const themeScript = `(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")d.setAttribute("data-theme",t)}catch(e){}})()`;
+// Also applies the site's own "reduce motion" switch (MOTION <GO>): it marks
+// <html data-motion="reduce"> and makes prefers-reduced-motion queries answer
+// "reduce", so every animation (CSS and JS) takes its reduced path.
+const themeScript = `(function(){var d=document.documentElement;d.classList.add("js");try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")d.setAttribute("data-theme",t);if(localStorage.getItem("motion")==="reduce"){d.setAttribute("data-motion","reduce");var mm=window.matchMedia.bind(window);window.matchMedia=function(q){if(/prefers-reduced-motion/.test(q)){var m=/:\\s*reduce/.test(q);var n=function(){};return{matches:m,media:q,onchange:null,addEventListener:n,removeEventListener:n,addListener:n,removeListener:n,dispatchEvent:function(){return false}}}return mm(q)}}}catch(e){}})()`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

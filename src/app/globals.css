@@ -1744,3 +1744,16 @@ html:not(.js) .section-rule::after {
     --hero-size: clamp(40px, min(13vw, 19vh), 196px);
   }
 }
+
+/* Site-level reduce-motion switch (MOTION <GO>): same effect as the OS
+   setting for CSS motion. JS effects follow via the matchMedia shim in the
+   head script. */
+html[data-motion="reduce"] *,
+html[data-motion="reduce"] ::before,
+html[data-motion="reduce"] ::after {
+  animation-duration: 0.01ms !important;
+  animation-delay: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}

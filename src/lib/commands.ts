@@ -24,6 +24,7 @@ export type CommandAction =
   | { type: "copy"; value: string; toast: string }
   | { type: "theme" }
   | { type: "shortcuts" }
+  | { type: "motion" }
   | { type: "help" }
   | { type: "bot" }
   | { type: "fx"; name: "rain" | "bell" };
@@ -244,6 +245,23 @@ export const commands: Command[] = [
     ],
     action: { type: "theme" },
     href: "/functions#theme",
+  },
+  {
+    id: "settings.motion",
+    mnemonic: "MOTION",
+    title: "Reduce motion",
+    hint: "Turn the site's animations down (or back up)",
+    group: "Settings",
+    keywords: [
+      "motion",
+      "animation",
+      "reduce",
+      "calm",
+      "accessibility",
+      "still",
+    ],
+    action: { type: "motion" },
+    href: "/functions#motion",
   },
   {
     id: "settings.shortcuts",

@@ -316,6 +316,31 @@ export default function CommandPalette({
         }[mode];
         return print([{ kind: "out", text }]);
       }
+      case "motion": {
+        let reduced = false;
+        try {
+          reduced = localStorage.getItem("motion") === "reduce";
+          if (reduced) localStorage.removeItem("motion");
+          else localStorage.setItem("motion", "reduce");
+        } catch {
+          return print([
+            {
+              kind: "err",
+              text: "motion: can't save the setting in this browser.",
+            },
+          ]);
+        }
+        print([
+          {
+            kind: "out",
+            text: reduced
+              ? "motion: animations back on. reloading…"
+              : "motion: reduced. reloading…",
+          },
+        ]);
+        window.setTimeout(() => window.location.reload(), 500);
+        return;
+      }
       case "bot":
         close();
         return openAyanBot();

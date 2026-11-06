@@ -7,7 +7,12 @@ import { BriefMenu } from "./BriefMenu";
 import { BRIEF_PROMPT, followUps, projectsIn, startersFor } from "./derive";
 import { localAnswer } from "./local";
 import { Markdown } from "./Markdown";
-import { CopyButton, FollowUps, UsageMeter } from "./MessageExtras";
+import {
+  CopyButton,
+  FollowUps,
+  ListenButton,
+  UsageMeter,
+} from "./MessageExtras";
 import { ProjectCards } from "./ProjectCards";
 import "./panel.css";
 import {
@@ -723,6 +728,7 @@ export default function AyanBotPanel({
                     />
                     <div className="mt-1.5 -ml-2 flex items-center">
                       <CopyButton text={m.content} />
+                      <ListenButton text={m.content} />
                     </div>
                     {m === lastBot && !busy && (
                       <FollowUps
