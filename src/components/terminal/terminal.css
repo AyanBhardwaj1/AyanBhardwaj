@@ -208,6 +208,10 @@
   .tm-page {
     padding: 0;
   }
+  .tm-quick {
+    /* Room for the ayan-bot button docked bottom-right. */
+    padding-right: 76px;
+  }
   .tm-shell {
     height: 100dvh;
     border-radius: 0;

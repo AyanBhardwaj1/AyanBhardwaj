@@ -151,12 +151,21 @@ export function Terminal({ data }: { data: TerminalData }) {
             p.name.toLowerCase().replace(/[^a-z0-9]/g, "") === k ||
             (p.code ?? "").toLowerCase() === k,
         ) ??
-        data.projects.find((p) =>
-          p.name
-            .toLowerCase()
-            .replace(/[^a-z0-9]/g, "")
-            .startsWith(k),
-        )
+        data.projects.find(
+          (p) =>
+            p.name
+              .toLowerCase()
+              .replace(/[^a-z0-9]/g, "")
+              .startsWith(k) || (p.code ?? "").toLowerCase().startsWith(k),
+        ) ??
+        // Last resort: letters in order ("yb" -> YouBank, "jrv" -> mossJARVIS).
+        (k.length >= 2
+          ? data.projects.find((p) => {
+              let i = 0;
+              for (const ch of p.name.toLowerCase()) if (ch === k[i]) i++;
+              return i === k.length;
+            })
+          : undefined)
       );
     },
     [data.projects],
