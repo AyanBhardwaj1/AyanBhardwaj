@@ -43,19 +43,20 @@ No environment variables are required. ayan-bot (the chat agent) runs in a free 
 
 ## Scripts
 
-| Command                | What it does                                            |
-| ---------------------- | ------------------------------------------------------- |
-| `npm run dev`          | Start the dev server with hot reload                    |
-| `npm run build`        | Production build                                        |
-| `npm run start`        | Serve the production build (run `build` first)          |
-| `npm run lint`         | ESLint                                                  |
-| `npm run typecheck`    | Generate Next.js route types, then `tsc --noEmit`       |
-| `npm run format`       | Format everything with Prettier                         |
-| `npm run format:check` | Check formatting without writing                        |
-| `npm run test:smoke`   | 69 browser checks on a production build (`build` first) |
-| `npm run test:bot`     | ayan-bot route against local fakes, no credits spent    |
+| Command                | What it does                                                |
+| ---------------------- | ----------------------------------------------------------- |
+| `npm run dev`          | Start the dev server with hot reload                        |
+| `npm run build`        | Production build                                            |
+| `npm run start`        | Serve the production build (run `build` first)              |
+| `npm run lint`         | ESLint                                                      |
+| `npm run typecheck`    | Generate Next.js route types, then `tsc --noEmit`           |
+| `npm run format`       | Format everything with Prettier                             |
+| `npm run format:check` | Check formatting without writing                            |
+| `npm run test:smoke`   | 69 browser checks on a production build (`build` first)     |
+| `npm run test:unit`    | Fit check matcher unit tests (Node's test runner, no build) |
+| `npm run test:bot`     | ayan-bot route against local fakes, no credits spent        |
 
-CI runs `lint`, `typecheck`, `format:check` and `build` on every pull request and on pushes to `main`, plus an advisory Lighthouse audit. Run the same four commands locally before opening a PR.
+CI runs `lint`, `typecheck`, `format:check`, `test:unit` and `build` on every pull request and on pushes to `main`, plus an advisory Lighthouse audit. Run the same commands locally before opening a PR.
 
 A weekly workflow (`.github/workflows/refresh-data.yml`) re-fetches the public GitHub snapshot in `src/data/` and opens a PR when it changed. It needs one repo setting: **Settings > Actions > General > Workflow permissions > Allow GitHub Actions to create and approve pull requests**. Run it any time from the Actions tab, or locally with `npm run data:refresh`.
 
