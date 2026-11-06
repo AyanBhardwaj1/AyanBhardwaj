@@ -1,0 +1,66 @@
+name: Refresh GitHub data
+
+# Weekly: re-fetch the public GitHub snapshot (contributions, repos, stars,
+# languages) that the site renders at build time, and open a PR when it
+# changed. Merging the PR redeploys the site with fresh numbers.
+#
+# One-time repo setting: Settings > Actions > General > Workflow permissions >
+# "Allow GitHub Actions to create and approve pull requests".
+
+on:
+  schedule:
+    - cron: "23 14 * * 1" # Mondays, 14:23 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: refresh-data
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node.js (from .nvmrc)
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      # The script writes each section that succeeds and exits non-zero if
+      # any failed; keep the good sections and still open the PR.
+      - name: Fetch public GitHub data
+        run: |
+          node scripts/fetch-github-data.mjs src/data \
+            || echo "::warning::Some GitHub data sections failed; keeping the ones that refreshed."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Open or update a PR if anything changed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: chore/refresh-github-data
+        run: |
+          # Every run rewrites generated_at; only real data changes count.
+          if ! git diff -U0 -- src/data | grep -E '^[+-][^+-]' | grep -qv '"generated_at"'; then
+            echo "No data changes."
+            git checkout -- src/data
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -C "$BRANCH"
+          git add src/data
+          git commit -m "chore(data): refresh GitHub snapshot $(date -u +%F)"
+          git push --force origin "$BRANCH"
+          if [ -z "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[].number')" ]; then
+            gh pr create --base main --head "$BRANCH" \
+              --title "chore(data): refresh GitHub snapshot" \
+              --body "Automated weekly refresh of \`src/data/*.json\` (contributions, repos, stars, languages). Check the Vercel preview, then merge to redeploy. (PRs opened with the Actions token do not trigger CI on their own; run CI from the Actions tab if wanted.)"
+          fi

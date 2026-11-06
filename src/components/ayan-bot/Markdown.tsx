@@ -16,7 +16,7 @@ function safeHref(raw: string): { href: string; internal: boolean } | null {
   if (href.startsWith("/") && !href.startsWith("//"))
     return {
       href,
-      internal: !/\.(pdf|txt|json)$/i.test(href.split(/[?#]/)[0]),
+      internal: !/\.(pdf|txt|json|vcf|md|xml)$/i.test(href.split(/[?#]/)[0]),
     };
   if (href.startsWith("#")) return { href, internal: false };
   try {
@@ -52,7 +52,8 @@ function inline(
     if (m[1] !== undefined) {
       out.push(
         <strong key={k} className="text-fg font-semibold">
-          {m[1]}
+          {/* Bold can wrap links and code ("**[YouBank](/projects/youbank)**"). */}
+          {inline(m[1], k, onNavigate)}
         </strong>,
       );
     } else if (m[2] !== undefined) {

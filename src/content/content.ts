@@ -1044,10 +1044,6 @@ export const easterEggs: EasterEgg[] = [
     response:
       "ayan: engineer, analyst, Mavs fan. not necessarily in that order.",
   },
-  {
-    command: "help",
-    response: "try: whoami, ls projects, latency, mavs, sudo hire ayan, coffee",
-  },
   { command: "ls projects", response: "", action: "list-projects" },
   {
     command: "sudo hire ayan",

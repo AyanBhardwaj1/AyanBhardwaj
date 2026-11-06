@@ -1,0 +1,259 @@
+/* AYAN terminal (/terminal). Always "after hours": a dark CRT-ish pane. */
+.tm-page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: clamp(12px, 3vw, 40px);
+  background:
+    radial-gradient(
+      1200px 600px at 50% -10%,
+      rgb(255 163 26 / 0.12),
+      transparent 60%
+    ),
+    #070706;
+}
+.tm-shell {
+  --tm-fg: #e9e3d8;
+  --tm-muted: #8f897f;
+  --tm-accent: #ffa31a;
+  --tm-up: #3ddc84;
+  --tm-down: #ff6a5e;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 1040px);
+  height: min(86dvh, 760px);
+  border: 1px solid rgb(242 238 231 / 0.14);
+  border-radius: 14px;
+  background: #0b0b0a;
+  color: var(--tm-fg);
+  box-shadow:
+    0 40px 120px -40px rgb(0 0 0 / 0.9),
+    0 0 0 1px rgb(255 163 26 / 0.06),
+    inset 0 1px 0 rgb(255 255 255 / 0.04);
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.55;
+  cursor: text;
+}
+/* Faint scanlines and a soft glow: decoration only. */
+.tm-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 0.018) 0 1px,
+    transparent 1px 3px
+  );
+  mix-blend-mode: overlay;
+}
+.tm-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 40px;
+  padding: 0 12px 0 14px;
+  border-bottom: 1px solid rgb(242 238 231 / 0.08);
+  background: #111110;
+  flex-shrink: 0;
+}
+.tm-dots {
+  display: inline-flex;
+  gap: 7px;
+}
+.tm-dots i {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #3a3833;
+}
+.tm-dots i:first-child {
+  background: #ff5f57;
+}
+.tm-dots i:nth-child(2) {
+  background: #febc2e;
+}
+.tm-dots i:nth-child(3) {
+  background: #28c840;
+}
+.tm-title {
+  flex: 1;
+  text-align: center;
+  color: var(--tm-muted);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+.tm-close {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--tm-muted);
+  font-size: 20px;
+  line-height: 1;
+}
+.tm-close:hover,
+.tm-close:focus-visible {
+  color: var(--tm-fg);
+  background: rgb(255 255 255 / 0.06);
+}
+.tm-log {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px 18px 8px;
+  scrollbar-width: thin;
+  scrollbar-color: #3a3833 transparent;
+}
+.tm-line {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  min-height: 1.55em;
+}
+.tm-banner {
+  white-space: pre;
+  line-height: 1.1;
+  font-size: clamp(7px, 1.6vw, 14px);
+  text-shadow: 0 0 18px rgb(255 163 26 / 0.45);
+}
+.tm-cmd {
+  margin-top: 8px;
+}
+.tm-err {
+  color: var(--tm-down);
+}
+.tm-accent {
+  color: var(--tm-accent);
+}
+.tm-muted {
+  color: var(--tm-muted);
+}
+.tm-up {
+  color: var(--tm-up);
+}
+.tm-down {
+  color: var(--tm-down);
+}
+.tm-strong {
+  color: #fff;
+  font-weight: 500;
+}
+.tm-link {
+  color: var(--tm-accent);
+  text-decoration: underline;
+  text-decoration-color: rgb(255 163 26 / 0.4);
+  text-underline-offset: 3px;
+}
+.tm-link:hover,
+.tm-link:focus-visible {
+  text-decoration-color: var(--tm-accent);
+}
+.tm-prompt {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 8px;
+}
+.tm-prompt label {
+  flex-shrink: 0;
+}
+.tm-field {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
+/* Autosuggestion: same box and font as the input, typed part invisible. */
+.tm-ghost {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  white-space: pre;
+  pointer-events: none;
+  color: var(--tm-muted);
+  opacity: 0.55;
+}
+.tm-ghostTyped {
+  visibility: hidden;
+}
+.tm-input {
+  position: relative;
+  padding: 0;
+  line-height: inherit;
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  color: var(--tm-fg);
+  font: inherit;
+  caret-color: var(--tm-accent);
+  outline: none;
+}
+.tm-prompt:focus-within {
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px rgb(255 163 26 / 0.35);
+}
+.tm-quick {
+  display: flex;
+  gap: 6px;
+  padding: 10px 12px;
+  border-top: 1px solid rgb(242 238 231 / 0.08);
+  overflow-x: auto;
+  flex-shrink: 0;
+  scrollbar-width: none;
+}
+.tm-quick button {
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid rgb(242 238 231 / 0.14);
+  border-radius: 999px;
+  color: var(--tm-muted);
+  font: inherit;
+  font-size: 12px;
+  background: transparent;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease;
+}
+.tm-quick button:hover,
+.tm-quick button:focus-visible {
+  color: var(--tm-accent);
+  border-color: rgb(255 163 26 / 0.5);
+}
+@media (max-width: 640px) {
+  .tm-page {
+    padding: 0;
+  }
+  .tm-quick {
+    /* Keep the visible strip clear of the ayan-bot button docked
+       bottom-right (padding would only add room at the scroll end). */
+    margin-right: 68px;
+  }
+  .tm-shell {
+    height: 100dvh;
+    border-radius: 0;
+    border: 0;
+    font-size: 13px;
+  }
+}
+
+/* Boot screen: server-rendered, then staggered in (never hidden: the first
+   frame already shows it faintly, so it paints immediately). */
+@media (prefers-reduced-motion: no-preference) {
+  .tm-boot {
+    animation: tm-boot 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--i, 0) * 55ms);
+  }
+}
+@keyframes tm-boot {
+  from {
+    opacity: 0.12;
+    transform: translateY(4px);
+  }
+}

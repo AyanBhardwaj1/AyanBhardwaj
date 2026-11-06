@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { links, profile, ui } from "@/content/content";
 import { sections } from "@/content/extras";
 import { formatDay, dataAsOf } from "@/lib/github";
@@ -62,8 +63,17 @@ export function Footer({ hasResume }: { hasResume: boolean }) {
       </div>
       <div className="container-page flex items-end justify-between gap-4 pb-4">
         <p className="t-label text-muted">{ui.footer.alternates[0]}</p>
-        <p className="t-label text-muted hidden sm:block">
-          Press ⌘K · type HELP &lt;GO&gt;
+        <p className="t-label text-muted">
+          <span className="hidden sm:inline">
+            Press ⌘K · type HELP &lt;GO&gt; ·{" "}
+          </span>
+          <Link href="/terminal" className="link text-fg">
+            Open the terminal
+          </Link>
+          {" · "}
+          <Link href="/cv" className="link text-fg">
+            Web CV
+          </Link>
         </p>
       </div>
       <div

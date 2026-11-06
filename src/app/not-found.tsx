@@ -1,17 +1,41 @@
 import Link from "next/link";
+import { HeroField } from "@/components/fx/HeroField";
 import type { Metadata } from "next";
-import { ui } from "@/content/content";
+import { projects, ui } from "@/content/content";
+import { projectHref } from "@/lib/projects";
+import { DidYouMean, type Candidate } from "@/components/ui/DidYouMean";
 import { sections } from "@/content/extras";
 import { StatusBar } from "@/components/StatusBar";
 
 export const metadata: Metadata = {
   title: "404 · Security not found",
-  robots: { index: false },
+  // Next adds its own noindex to 404 responses; just don't claim the home canonical.
+  alternates: { canonical: null },
 };
 
 const SUGGEST = sections.filter((s) =>
   ["projects", "experience", "contact"].includes(s.id),
 );
+
+const CANDIDATES: Candidate[] = [
+  ...projects.map((p) => ({
+    href: projectHref(p.id),
+    label: p.name,
+    keys: [p.id, p.name],
+  })),
+  ...sections.map((s) => ({
+    href: `/#${s.id}`,
+    label: s.label,
+    keys: [s.id, s.label],
+  })),
+  { href: "/cv", label: "Web CV", keys: ["cv", "resume", "fit"] },
+  { href: "/terminal", label: "Terminal", keys: ["terminal", "term", "shell"] },
+  {
+    href: "/functions",
+    label: "Function directory",
+    keys: ["functions", "help", "commands"],
+  },
+];
 
 /** A delisted ticker: the price chart falls off a cliff, then a way home. */
 export default function NotFound() {
@@ -20,8 +44,10 @@ export default function NotFound() {
       <StatusBar />
       <main
         id="main"
-        className="container-page relative flex min-h-svh flex-col justify-center pt-20 pb-16"
+        className="container-page relative isolate flex min-h-svh flex-col justify-center pt-20 pb-16"
       >
+        {/* The hero's after-hours field, quietly behind the 404. */}
+        <HeroField />
         <p
           className="hx-rise t-data text-down"
           style={{ "--d": "0ms" } as React.CSSProperties}
@@ -81,6 +107,7 @@ export default function NotFound() {
             ▍
           </span>
         </p>
+        <DidYouMean candidates={CANDIDATES} />
         <nav
           aria-label="Suggested pages"
           className="hx-rise mt-10 flex flex-wrap gap-3"
@@ -94,6 +121,9 @@ export default function NotFound() {
               <span className="text-accent">{s.mnemonic}</span> {s.label}
             </Link>
           ))}
+          <Link href="/terminal" className="pill">
+            <span className="text-accent">TERM</span> Terminal
+          </Link>
         </nav>
       </main>
     </>

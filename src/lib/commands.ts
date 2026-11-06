@@ -14,17 +14,21 @@ import { hasProjectPage, projectHref } from "./projects";
  * Pure data (no React), so it is safe on both sides of the boundary.
  */
 
-export type CommandGroup = "Go" | "Ask" | "Projects" | "Links" | "Settings";
+export type CommandGroup =
+  "Go" | "Ask" | "Projects" | "Links" | "Fun" | "Settings";
 
 export type CommandAction =
   | { type: "scroll"; id: string }
   | { type: "route"; href: string }
   | { type: "external"; href: string }
+  | { type: "download"; href: string }
   | { type: "copy"; value: string; toast: string }
   | { type: "theme" }
   | { type: "shortcuts" }
+  | { type: "motion" }
   | { type: "help" }
-  | { type: "bot" };
+  | { type: "bot" }
+  | { type: "fx"; name: "rain" | "bell" | "tour" };
 
 export type Command = {
   id: string;
@@ -141,6 +145,16 @@ export const commands: Command[] = [
     href: links.email.href,
   },
   {
+    id: "link.vcf",
+    mnemonic: "VCF",
+    title: "Save contact card",
+    hint: "vCard for your phone or address book",
+    group: "Links",
+    keywords: ["vcard", "contact", "save", "phone", "address book"],
+    action: { type: "download", href: "/ayan.vcf" },
+    href: "/ayan.vcf",
+  },
+  {
     id: "link.cv",
     mnemonic: "CV",
     title: "Resume (PDF)",
@@ -196,6 +210,90 @@ export const commands: Command[] = [
     href: "/functions",
   },
   {
+    id: "fun.rain",
+    mnemonic: "RAIN",
+    title: "Ticker rain",
+    hint: "Five seconds of falling quotes. Esc to stop",
+    group: "Fun",
+    keywords: ["rain", "matrix", "tickers", "quotes", "konami", "fun"],
+    action: { type: "fx", name: "rain" },
+    href: "/functions#rain",
+  },
+  {
+    id: "fun.tour",
+    mnemonic: "TOUR",
+    title: "Take the guided tour",
+    hint: "40 seconds through the highlights; any key stops it",
+    group: "Fun",
+    keywords: [
+      "tour",
+      "guide",
+      "walkthrough",
+      "highlights",
+      "intro",
+      "recruiter",
+    ],
+    action: { type: "fx", name: "tour" },
+    href: "/functions#tour",
+  },
+  {
+    id: "link.fit",
+    mnemonic: "FIT",
+    title: "Fit check",
+    hint: "Paste a job description; see the matching work",
+    group: "Links",
+    keywords: [
+      "fit",
+      "job",
+      "description",
+      "role",
+      "match",
+      "hiring",
+      "recruiter",
+    ],
+    action: { type: "route", href: "/cv#fit" },
+    href: "/cv#fit",
+  },
+  // The CV, tailored for each role lens (see /cv "Tailor for").
+  ...(
+    [
+      ["ai", "CVAI", "AI / ML", ["ai", "ml", "machine learning", "llm"]],
+      ["fintech", "CVFN", "Fintech", ["fintech", "finance", "quant"]],
+      ["systems", "CVSY", "Systems", ["systems", "rust", "performance"]],
+      ["fullstack", "CVFS", "Full-stack", ["full-stack", "fullstack", "web"]],
+      ["research", "CVRS", "Research", ["research", "nlp", "evals"]],
+    ] as const
+  ).map(([role, mnemonic, label, kw]): Command => ({
+    id: `link.cv-${role}`,
+    mnemonic,
+    title: `CV for ${label}`,
+    hint: "The web CV with matching projects first",
+    group: "Links",
+    keywords: ["cv", "resume", "tailored", ...kw],
+    action: { type: "route", href: `/cv?for=${role}` },
+    href: `/cv?for=${role}`,
+  })),
+  {
+    id: "link.terminal",
+    mnemonic: "TERM",
+    title: "Open the terminal",
+    hint: "whoami, ls projects, cat youbank, ask …",
+    group: "Fun",
+    keywords: ["terminal", "shell", "cli", "command line", "console", "bash"],
+    action: { type: "route", href: "/terminal" },
+    href: "/terminal",
+  },
+  {
+    id: "fun.bell",
+    mnemonic: "BELL",
+    title: "Ring the closing bell",
+    hint: "4:00 PM ET, whenever you like",
+    group: "Fun",
+    keywords: ["bell", "closing", "close", "confetti", "nyse", "fun"],
+    action: { type: "fx", name: "bell" },
+    href: "/functions#bell",
+  },
+  {
     id: "settings.theme",
     mnemonic: "THEME",
     title: "Toggle theme",
@@ -212,6 +310,23 @@ export const commands: Command[] = [
     ],
     action: { type: "theme" },
     href: "/functions#theme",
+  },
+  {
+    id: "settings.motion",
+    mnemonic: "MOTION",
+    title: "Reduce motion",
+    hint: "Turn the site's animations down (or back up)",
+    group: "Settings",
+    keywords: [
+      "motion",
+      "animation",
+      "reduce",
+      "calm",
+      "accessibility",
+      "still",
+    ],
+    action: { type: "motion" },
+    href: "/functions#motion",
   },
   {
     id: "settings.shortcuts",

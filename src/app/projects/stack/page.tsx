@@ -14,7 +14,7 @@ import { s } from "@/components/projects/stack/styles";
 import { getProject, projectMetadata } from "@/lib/projects";
 import { bundle, features, intro, media, styleNotes } from "./data";
 
-export const metadata = projectMetadata("stack", { image: media.lead });
+export const metadata = projectMetadata("stack");
 
 function Head({
   kicker,

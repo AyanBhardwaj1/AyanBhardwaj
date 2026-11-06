@@ -835,6 +835,9 @@ html[data-jarvis-boot] .jv-boot::after {
   margin: 0;
   color: var(--cyan-hot);
 }
+.jv-metrics .jv-barCell {
+  grid-column: 1 / -1;
+}
 .jv-metrics i,
 .jv-pipeline i {
   grid-column: 1 / -1;

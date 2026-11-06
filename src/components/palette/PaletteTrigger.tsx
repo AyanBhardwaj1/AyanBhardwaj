@@ -26,7 +26,6 @@ export function PaletteTrigger({
       onPointerEnter={prefetch}
       onFocus={prefetch}
       aria-keyshortcuts="Meta+K Control+K"
-      aria-label="Open command palette"
       className={className}
     >
       <svg
@@ -40,10 +39,13 @@ export function PaletteTrigger({
         <circle cx="7" cy="7" r="4.5" />
         <path d="m10.5 10.5 3 3" strokeLinecap="round" />
       </svg>
-      <span className={alwaysLabel ? "" : "hidden sm:inline"}>{label}</span>
+      <span className={alwaysLabel ? "" : "sr-only sm:not-sr-only"}>
+        {label}
+      </span>
+      <span className="sr-only"> (command palette)</span>
       <kbd
         aria-hidden="true"
-        className="hidden font-mono text-[0.6875rem] opacity-70 sm:inline"
+        className="hidden font-mono text-[0.6875rem] sm:inline"
       >
         ⌘K
       </kbd>

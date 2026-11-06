@@ -15,6 +15,18 @@ Source for my personal developer portfolio: who I am, what I've built, and how t
 - ESLint (`eslint-config-next`) and Prettier (with `prettier-plugin-tailwindcss`)
 - Hosted on [Vercel](https://vercel.com), with CI on GitHub Actions
 
+## What's on the site
+
+- **Home**: hero with a WebGL "after-hours" contour field, decoding section titles, the AYAN index career chart, project cards (Runway plays its demo on hover), a physics project graph, the trophy case and a GitHub contribution surface.
+- **Seven case studies** at `/projects/<slug>`, each with its own design, live demos that play once on first view, an "Ask about" button and "Worth asking about" questions for ayan-bot, prev/next morphing titles, a `$ cat <slug>` link into the terminal and an "explored n of 7" tracker.
+- **⌘K command palette** with Bloomberg-style codes (`PROJ`, `EXP`, `CV`, `CVFN`, `FIT`, `VCF`, `TOUR`, `TERM`, `MOTION`, `RAIN`, `BELL`, `ASK …`); `j` / `k` step through sections; `/functions` lists them all.
+- **ayan-bot**, a grounded chat agent about Ayan: page-aware starters, an "answer for: recruiter | engineer" switch, inline project cards, follow-ups, a recruiter brief, copy and read-aloud, "select text → ask", ⌘J. Hard spend caps and layered defenses: see [docs/AYAN-BOT.md](docs/AYAN-BOT.md).
+- **`/terminal`**: a command line over the site (`whoami`, `ls projects ai`, `cat youbank`, `grep`, `diff youbank runway`, `top`, `fit …`, `ask …`) with fish-style autosuggestions, persistent history and shareable `?run=` links.
+- **`/cv`**: a web CV generated from the same content, print-ready, tailorable for a role (`/cv?for=fintech`), copyable as text (`/cv.md`), with a **Fit check**: paste a job description, see which requirements the work backs up (in the browser, nothing sent).
+- **For recruiters**: a role filter on the projects, `FIT <GO>`, a share button on every case study, `draft --to ayan`, which writes a first email for your own mail app, and a one-tap contact card (`/ayan.vcf`).
+- **Accessibility**: keyboard first, axe-clean, `MOTION <GO>` turns animations down site-wide, reduced-motion respected everywhere.
+- **Share cards and SEO**: branded Open Graph images per page, JSON-LD, sitemap, `llms.txt`, `resume.json`, `cv.md`.
+
 ## Local development
 
 Requirements: Node.js 22 (see `.nvmrc`) and npm.
@@ -27,21 +39,26 @@ npm ci
 npm run dev        # http://localhost:3000
 ```
 
-No environment variables are required.
+No environment variables are required. ayan-bot (the chat agent) runs in a free mock mode locally; for production setup, spend caps and its security model see [docs/AYAN-BOT.md](docs/AYAN-BOT.md).
 
 ## Scripts
 
-| Command                | What it does                                      |
-| ---------------------- | ------------------------------------------------- |
-| `npm run dev`          | Start the dev server with hot reload              |
-| `npm run build`        | Production build                                  |
-| `npm run start`        | Serve the production build (run `build` first)    |
-| `npm run lint`         | ESLint                                            |
-| `npm run typecheck`    | Generate Next.js route types, then `tsc --noEmit` |
-| `npm run format`       | Format everything with Prettier                   |
-| `npm run format:check` | Check formatting without writing                  |
+| Command                | What it does                                                          |
+| ---------------------- | --------------------------------------------------------------------- |
+| `npm run dev`          | Start the dev server with hot reload                                  |
+| `npm run build`        | Production build                                                      |
+| `npm run start`        | Serve the production build (run `build` first)                        |
+| `npm run lint`         | ESLint                                                                |
+| `npm run typecheck`    | Generate Next.js route types, then `tsc --noEmit`                     |
+| `npm run format`       | Format everything with Prettier                                       |
+| `npm run format:check` | Check formatting without writing                                      |
+| `npm run test:smoke`   | 72 browser checks on a production build (`build` first)               |
+| `npm run test:unit`    | Fit check and terminal-link unit tests (Node's test runner, no build) |
+| `npm run test:bot`     | ayan-bot route against local fakes, no credits spent                  |
 
-CI runs `lint`, `typecheck`, `format:check` and `build` on every pull request and on pushes to `main`, plus an advisory Lighthouse audit. Run the same four commands locally before opening a PR.
+CI runs `lint`, `typecheck`, `format:check`, `test:unit` and `build` on every pull request and on pushes to `main`, plus an advisory Lighthouse audit. Run the same commands locally before opening a PR.
+
+A weekly workflow (`.github/workflows/refresh-data.yml`) re-fetches the public GitHub snapshot in `src/data/` and opens a PR when it changed. It needs one repo setting: **Settings > Actions > General > Workflow permissions > Allow GitHub Actions to create and approve pull requests**. Run it any time from the Actions tab, or locally with `npm run data:refresh`.
 
 ## Project structure
 

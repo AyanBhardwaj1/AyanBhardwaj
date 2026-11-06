@@ -84,7 +84,7 @@ function step(nodes: N[], edges: E[], alpha: number) {
       const d2 = dx * dx + dy * dy || 1;
       if (d2 > 520 * 520) continue;
       const d = Math.sqrt(d2);
-      const charge = (80 + A.r * 7) * alpha;
+      const charge = (52 + A.r * 5) * alpha;
       const f = charge / d2;
       A.vx -= dx * f;
       A.vy -= dy * f;
@@ -103,15 +103,21 @@ function step(nodes: N[], edges: E[], alpha: number) {
     const t = (n.c / DOMAINS.length) * Math.PI * 2;
     n.vx += (Math.cos(t) * 170 - n.x) * 0.05 * alpha * 0.2;
     n.vy += (Math.sin(t) * 120 - n.y) * 0.05 * alpha * 0.2;
-    n.vx -= n.x * 0.012 * alpha;
-    n.vy -= n.y * 0.012 * alpha;
+    n.vx -= n.x * 0.02 * alpha;
+    n.vy -= n.y * 0.024 * alpha;
     n.vx *= 0.6;
     n.vy *= 0.6;
     n.x += n.vx;
     n.y += n.vy;
-    // Soft walls keep loners in view.
-    n.x = Math.max(-300, Math.min(300, n.x));
-    n.y = Math.max(-220, Math.min(220, n.y));
+    // A soft elliptical boundary keeps loners in view without pinning nodes
+    // to straight walls: past the edge, a node is eased back in proportion
+    // to how far out it is.
+    const r = Math.hypot(n.x / 320, n.y / 230);
+    if (r > 1) {
+      const pull = (1 - 1 / r) * 0.3;
+      n.x -= n.x * pull;
+      n.y -= n.y * pull;
+    }
   }
 }
 

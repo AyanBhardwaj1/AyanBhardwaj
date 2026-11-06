@@ -1,0 +1,242 @@
+import type { FitIndex, FitTerm } from "./fit";
+
+/**
+ * The browser half of the fit check: compile the server-built index once,
+ * then match any pasted text against it. Shared by the web CV and /terminal.
+ */
+
+export type CompiledFit = {
+  terms: (FitTerm & { re: RegExp })[];
+  missing: { label: string; re: RegExp }[];
+};
+
+/** Fewer technical requirements than this: list them, but don't score. */
+export const MIN_SCORED = 3;
+
+export type FitResult = {
+  /** Technical requirements with evidence (the score counts these). */
+  hits: FitTerm[];
+  /** Soft matches (startup, leadership): shown, never scored. */
+  soft: FitTerm[];
+  gaps: string[];
+  /** Technical requirements recognised (hits + gaps). */
+  total: number;
+  pct: number;
+  /** Enough technical requirements to make a score meaningful. */
+  scored: boolean;
+};
+
+export function compileFit(index: FitIndex): CompiledFit {
+  return {
+    terms: index.terms.map((t) => ({
+      ...t,
+      re: new RegExp(t.jd, t.cs ? "" : "i"),
+    })),
+    // Built on the server (lib/fit); proper nouns, so case-sensitive.
+    missing: index.notOnSite.map((m) => ({
+      label: m.label,
+      re: new RegExp(m.re),
+    })),
+  };
+}
+
+export function matchFit(c: CompiledFit, text: string): FitResult {
+  return resultFrom(
+    c.terms.filter((t) => t.re.test(text)),
+    c.missing.filter((m) => m.re.test(text)).map((m) => m.label),
+  );
+}
+
+/** A result from the terms found and the not-on-site names found. */
+function resultFrom(found: FitTerm[], missing: string[]): FitResult {
+  const tech = found.filter((t) => !t.soft);
+  const hits = tech.filter((t) => t.evidence.length > 0);
+  const soft = found.filter((t) => t.soft && t.evidence.length > 0);
+  const gaps = [
+    ...tech.filter((t) => !t.evidence.length).map((t) => t.label),
+    ...missing,
+  ];
+  const total = hits.length + gaps.length;
+  return {
+    hits,
+    soft,
+    gaps,
+    total,
+    pct: total ? Math.round((hits.length / total) * 100) : 0,
+    scored: total >= MIN_SCORED,
+  };
+}
+
+/** A ≤480-char prompt asking ayan-bot for the strongest examples. */
+export function fitPrompt(r: FitResult): string {
+  const top = r.hits
+    .slice(0, 8)
+    .map((h) => h.label)
+    .join(", ");
+  return `A role asks for: ${top}. Where has Ayan done this work? Point me to the strongest examples.`.slice(
+    0,
+    480,
+  );
+}
+
+/** A plain-text summary to paste into notes, an ATS or a message. */
+export function fitSummary(r: FitResult, url: string): string {
+  return [
+    `Ayan Bhardwaj: fit check (${url})`,
+    r.scored
+      ? `${r.hits.length} of ${r.total} technical requirements backed by work on the site.`
+      : `${r.total} technical requirement${r.total === 1 ? "" : "s"} recognised: too few to score.`,
+    "",
+    ...[...r.hits, ...r.soft].map(
+      (h) => `+ ${h.label}: ${h.evidence.map((e) => e.name).join(", ")}`,
+    ),
+    ...(r.gaps.length
+      ? ["", `Not shown on the site: ${r.gaps.join(", ")}`]
+      : []),
+  ].join("\n");
+}
+
+/** Where a job description waits while ayan-bot hands it to the Fit check. */
+export const FIT_HANDOFF_KEY = "ayan:fit-jd";
+export const FIT_HANDOFF_EVENT = "ayan:fit";
+
+/** A long paste that reads like a role, not a question. */
+export function looksLikeJobDescription(t: string): boolean {
+  if (t.length < 300) return false;
+  const cues = t.match(
+    /responsibilit|requirements?\b|qualifications?|you will|you'll|we're looking|we are looking|years of|nice to have|about the role|what you('ll)? (do|bring)|preferred|benefits|equal opportunity/gi,
+  );
+  return (cues?.length ?? 0) >= 2;
+}
+
+/** Which CV lens a matched requirement points to (see lib/roles). */
+const TERM_ROLE: Record<
+  string,
+  "ai" | "fintech" | "systems" | "fullstack" | "research"
+> = {
+  ml: "ai",
+  dl: "ai",
+  llm: "ai",
+  rag: "ai",
+  agents: "ai",
+  cv: "ai",
+  gnn: "ai",
+  fintech: "fintech",
+  quant: "fintech",
+  valuation: "fintech",
+  sec: "fintech",
+  trading: "fintech",
+  rust: "systems",
+  cpp: "systems",
+  wasm: "systems",
+  desktop: "systems",
+  perf: "systems",
+  react: "fullstack",
+  nextjs: "fullstack",
+  node: "fullstack",
+  api: "fullstack",
+  frontend: "fullstack",
+  fullstack: "fullstack",
+  postgres: "fullstack",
+  nlp: "research",
+  evals: "research",
+  scraping: "research",
+};
+
+/** The role a job description leans toward, or null if nothing stands out. */
+export function fitRole(r: FitResult) {
+  const n = new Map<string, number>();
+  for (const h of r.hits) {
+    const role = TERM_ROLE[h.id];
+    if (role) n.set(role, (n.get(role) ?? 0) + 1);
+  }
+  // Ties go to the more specific lens; full-stack terms show up everywhere.
+  const rank = ["ai", "fintech", "systems", "research", "fullstack"];
+  const best = [...n.entries()].sort(
+    (a, b) => b[1] - a[1] || rank.indexOf(a[0]) - rank.indexOf(b[0]),
+  )[0];
+  return best && best[1] >= 2 ? (best[0] as (typeof TERM_ROLE)[string]) : null;
+}
+
+/** FitCheck -> CvTailor: "tailor the CV for this role". */
+export const TAILOR_EVENT = "ayan:tailor";
+
+export type FitMark = {
+  start: number;
+  end: number;
+  kind: "hit" | "gap" | "soft";
+  /** Every requirement this phrase counted toward (overlaps merge). */
+  labels: string[];
+};
+
+const RANK = { hit: 0, gap: 1, soft: 2 } as const;
+
+/**
+ * Where in the pasted text each recognised requirement was found, for the
+ * "show what it recognised" view. Overlapping matches merge into one mark
+ * that names every requirement ("Postgres" counts for SQL and PostgreSQL),
+ * so nothing that was counted goes unmarked.
+ */
+export function fitMarks(c: CompiledFit, text: string): FitMark[] {
+  const raw: FitMark[] = [];
+  const add = (re: RegExp, kind: FitMark["kind"], label: string) => {
+    const g = new RegExp(
+      re.source,
+      re.flags.includes("g") ? re.flags : `${re.flags}g`,
+    );
+    for (const m of text.matchAll(g)) {
+      if (!m[0]) continue;
+      raw.push({
+        start: m.index,
+        end: m.index + m[0].length,
+        kind,
+        labels: [label],
+      });
+    }
+  };
+  for (const t of c.terms)
+    add(t.re, t.soft ? "soft" : t.evidence.length ? "hit" : "gap", t.label);
+  for (const m of c.missing) add(m.re, "gap", m.label);
+  raw.sort((a, b) => a.start - b.start || b.end - a.end);
+  const out: FitMark[] = [];
+  for (const m of raw) {
+    const prev = out[out.length - 1];
+    if (prev && m.start < prev.end) {
+      prev.end = Math.max(prev.end, m.end);
+      if (RANK[m.kind] < RANK[prev.kind]) prev.kind = m.kind;
+      for (const l of m.labels)
+        if (!prev.labels.includes(l)) prev.labels.push(l);
+    } else out.push({ ...m, labels: [...m.labels] });
+  }
+  return out;
+}
+
+/**
+ * A shareable result: only the recognised term ids and gap names, never
+ * the posting's text ("python,react|Kubernetes").
+ */
+export function encodeFit(r: FitResult): string {
+  const ids = [...r.hits, ...r.soft].map((t) => t.id);
+  const gaps = r.gaps.map(encodeURIComponent);
+  return `${ids.join(",")}|${gaps.join(",")}`;
+}
+
+/** The result a shared link describes, or null if it doesn't parse. */
+export function decodeFit(c: CompiledFit, raw: string): FitResult | null {
+  if (raw.length > 2000) return null;
+  const [a = "", b = ""] = raw.split("|");
+  const ids = new Set(a.split(",").filter(Boolean));
+  let names: string[];
+  try {
+    names = b.split(",").filter(Boolean).map(decodeURIComponent);
+  } catch {
+    return null;
+  }
+  const found = c.terms.filter(
+    (t) => ids.has(t.id) || (!t.evidence.length && names.includes(t.label)),
+  );
+  const known = new Set(c.missing.map((m) => m.label));
+  const missing = names.filter((n) => known.has(n));
+  if (!found.length && !missing.length) return null;
+  return resultFrom(found, missing);
+}

@@ -12,7 +12,10 @@
     "format:check": "prettier --check .",
     "data:refresh": "node scripts/fetch-github-data.mjs src/data",
     "check:leaks": "node scripts/check-leaks.mjs",
-    "postbuild": "node scripts/check-leaks.mjs"
+    "postbuild": "node scripts/check-leaks.mjs",
+    "test:bot": "bash scripts/ayan-bot-e2e/run.sh",
+    "test:smoke": "bash scripts/smoke/run.sh",
+    "test:unit": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --disable-warning=ExperimentalWarning --test \"scripts/unit/*.test.mts\""
   },
   "dependencies": {
     "cmdk": "^1.1.1",

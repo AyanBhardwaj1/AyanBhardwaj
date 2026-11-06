@@ -53,6 +53,7 @@ const INVISIBLE = new RegExp(
 /** Strip control characters (keep newlines and tabs) and collapse runaway whitespace. */
 export function cleanText(s: string): string {
   return s
+    .normalize("NFKC")
     .replace(INVISIBLE, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
@@ -119,11 +120,61 @@ const INJECTION_PATTERNS: RegExp[] = [
   /\b(pretend|act|roleplay|role-play)\b[^.?!\n]{0,20}\b(to be|as|you('re| are))\b[^.?!\n]{0,40}\b(unrestricted|unfiltered|different (ai|assistant|bot)|chatgpt|gpt|another|evil)\b/i,
   /<\/?\s*(system|instructions?|developer)\s*>/i,
   /\bnew (instructions|rules)\s*:/i,
+  // Chat-template and role markers pasted in to fake a turn boundary.
+  /<\|(im_start|im_end|system|endoftext)\|>|\[\/?INST\]|<<\/?SYS>>/i,
+  // Asking for the hidden setup in other words.
+  /\byour (initial|original|hidden|secret|internal|system) (prompt|instructions|rules|context|configuration)\b/i,
+  /\bthe (hidden|secret|internal|system|developer) (prompt|instructions|message)\b/i,
+  /\b(print|dump|repeat|output|echo)\b[^.?!\n]{0,30}\b(everything|all text|the text|verbatim)\b[^.?!\n]{0,30}\b(above|before|so far)\b/i,
+  // The bot's own secrets (not questions about how a project uses keys).
+  /\b(your|ayan-bot'?s|this (site|bot)'?s|the site'?s|openai) (api[ _-]?key|secret key|token|credentials?)\b/i,
+  /\b(your|the server'?s|this site'?s) env(ironment)? var(iable)?s?\b|\bprocess\.env\b/i,
 ];
 
+/** Long base64-ish blobs: smuggled instructions or payloads, never a real question. */
+const BLOB = /[A-Za-z0-9+/=_-]{120,}/;
+
+/** A pasted role line ("system: …") at the start of any line. Checked on the
+ * original text, since flattening whitespace would hide the line break. */
+const ROLE_LINE = /^\s*(#{1,3}\s*)?(system|assistant|developer)\s*:/im;
+
 export function looksLikeInjection(text: string): boolean {
-  return INJECTION_PATTERNS.some((re) => re.test(text));
+  const flat = text.replace(/\s+/g, " ");
+  return (
+    BLOB.test(text) ||
+    ROLE_LINE.test(text) ||
+    INJECTION_PATTERNS.some((re) => re.test(flat))
+  );
 }
+
+// ---------- Output guard ----------
+
+/**
+ * Stops a reply that leaks what it shouldn't: the system prompt's canary
+ * token (only present if the model is quoting its instructions), lines of
+ * the instructions themselves, or anything shaped like a secret key.
+ */
+const LEAK_PATTERNS: RegExp[] = [
+  /\bsk-(proj-|svcacct-|admin-)?[A-Za-z0-9_-]{16,}/,
+  /\b(AKIA|ASIA)[A-Z0-9]{16}\b/,
+  /\bgh[pousr]_[A-Za-z0-9]{30,}/,
+  /# DOSSIER \(the only facts/i,
+  /SCOPE \(strict\)/,
+  /Out of scope includes:/,
+];
+
+export function leaks(text: string, canary: string): boolean {
+  return (
+    (canary !== "" && text.includes(canary)) ||
+    LEAK_PATTERNS.some((re) => re.test(text))
+  );
+}
+
+export const LEAK_REFUSAL =
+  "\n\n(ayan-bot stopped that reply: it started heading somewhere it shouldn't. Ask me about Ayan's work instead. <GO>)";
+
+export const BUDGET_MESSAGE =
+  "ayan-bot has used up its thinking budget for today, so the live model is resting. The quick briefs still work, and Ayan's inbox never closes: ayan.bhardwaj@utexas.edu. <GO>";
 
 // ---------- Rate limiting ----------
 
@@ -210,6 +261,19 @@ const hostOf = (u: string | null): string | null => {
  * public site URL, or (outside production) localhost. Requests with neither header are rejected:
  * browsers always send Origin on a cross-site or same-site fetch POST.
  */
+/**
+ * Fetch metadata: browsers label every request with Sec-Fetch-Site. A
+ * cross-site value means another site is driving the visitor's browser at
+ * this endpoint; refuse it. (Absent on non-browser clients, which the
+ * Origin check and proof-of-work handle.)
+ */
+export function isCrossSiteFetch(headers: {
+  get(name: string): string | null;
+}): boolean {
+  const site = headers.get("sec-fetch-site");
+  return site !== null && site !== "same-origin" && site !== "same-site";
+}
+
 export function isAllowedOrigin(
   headers: { get(name: string): string | null },
   siteUrl: string,

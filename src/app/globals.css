@@ -1433,3 +1433,443 @@ html:not(.js) .section-rule::after {
     transform: none;
   }
 }
+
+/* Print: a clean, light, ink-friendly fallback résumé. */
+@media print {
+  /* Doubled :root outranks the light-scheme :root:not(...) token block. */
+  :root:root,
+  [data-theme] {
+    --bg: #fff;
+    --bg-elev: #fff;
+    --bg-card: #fff;
+    --fg: #111;
+    --fg-muted: #444;
+    --line: #ddd;
+    --line-strong: #bbb;
+    --accent: #7a3d00;
+  }
+  html,
+  body {
+    background: #fff !important;
+    color: #111 !important;
+    font-size: 11pt;
+    /* The theme fade would still be mid-transition when printing starts. */
+    transition: none !important;
+  }
+  .rails::before,
+  .rails::after,
+  .ticker,
+  .bob,
+  #activity,
+  #constellation,
+  [aria-label="Manifesto"],
+  [data-print="hide"] {
+    display: none !important;
+  }
+  .section-y {
+    padding-block: 18pt;
+  }
+  .js [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .card:not(:has(.card)),
+  figure {
+    break-inside: avoid;
+  }
+  /* Scoped dark slabs (trophies, footer) print on paper too. */
+  :root [data-theme="dark"] {
+    --bg: #fff;
+    --bg-elev: #fff;
+    --bg-card: #fff;
+    --bg-card-hover: #fff;
+    --fg: #111;
+    --fg-muted: #444;
+    --line: #ddd;
+    --line-strong: #bbb;
+    --accent: #7a3d00;
+    background: #fff !important;
+    color: #111 !important;
+  }
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+  .min-h-svh {
+    min-height: 0 !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* FX layer (src/components/fx): hero field, title decode, hero exit, */
+/* palette easter eggs. Every effect has a static reduced-motion stop. */
+/* ------------------------------------------------------------------ */
+
+/* ---------- Hero "after-hours field" (WebGL, loaded on idle) -------- */
+.hx-field {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+  /* Static fallback, and the base the shader draws over. */
+  background: radial-gradient(
+    ellipse 62% 46% at 50% 30%,
+    color-mix(in oklab, var(--accent-glow) 35%, transparent),
+    transparent 72%
+  );
+  /* Fade toward every edge; quietest at the bottom, under the ticker. */
+  -webkit-mask-image:
+    linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 14%,
+      #000 50%,
+      transparent 86%
+    ),
+    radial-gradient(ellipse 80% 75% at 50% 40%, #000 40%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 14%,
+      #000 50%,
+      transparent 86%
+    ),
+    radial-gradient(ellipse 80% 75% at 50% 40%, #000 40%, transparent 100%);
+  mask-composite: intersect;
+}
+.hx-field-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1200ms var(--ease-out);
+}
+.hx-field-canvas[data-on] {
+  opacity: 1;
+}
+.hx-field[data-fallback] .hx-field-canvas {
+  display: none;
+}
+
+/* ---------- Section title decode (glyphs resolve into the title) ---- */
+.dx,
+.dx-real {
+  display: block;
+}
+.dx {
+  position: relative;
+}
+.dx-w {
+  white-space: nowrap;
+}
+.dx-real [data-c] {
+  transition: opacity 260ms var(--ease-out);
+}
+.dx-real [data-h] {
+  opacity: 0;
+  transition: none;
+}
+/* The overlay clone: same box and wrapping as the real text, no ink of its
+   own; only the glyphs on unresolved characters show. */
+.dx-fx {
+  position: absolute;
+  inset: 0;
+  color: transparent;
+  pointer-events: none;
+  user-select: none;
+}
+.dx-fx [data-c] {
+  position: relative;
+}
+.dx-fx [data-g]::after {
+  content: attr(data-g);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.68em;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+/* ---------- Hero exit: the name loosens and fades as you scroll ----- */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .hx-letter {
+      animation:
+        hx-letter 760ms var(--ease-expo) both,
+        hx-drift linear both;
+      animation-delay: calc(var(--i, 0) * 34ms + var(--line-delay, 0ms)), 0s;
+      animation-timeline: auto, scroll(root block);
+      animation-range:
+        normal,
+        0 75svh;
+    }
+    .hx-line {
+      animation: hx-fade linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 75svh;
+    }
+  }
+}
+@keyframes hx-drift {
+  to {
+    translate: calc(var(--c, 0) * 0.07em) -0.08em;
+  }
+}
+@keyframes hx-fade {
+  25% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* ---------- Easter eggs: toast, RAIN overlay, BELL confetti --------- */
+.fx-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(5.25rem + env(safe-area-inset-bottom));
+  z-index: 210;
+  max-width: min(calc(100vw - 32px), 34rem);
+  padding: 10px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: color-mix(in oklab, var(--bg-elev) 92%, transparent);
+  box-shadow: var(--shadow-float);
+  backdrop-filter: blur(12px);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  opacity: 0;
+  translate: -50% 10px;
+  transition:
+    opacity var(--dur-ui) var(--ease-out),
+    translate 420ms var(--ease-expo);
+}
+.fx-toast[data-on] {
+  opacity: 1;
+  translate: -50% 0;
+}
+.fx-toast-k {
+  color: var(--accent);
+}
+@media (min-width: 768px) {
+  .fx-toast {
+    bottom: 28px;
+  }
+}
+.fx-rain,
+.fx-bell {
+  position: fixed;
+  inset: 0;
+  z-index: 205;
+}
+.fx-rain canvas,
+.fx-bell canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.fx-bell {
+  pointer-events: none;
+}
+.fx-rain {
+  cursor: pointer;
+  background: color-mix(in oklab, var(--bg) 64%, transparent);
+  opacity: 0;
+  transition: opacity var(--fx-out, 420ms) var(--ease-out);
+}
+.fx-rain[data-on] {
+  opacity: 1;
+}
+.fx-rain-hint {
+  position: absolute;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  translate: -50% 0;
+  padding: 8px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--bg-elev);
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.fx-rain-hint kbd {
+  color: var(--fg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hx-field-canvas {
+    display: none;
+  }
+  .fx-toast {
+    translate: -50% 0;
+  }
+}
+@media print {
+  .hx-field,
+  .fx-toast,
+  .fx-rain,
+  .fx-bell {
+    display: none !important;
+  }
+}
+/* ---------------------------- end FX layer ------------------------- */
+
+/* Hero name scales with width, and with height on short laptop screens, so
+   the headline and CTAs make the first view (1280x720 included). */
+.hx-hero {
+  --hero-size: clamp(40px, 13vw, 196px);
+}
+@media (min-width: 768px) {
+  .hx-hero {
+    --hero-size: clamp(40px, min(13vw, 19vh), 196px);
+  }
+}
+
+/* Site-level reduce-motion switch (MOTION <GO>): same effect as the OS
+   setting for CSS motion. JS effects follow via the matchMedia shim in the
+   head script. */
+html[data-motion="reduce"] *,
+html[data-motion="reduce"] ::before,
+html[data-motion="reduce"] ::after {
+  animation-duration: 0.01ms !important;
+  animation-delay: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* TOUR <GO>: the guided-tour caption card. */
+.fx-tour {
+  position: fixed;
+  left: 50%;
+  bottom: calc(1.25rem + env(safe-area-inset-bottom));
+  z-index: 120;
+  width: min(92vw, 34rem);
+  padding: 14px 16px 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: 16px;
+  background: color-mix(in oklab, var(--bg-elev) 92%, transparent);
+  color: var(--fg);
+  box-shadow: var(--shadow-float);
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+  opacity: 0;
+  translate: -50% 12px;
+  transition:
+    opacity 300ms var(--ease-expo),
+    translate 300ms var(--ease-expo);
+}
+.fx-tour[data-on] {
+  opacity: 1;
+  translate: -50% 0;
+}
+.fx-tour-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  white-space: pre;
+}
+.fx-tour-title {
+  margin-top: 6px;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.fx-tour-line {
+  margin-top: 4px;
+  color: var(--fg-muted);
+  font-size: 15px;
+  line-height: 1.45;
+  padding-right: 6.5rem;
+}
+.fx-tour-stop {
+  position: absolute;
+  right: 12px;
+  bottom: 14px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  background: transparent;
+}
+.fx-tour-stop:hover,
+.fx-tour-stop:focus-visible {
+  color: var(--fg);
+  border-color: var(--accent);
+}
+.fx-tour-bar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  background: var(--accent);
+  transform-origin: left;
+  transform: scaleX(0);
+}
+.fx-tour-bar[data-run] {
+  animation: fx-tour-bar var(--d, 4400ms) linear forwards;
+}
+@keyframes fx-tour-bar {
+  to {
+    transform: scaleX(1);
+  }
+}
+@media (max-width: 767px) {
+  .fx-tour {
+    /* Sit above the docked nav pill and bot button. */
+    bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
+}
+
+/* "What are you hiring for?": matches stay lit, the rest step back. */
+#projects[data-role] [data-roles] {
+  transition:
+    opacity 300ms var(--ease-expo),
+    filter 300ms var(--ease-expo);
+}
+#projects[data-role="ai"] [data-roles]:not([data-roles~="ai"]),
+#projects[data-role="fintech"] [data-roles]:not([data-roles~="fintech"]),
+#projects[data-role="systems"] [data-roles]:not([data-roles~="systems"]),
+#projects[data-role="fullstack"] [data-roles]:not([data-roles~="fullstack"]),
+#projects[data-role="research"] [data-roles]:not([data-roles~="research"]) {
+  opacity: 0.32;
+  filter: grayscale(0.8);
+}
+#projects[data-role="ai"] .lw-card[data-roles~="ai"],
+#projects[data-role="fintech"] .lw-card[data-roles~="fintech"],
+#projects[data-role="systems"] .lw-card[data-roles~="systems"],
+#projects[data-role="fullstack"] .lw-card[data-roles~="fullstack"],
+#projects[data-role="research"] .lw-card[data-roles~="research"] {
+  box-shadow:
+    0 0 0 1px var(--accent),
+    var(--shadow-card);
+}

@@ -1,0 +1,327 @@
+/* /cv: a web CV, readable on screen, clean on paper. */
+.cv {
+  min-height: 100dvh;
+  padding: clamp(16px, 4vw, 48px) var(--gutter) 64px;
+}
+.cv-tools {
+  max-width: 860px;
+  margin: 0 auto 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.cv-sheet {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: clamp(20px, 5vw, 56px);
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.cv-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--fg);
+}
+.cv-name {
+  font-size: clamp(28px, 4.4vw, 40px);
+  font-weight: 800;
+  font-stretch: 112%;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.cv-role {
+  margin-top: 6px;
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.cv-contact {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+/* Comfortable tap targets on screen (24px+), compact again in print. */
+.cv-contact a {
+  display: inline-block;
+  padding-block: 4px;
+}
+.cv-contact a,
+.cv-item h3 a {
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 3px;
+}
+.cv-contact a:hover,
+.cv-item h3 a:hover {
+  color: var(--accent);
+}
+.cv-summary {
+  margin-top: 14px;
+  color: var(--fg-muted);
+}
+.cv-h2 {
+  margin: 22px 0 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--line-strong);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.cv-item {
+  margin-top: 10px;
+  break-inside: avoid;
+}
+.cv-itemHead {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2px 16px;
+}
+.cv-item h3 {
+  font-size: 15.5px;
+  font-weight: 600;
+}
+.cv-note,
+.cv-sep {
+  color: var(--fg-muted);
+  font-weight: 400;
+}
+.cv-sub {
+  font-weight: 400;
+}
+.cv-when {
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.cv-bullets {
+  margin-top: 4px;
+  padding-left: 1.1em;
+  list-style: disc;
+}
+.cv-bullets li {
+  margin-top: 2px;
+}
+.cv-bullets li::marker {
+  color: var(--accent);
+}
+.cv-desc {
+  margin-top: 2px;
+  color: var(--fg-muted);
+}
+.cv-stack {
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+.cv-strong {
+  font-weight: 600;
+}
+.cv-cols {
+  display: grid;
+  gap: 0 32px;
+}
+@media (min-width: 720px) {
+  .cv-cols {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.cv-skills > div {
+  display: grid;
+  grid-template-columns: 9.5rem 1fr;
+  gap: 12px;
+  margin-top: 4px;
+}
+.cv-skills dt {
+  font-weight: 600;
+}
+.cv-skills dd {
+  color: var(--fg-muted);
+}
+@media (max-width: 560px) {
+  .cv-contact {
+    align-items: flex-start;
+  }
+  .cv-skills > div {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+.cv-foot {
+  margin-top: 24px;
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+@media print {
+  @page {
+    margin: 11mm 13mm;
+  }
+  :root,
+  html,
+  body {
+    color-scheme: light !important;
+    background: #fff !important;
+    transition: none !important;
+  }
+  .cv {
+    padding: 0;
+  }
+  .cv-sheet {
+    max-width: none;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+    background: #fff;
+    font-size: 9.6pt;
+    line-height: 1.32;
+  }
+  .cv-h2 {
+    margin-top: 9pt;
+  }
+  .cv-item {
+    margin-top: 5pt;
+  }
+  .cv-summary {
+    margin-top: 8pt;
+  }
+  .cv-desc,
+  .cv-stack {
+    display: none;
+  }
+  .cv-contact a {
+    padding-block: 0;
+  }
+}
+
+.cv-fitSheet {
+  margin-bottom: 20px;
+}
+
+/* Fit check: the bar fills, then new matches rise in one after another. */
+.cv-gauge path {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+.cv-gaugeTrack {
+  stroke: var(--line-strong);
+}
+.cv-gaugeFill {
+  stroke: var(--accent);
+  stroke-dasharray: 100;
+  stroke-dashoffset: calc(100 - var(--p, 0));
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: cv-gauge-sweep 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.cv-gaugeNeedle {
+  stroke: var(--fg);
+  stroke-width: 2;
+  stroke-linecap: round;
+  fill: var(--fg);
+  transform-origin: 60px 60px;
+  transform: rotate(calc(var(--p, 0) * 1.8deg - 90deg));
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: cv-needle-sweep 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.cv-gaugeNum {
+  fill: var(--fg);
+  font: 600 15px var(--font-mono);
+}
+@keyframes cv-gauge-sweep {
+  from {
+    stroke-dashoffset: 100;
+  }
+}
+@keyframes cv-needle-sweep {
+  from {
+    transform: rotate(-90deg);
+  }
+}
+.cv-fitCard {
+  animation: cv-fit-rise 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 35ms);
+}
+@keyframes cv-fit-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cv-gaugeFill,
+  .cv-gaugeNeedle,
+  .cv-fitCard {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* Tailor for a role: matching projects first, a few extra that fit it. */
+.cv-tailor {
+  max-width: 860px;
+  margin: 0 auto 16px;
+}
+
+/* Fit check: the posting with recognised phrases marked. */
+.cv-annot {
+  margin-top: 8px;
+  max-height: 16rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--fg-muted);
+}
+.cv-mark {
+  color: var(--fg);
+  border-radius: 3px;
+  padding: 0 2px;
+}
+/* Colour plus a line style, so the kind never rests on colour alone:
+   solid = backed, wavy = not on the site, dotted = not scored. */
+.cv-mark {
+  text-decoration-line: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+.cv-mark-hit {
+  background: color-mix(in srgb, var(--up) 24%, transparent);
+  text-decoration-style: solid;
+  text-decoration-color: var(--up);
+}
+.cv-mark-gap {
+  background: color-mix(in srgb, var(--down) 22%, transparent);
+  text-decoration-style: wavy;
+  text-decoration-color: var(--down);
+}
+.cv-mark-soft {
+  background: color-mix(in srgb, var(--fg) 10%, transparent);
+  text-decoration-style: dotted;
+  text-decoration-color: var(--fg-muted);
+}

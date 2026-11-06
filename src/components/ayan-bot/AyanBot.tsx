@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePalette } from "../palette/PaletteProvider";
+import { SelectionAsk } from "./SelectionAsk";
 import "../sections/lower/bot.css";
 
 /**
@@ -12,12 +13,17 @@ import "../sections/lower/bot.css";
  *
  * Other code can open it (e.g. an ASK <GO> command in the ⌘K palette):
  *   window.dispatchEvent(new CustomEvent("ayan-bot:open", { detail: { prompt: "..." } }))
+ *
+ * ⌘J / Ctrl+J toggles the panel (or, with page text selected, asks about it).
  */
 
 const loadPanel = () => import("./AyanBotPanel");
 const AyanBotPanel = dynamic(loadPanel, { ssr: false });
 
 export const AYAN_BOT_OPEN_EVENT = "ayan-bot:open";
+
+const FIELD =
+  'input, textarea, select, [contenteditable]:not([contenteditable="false"])';
 
 export function AyanBot() {
   const [mounted, setMounted] = useState(false);
@@ -26,6 +32,8 @@ export function AyanBot() {
     null,
   );
   const launcherRef = useRef<HTMLButtonElement>(null);
+  const selectionRef = useRef<string | null>(null);
+  const openRef = useRef(false);
   const palette = usePalette();
 
   const show = useCallback((prompt?: string) => {
@@ -50,6 +58,39 @@ export function AyanBot() {
     return () => window.removeEventListener(AYAN_BOT_OPEN_EVENT, onOpen);
   }, [show]);
 
+  useEffect(() => {
+    openRef.current = open;
+  }, [open]);
+
+  // ⌘J / Ctrl+J: toggle. Not while typing elsewhere (the bot's own composer
+  // is fine) and not over another dialog such as the ⌘K palette.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (
+        e.key.toLowerCase() !== "j" ||
+        !(e.metaKey || e.ctrlKey) ||
+        e.altKey ||
+        e.shiftKey ||
+        e.repeat ||
+        e.defaultPrevented
+      )
+        return;
+      const active = document.activeElement;
+      if (
+        active instanceof HTMLElement &&
+        active.closest(FIELD) &&
+        !active.closest(".ab-panel")
+      )
+        return;
+      if (document.querySelector("dialog[open]")) return;
+      e.preventDefault();
+      if (openRef.current && !selectionRef.current) close();
+      else show(selectionRef.current ?? undefined);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [show, close]);
+
   return (
     <>
       <button
@@ -60,6 +101,8 @@ export function AyanBot() {
         onFocus={() => void loadPanel()}
         aria-haspopup="dialog"
         aria-expanded={open}
+        aria-keyshortcuts="Meta+J Control+J"
+        title="Ask ayan-bot (⌘J / Ctrl+J)"
         data-open={open ? "" : undefined}
         tabIndex={open ? -1 : undefined}
         className="ab-launcher no-print group border-line-strong bg-bg-elev/90 text-fg hover:border-accent/60 focus-visible:border-accent fixed right-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-[60] inline-flex size-12 items-center justify-center gap-2 rounded-full border font-mono text-[12px] tracking-wide shadow-[var(--shadow-float)] backdrop-blur-[12px] md:right-6 md:bottom-6 md:size-auto md:h-11 md:justify-start md:pr-4 md:pl-3"
@@ -82,7 +125,7 @@ export function AyanBot() {
           <path d="m6.5 8 2 1.5-2 1.5M10.5 11h3" />
         </svg>
         <span className="hidden md:inline">
-          <span className="text-muted group-hover:text-fg transition-colors">
+          <span className="text-fg/70 group-hover:text-fg transition-colors">
             ask{" "}
           </span>
           ayan-bot
@@ -90,6 +133,14 @@ export function AyanBot() {
         <span className="sr-only md:hidden">Ask ayan-bot</span>
         <span className="sr-only">: chat about Ayan&apos;s work</span>
       </button>
+      <SelectionAsk
+        promptRef={selectionRef}
+        onAsk={(prompt) =>
+          window.dispatchEvent(
+            new CustomEvent(AYAN_BOT_OPEN_EVENT, { detail: { prompt } }),
+          )
+        }
+      />
       {mounted && (
         <AyanBotPanel
           open={open}

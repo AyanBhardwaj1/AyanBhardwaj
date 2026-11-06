@@ -1,6 +1,9 @@
 import Image from "next/image";
 import { links, profile } from "@/content/content";
 import { headshot } from "@/content/extras";
+import { HeroField } from "../fx/HeroField";
+import { TourLink } from "../fx/TourLink";
+import { Konami } from "../fx/Konami";
 import { Ticker, type TickerItem } from "../ui/Ticker";
 
 function Spark({ className }: { className?: string }) {
@@ -71,6 +74,8 @@ function Sparkline() {
 /**
  * Each letter rises out of a mask in a stagger (CSS only; see .hx-letter).
  * Runs before hydration and needs no JS, so the name is never held back.
+ * --c (distance from the word's center) spreads the letters apart as the
+ * hero scrolls away (scroll-driven, where supported).
  */
 function Letters({ word, delay = 0 }: { word: string; delay?: number }) {
   return (
@@ -82,6 +87,7 @@ function Letters({ word, delay = 0 }: { word: string; delay?: number }) {
           style={
             {
               "--i": i,
+              "--c": i - (word.length - 1) / 2,
               "--line-delay": `${delay}ms`,
             } as React.CSSProperties
           }
@@ -107,8 +113,10 @@ export function Hero({
     <section
       id="top"
       aria-label="Introduction"
-      className="relative flex min-h-svh flex-col pt-16 md:pt-36"
+      className="hx-hero relative isolate flex min-h-svh flex-col pt-16 md:pt-[clamp(7.5rem,15vh,9rem)]"
     >
+      <HeroField />
+      <Konami />
       <div className="container-page relative flex flex-1 flex-col items-center text-center">
         <p
           className="hx-rise t-label text-muted mb-5 text-balance md:mb-10"
@@ -118,18 +126,21 @@ export function Hero({
           Business (CSB Honors) @ UT Austin
         </p>
 
-        <h1 aria-label={profile.name} className="t-display relative z-0">
+        <h1
+          aria-label={profile.name}
+          className="t-display relative z-0 [font-size:var(--hero-size)]"
+        >
           <Letters word="Ayan" delay={40} />
           <Letters word="Bhardwaj" delay={130} />
         </h1>
 
         <div
           className="relative z-10 mt-5 flex justify-center sm:-mt-[0.06em] md:-mt-[0.32em]"
-          style={{ fontSize: "clamp(40px, 13vw, 196px)" }}
+          style={{ fontSize: "var(--hero-size)" }}
         >
           <Spark className="hx-glyph absolute top-[-0.2em] left-[-1.4em] hidden size-[0.42em] md:block" />
           <Candles className="hx-glyph hx-glyph-b absolute right-[-1.5em] bottom-[0.6em] hidden size-[0.5em] md:block" />
-          <figure className="hx-portrait group border-line-strong bg-card relative w-[clamp(144px,20vw,260px)] overflow-hidden rounded-xl border text-base">
+          <figure className="hx-portrait group border-line-strong bg-card relative w-[clamp(144px,min(20vw,27vh),260px)] overflow-hidden rounded-xl border text-base">
             <Image
               src={headshot.src}
               alt={headshot.alt}
@@ -159,7 +170,7 @@ export function Hero({
         </div>
 
         <p
-          className="hx-rise t-lead mt-7 max-w-[24ch] text-balance md:mt-14"
+          className="hx-rise t-lead mt-7 max-w-[24ch] text-balance md:mt-[min(3.5rem,5vh)]"
           style={rise(420)}
         >
           {profile.headline}
@@ -200,6 +211,9 @@ export function Hero({
               <span className="sr-only">(PDF, opens in a new tab)</span>
             </a>
           )}
+        </div>
+        <div className="hx-rise mt-3" style={rise(640)}>
+          <TourLink />
         </div>
 
         <div

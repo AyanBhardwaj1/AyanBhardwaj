@@ -1,3 +1,4 @@
+import { COMMANDS, EXAMPLES, linkSafe } from "@/lib/terminal-commands";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { commands } from "@/lib/commands";
@@ -9,6 +10,12 @@ export const metadata: Metadata = {
   description:
     "Every ⌘K command on Ayan Bhardwaj's site, Bloomberg-style: mnemonic, name, and where it goes.",
   alternates: { canonical: "/functions" },
+  openGraph: {
+    url: "/functions",
+    title: "Function directory · Ayan Bhardwaj",
+    description:
+      "Every ⌘K command on Ayan Bhardwaj's site, Bloomberg-style: mnemonic, name, and where it goes.",
+  },
 };
 
 /** No-JS fallback for the palette, and a fun page on its own. */
@@ -84,6 +91,66 @@ export default function FunctionsPage() {
           </table>
         </section>
       ))}
+
+      {/* The terminal's commands, each with an example that runs from a
+          link (read-only ones replay via ?run=). */}
+      <section aria-labelledby="fn-terminal" className="mt-16">
+        <h2 id="fn-terminal" className="t-label text-muted mb-3">
+          /terminal
+        </h2>
+        <p className="text-muted mb-4 max-w-[60ch]">
+          The same site as a command line. Type{" "}
+          <code>help &lt;command&gt;</code> there for examples.
+        </p>
+        <table className="t-data border-line w-full table-fixed border-t text-left">
+          <colgroup>
+            <col className="w-36 md:w-56" />
+            <col className="w-auto" />
+            <col className="hidden sm:table-column sm:w-[34%]" />
+          </colgroup>
+          <thead className="sr-only">
+            <tr>
+              <th scope="col">Command</th>
+              <th scope="col">What it does</th>
+              <th scope="col">Try it</th>
+            </tr>
+          </thead>
+          <tbody>
+            {COMMANDS.map((c) => {
+              const ex =
+                EXAMPLES[c.name]?.find((e) => e.startsWith(c.name)) ?? c.name;
+              const runs = linkSafe(ex);
+              const href = runs
+                ? `/terminal?run=${encodeURIComponent(ex)}`
+                : "/terminal";
+              return (
+                <tr
+                  key={c.name}
+                  className="border-line hover:bg-card focus-within:bg-card border-b align-top transition-colors duration-150"
+                >
+                  <td className="py-3 pr-4 pl-2">
+                    <a href={href} className="link text-accent">
+                      <code className="[overflow-wrap:anywhere]">
+                        {c.args ? `${c.name} ${c.args}` : c.name}
+                      </code>
+                    </a>
+                  </td>
+                  <td className="text-muted py-3 pr-4">{c.help}</td>
+                  <td className="hidden py-3 sm:table-cell">
+                    {runs ? (
+                      <a href={href} className="link text-fg">
+                        $ {ex}
+                      </a>
+                    ) : (
+                      <span className="text-muted">$ {ex}</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </section>
     </main>
   );
 }

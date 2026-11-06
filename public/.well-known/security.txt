@@ -1,0 +1,4 @@
+Contact: mailto:ayan.bhardwaj@utexas.edu
+Expires: 2027-11-01T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://ayan-bhardwaj.vercel.app/.well-known/security.txt

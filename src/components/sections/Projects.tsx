@@ -1,4 +1,6 @@
 import Image from "next/image";
+import { roleAttr } from "@/lib/roles";
+import { RoleFilter } from "../ui/RoleFilter";
 import Link from "next/link";
 import { ViewTransition } from "react";
 import { projects, ui, type Project } from "@/content/content";
@@ -18,6 +20,7 @@ import { ConstellationIsland } from "../viz/ConstellationIsland";
 import { CountUp } from "../motion/CountUp";
 import { MiniTerminal } from "../viz/MiniTerminal";
 import "./lower/lower.css";
+import { HoverVideo } from "../ui/HoverVideo";
 
 const host = (url: string) =>
   url.replace(/^https?:\/\//, "").replace(/\/$/, "");
@@ -95,7 +98,16 @@ function ProjectLinks({ p, big }: { p: Project; big?: boolean }) {
  * whole card (stretched link), so there are no nested links and the accessible
  * name stays the project name.
  */
-function CardTitle({ p, className }: { p: Project; className: string }) {
+function CardTitle({
+  p,
+  className,
+  level = 4,
+}: {
+  p: Project;
+  className: string;
+  level?: 3 | 4;
+}) {
+  const H = level === 3 ? "h3" : "h4";
   const href = projectHref(p.id);
   const inner = (
     <Link
@@ -107,7 +119,7 @@ function CardTitle({ p, className }: { p: Project; className: string }) {
     </Link>
   );
   return (
-    <h4 className={className}>
+    <H className={className}>
       {hasProjectPage(p.id) ? (
         <ViewTransition
           name={`project-name-${p.id}`}
@@ -119,7 +131,7 @@ function CardTitle({ p, className }: { p: Project; className: string }) {
       ) : (
         inner
       )}
-    </h4>
+    </H>
   );
 }
 
@@ -156,6 +168,11 @@ function OpenCta() {
   );
 }
 
+/** Cards with a real screen recording play it on hover. */
+const CARD_VIDEO: Record<string, string> = {
+  runway: "/media/projects/runway/waste-demo.mp4",
+};
+
 function ProjectCard({
   p,
   index,
@@ -171,6 +188,7 @@ function ProjectCard({
     <Reveal delay={(index % 2) * 0.08} className="h-full">
       <article
         id={`project-${p.id}`}
+        data-roles={roleAttr(p)}
         data-glow=""
         data-tilt=""
         className="lw-card card group relative flex h-full flex-col p-2"
@@ -191,6 +209,7 @@ function ProjectCard({
           ) : (
             <TypeCard p={p} />
           )}
+          {CARD_VIDEO[p.id] && <HoverVideo src={CARD_VIDEO[p.id]} />}
           <span aria-hidden="true" className="lw-sheen" />
           {page && <OpenCta />}
         </div>
@@ -276,6 +295,7 @@ function MossSdkGroup({ apps }: { apps: Project[] }) {
             <li
               key={p.id}
               id={`project-${p.id}`}
+              data-roles={roleAttr(p)}
               data-glow=""
               style={{ "--i": i } as React.CSSProperties}
               className="lw-row border-line grid gap-2 border-b px-5 py-5 last:border-b-0 md:grid-cols-12 md:items-baseline md:gap-6 md:px-8"
@@ -400,10 +420,13 @@ export function Projects() {
           }
         />
 
+        <RoleFilter scope="projects" />
+
         {/* Featured: YouBank */}
         <Reveal>
           <article
             id="project-youbank"
+            data-roles={roleAttr(youbank)}
             data-glow=""
             className="lw-card card relative overflow-hidden p-2"
           >
@@ -418,7 +441,7 @@ export function Projects() {
                   </span>
                 </div>
                 <div>
-                  <CardTitle p={youbank} className="t-h2" />
+                  <CardTitle p={youbank} className="t-h2" level={3} />
                   <p className="t-lead mt-3 max-w-[28ch]">{youbank.tagline}</p>
                 </div>
                 <p className="text-muted max-w-[56ch]">{youbank.description}</p>
@@ -546,6 +569,7 @@ export function Projects() {
               <li
                 key={p.id}
                 id={`project-${p.id}`}
+                data-roles={roleAttr(p)}
                 data-inview=""
                 className="lw-row lw-self border-line grid gap-2 border-b py-5 md:grid-cols-12 md:items-baseline md:gap-6 md:px-3"
               >

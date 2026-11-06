@@ -1,8 +1,34 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { LIMITS, type ChatMessage } from "@/lib/ayan-bot/guard";
+import { AUDIENCES, type Audience } from "@/lib/ayan-bot/audience";
+import {
+  FIT_HANDOFF_EVENT,
+  FIT_HANDOFF_KEY,
+  looksLikeJobDescription,
+} from "@/lib/fit-match";
+import { BriefMenu } from "./BriefMenu";
+import { BRIEF_PROMPT, followUps, projectsIn, startersFor } from "./derive";
+import { localAnswer } from "./local";
 import { Markdown } from "./Markdown";
+import {
+  CopyButton,
+  FollowUps,
+  ListenButton,
+  UsageMeter,
+} from "./MessageExtras";
+import { ProjectCards } from "./ProjectCards";
+import "./panel.css";
+import {
+  currentPage,
+  dropTicket,
+  prefetchTicket,
+  takeTicket,
+  type Ticket,
+} from "./ticket";
 
 /**
  * The ayan-bot chat panel (lazy chunk). A non-modal side panel on desktop and
@@ -16,6 +42,13 @@ import { Markdown } from "./Markdown";
  * first token. On phones the panel is a modal bottom sheet (focus trapped,
  * page scroll locked) sized to the visual viewport, so the keyboard never
  * covers the composer.
+ *
+ * Around each finished answer, everything is derived on the client from the
+ * answer text and content.ts (derive.ts), so it costs no model tokens:
+ * case-study cards, follow-up chips and a copy button. The starters follow
+ * the page the panel opened on. When the visitor is out of messages (or the
+ * live model is off), the suggested questions and the recruiter brief are
+ * answered from saved briefs (local.ts) without calling the server.
  */
 
 type Msg = ChatMessage & {
@@ -24,13 +57,6 @@ type Msg = ChatMessage & {
   /** Answered from the saved briefs because the live model is offline. */
   saved?: boolean;
 };
-
-const STARTERS = [
-  "What did Ayan build at Moss?",
-  "Show me his hackathon projects",
-  "What's the CSB program?",
-  "How do I contact him?",
-];
 
 const STORE_KEY = "ayan-bot:chat";
 
@@ -78,6 +104,36 @@ const newId = () =>
 
 const MOBILE = "(max-width: 767px)";
 
+/** Downloads the conversation as Markdown (generated in the browser). */
+function saveTranscript(msgs: Msg[]) {
+  const origin = window.location.origin;
+  const lines = [
+    `# ayan-bot chat`,
+    ``,
+    `From ${origin}, ${new Date().toLocaleString()}. ayan-bot answers only from Ayan Bhardwaj's site and can be wrong.`,
+    ``,
+  ];
+  for (const m of msgs) {
+    if (!m.content || m.status === "error") continue;
+    // Site-relative links become absolute so they work outside the site.
+    const text = m.content.replace(/\]\((\/[^)\s]*)\)/g, `](${origin}$1)`);
+    lines.push(
+      m.role === "user" ? `**You:** ${text}` : `**ayan-bot:** ${text}`,
+      "",
+    );
+  }
+  const blob = new Blob([lines.join("\n")], { type: "text/markdown" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "ayan-bot-chat.md";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+const AUDIENCE_KEY = "ayan-bot:audience";
+
 export default function AyanBotPanel({
   open,
   onClose,
@@ -91,10 +147,24 @@ export default function AyanBotPanel({
 }) {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
+  // A pasted job description: offer the Fit check, which reads all of it
+  // for free, instead of a 500-character question.
+  const [jd, setJd] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  /** Answer style the visitor picked; remembered on this device. */
+  const [audience, setAudience] = useState<Audience | null>(null);
   const [announce, setAnnounce] = useState("");
   const [mode, setMode] = useState<string | null>(null);
+  /** Messages this visitor has left in the current window (null = unknown). */
+  const [left, setLeft] = useState<number | null>(null);
+  /** Minutes until the allowance refills, from the last 429's Retry-After. */
+  const [retryMin, setRetryMin] = useState<number | null>(null);
+  /** When the allowance should have refilled (ms epoch), after a 429. */
+  const refillAt = useRef(0);
   const [mobile, setMobile] = useState(false);
+  /** currentPage() key ("home", "functions" or a project slug). */
+  const [page, setPage] = useState("home");
+  const pathname = usePathname();
   const abortRef = useRef<AbortController | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const logRef = useRef<HTMLDivElement>(null);
@@ -102,6 +172,27 @@ export default function AyanBotPanel({
   const handled = useRef<number | null>(null);
   const titleId = useId();
   const counterId = useId();
+
+  useEffect(() => {
+    try {
+      const a = localStorage.getItem(AUDIENCE_KEY);
+      if (a === "recruiter" || a === "engineer")
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time read of a saved preference
+        setAudience(a);
+    } catch {
+      /* no storage */
+    }
+  }, []);
+  const pickAudience = (a: Audience) => {
+    const next = audience === a ? null : a;
+    setAudience(next);
+    try {
+      if (next) localStorage.setItem(AUDIENCE_KEY, next);
+      else localStorage.removeItem(AUDIENCE_KEY);
+    } catch {
+      /* fine: it just won't be remembered */
+    }
+  };
 
   // Restore this tab's conversation once.
   useEffect(() => {
@@ -116,6 +207,12 @@ export default function AyanBotPanel({
     if (!busy) writeStore(msgs);
   }, [msgs, busy]);
 
+  // Which page the panel is on, for page-aware starters and cards.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reads window.location after navigation
+    setPage(currentPage());
+  }, [pathname, open]);
+
   // Keep the newest line in view while streaming.
   useEffect(() => {
     const el = logRef.current;
@@ -124,10 +221,29 @@ export default function AyanBotPanel({
     if (nearBottom || !busy) el.scrollTop = el.scrollHeight;
   }, [msgs, busy]);
 
+  // Warm a solved ticket (and learn the visitor's allowance) when it opens.
+  useEffect(() => {
+    if (!open) return;
+    let live = true;
+    void prefetchTicket().then((t) => {
+      if (!live || !t) return;
+      if (t.remaining !== null) setLeft(t.remaining);
+      if (t.mode) setMode(t.mode);
+    });
+    return () => {
+      live = false;
+    };
+  }, [open]);
+
   // Focus the input when the panel opens; Esc closes from anywhere.
   useEffect(() => {
     if (!open) return;
-    const t = requestAnimationFrame(() => inputRef.current?.focus());
+    // Fine pointers get the composer focused; on touch that would raise the
+    // keyboard over the starters, so wait for a tap.
+    const t = requestAnimationFrame(() => {
+      if (window.matchMedia("(pointer: fine)").matches)
+        inputRef.current?.focus();
+    });
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape" || e.defaultPrevented) return;
       // Leave Esc to the ⌘K palette when it's open on top.
@@ -228,6 +344,7 @@ export default function AyanBotPanel({
         .map(({ role, content }) => ({ role, content }));
       setMsgs((all) => [...all, user, bot]);
       setInput("");
+      setJd(null);
       setBusy(true);
       setAnnounce("ayan-bot is thinking…");
       const ctrl = new AbortController();
@@ -277,19 +394,77 @@ export default function AyanBotPanel({
         patch(bot.id, (m) => ({ ...m, content: snapshot }));
       };
       let finalStatus: Msg["status"] = "done";
+      const local = localAnswer(text);
+      // A saved brief, typed out like a reply (no request, no tokens).
+      const answerLocally = async () => {
+        patch(bot.id, (m) => ({ ...m, saved: true }));
+        acc = local ?? "";
+        push();
+        await drain();
+      };
       try {
-        const res = await fetch("/api/ayan-bot", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: history }),
-          signal: ctrl.signal,
-        });
+        // Out of messages and the window hasn't refilled yet: answer from the
+        // saved briefs without a request. After the refill time, ask again.
+        if (left === 0 && local && Date.now() < refillAt.current) {
+          await answerLocally();
+          return;
+        }
+        const post = (t: Ticket | null) =>
+          fetch("/api/ayan-bot", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              messages: history,
+              page: currentPage(),
+              ...(audience ? { audience } : {}),
+              ticket: t?.ticket ?? "",
+              nonce: t?.nonce ?? "",
+            }),
+            signal: ctrl.signal,
+          });
+        let ticket = await takeTicket(ctrl.signal);
+        // No ticket means the challenge endpoint refused or is down: treat
+        // it as unavailable (saved brief if there is one) instead of sending
+        // a request that can only come back "session expired".
+        if (!ticket) {
+          if (local) {
+            await answerLocally();
+            return;
+          }
+          acc =
+            "ayan-bot can't take questions right now. Try again in a few minutes, or email Ayan at ayan.bhardwaj@utexas.edu.";
+          finalStatus = "offline";
+          flushNow();
+          return;
+        }
+        let res = await post(ticket);
+        // A stale or reused ticket: solve a fresh one and send once more.
+        if (res.status === 401) {
+          dropTicket();
+          ticket = await takeTicket(ctrl.signal);
+          res = await post(ticket);
+        }
+        const leftHeader = res.headers.get("x-ayan-bot-remaining");
+        if (leftHeader !== null && /^\d+$/.test(leftHeader))
+          setLeft(Number(leftHeader));
         const resMode = res.headers.get("x-ayan-bot-mode");
         setMode(resMode);
+        if (res.status === 429) {
+          const after = Number(res.headers.get("retry-after"));
+          // Only a per-visitor limit says how many are left (header "0");
+          // a site-wide limit shouldn't zero this visitor's meter.
+          if (leftHeader === "0") setLeft(0);
+          refillAt.current = Date.now() + (after > 0 ? after : 300) * 1000;
+          setRetryMin(after > 0 ? Math.ceil(after / 60) : null);
+        } else if (res.ok) setRetryMin(null);
         const isJson = (res.headers.get("content-type") ?? "").includes(
           "application/json",
         );
-        if (!res.ok || !res.body || isJson) {
+        const unavailable =
+          res.status === 429 || res.status === 503 || resMode === "offline";
+        if ((!res.ok || !res.body || isJson) && local && unavailable) {
+          await answerLocally();
+        } else if (!res.ok || !res.body || isJson) {
           let message = "ayan-bot hit a snag. Try again in a moment.";
           try {
             const j = (await res.json()) as { message?: unknown };
@@ -337,7 +512,7 @@ export default function AyanBotPanel({
         );
       }
     },
-    [busy, msgs, patch],
+    [busy, msgs, patch, left, audience],
   );
 
   // Prompts handed in by the launcher (e.g. from the ⌘K palette).
@@ -379,25 +554,27 @@ export default function AyanBotPanel({
   );
   const starters = (label: string) => (
     <ul className="flex flex-wrap gap-2" aria-label={label}>
-      {STARTERS.filter((q) => !asked.has(q)).map((q, i) => (
-        <li
-          key={q}
-          className="ab-starter"
-          style={{ "--i": i } as React.CSSProperties}
-        >
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => void send(q)}
-            className="ab-chip border-line bg-card hover:border-accent/60 hover:bg-card-hover inline-flex min-h-10 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-left text-[13px] disabled:opacity-50"
+      {startersFor(page)
+        .filter((q) => !asked.has(q))
+        .map((q, i) => (
+          <li
+            key={q}
+            className="ab-starter"
+            style={{ "--i": i } as React.CSSProperties}
           >
-            {q}
-            <span aria-hidden="true" className="ab-chip-go text-accent">
-              →
-            </span>
-          </button>
-        </li>
-      ))}
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void send(q)}
+              className="ab-chip border-line bg-card hover:border-accent/60 hover:bg-card-hover inline-flex min-h-10 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-left text-[13px] disabled:opacity-50"
+            >
+              {q}
+              <span aria-hidden="true" className="ab-chip-go text-accent">
+                →
+              </span>
+            </button>
+          </li>
+        ))}
     </ul>
   );
 
@@ -440,6 +617,18 @@ export default function AyanBotPanel({
             </span>
           )}
           <div className="ml-auto flex items-center gap-1">
+            <BriefMenu disabled={busy} onPick={(q) => void send(q)} />
+            {msgs.some((m) => m.role === "assistant" && m.content) && (
+              <button
+                type="button"
+                onClick={() => saveTranscript(msgs)}
+                disabled={busy}
+                className="text-muted hover:text-fg hover:bg-card min-h-9 rounded-[8px] px-2.5 font-mono text-[11px] tracking-wider uppercase transition-colors disabled:opacity-40"
+              >
+                Save
+                <span className="sr-only"> this chat as a Markdown file</span>
+              </button>
+            )}
             {msgs.length > 0 && (
               <button
                 type="button"
@@ -492,10 +681,31 @@ export default function AyanBotPanel({
                 everything else is off the tape.
               </p>
               {starters("Suggested questions")}
+              <p
+                className="ab-starter text-muted text-[13px]"
+                style={{ "--i": 6 } as React.CSSProperties}
+              >
+                Hiring?{" "}
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void send(BRIEF_PROMPT)}
+                  className="text-accent decoration-accent/40 hover:decoration-accent rounded-[3px] underline underline-offset-[3px] disabled:opacity-50"
+                >
+                  Get the 30-second recruiter brief
+                </button>
+                <span className="hidden md:inline">
+                  {" · "}
+                  <kbd className="border-line-strong rounded-[4px] border px-1 font-mono text-[11px]">
+                    ⌘J
+                  </kbd>{" "}
+                  toggles this panel
+                </span>
+              </p>
             </div>
           )}
 
-          {msgs.map((m) =>
+          {msgs.map((m, mi) =>
             m.role === "user" ? (
               <div key={m.id} className="ab-msg flex justify-end">
                 <p className="bg-card border-line max-w-[85%] rounded-[14px] rounded-br-[4px] border px-3.5 py-2 break-words whitespace-pre-wrap">
@@ -591,8 +801,32 @@ export default function AyanBotPanel({
                     Retry
                   </button>
                 )}
-                {m.saved && m.status === "done" && m === lastBot && (
-                  <div className="mt-4">{starters("More questions")}</div>
+                {m.status === "done" && m.content && (
+                  <>
+                    <ProjectCards
+                      items={projectsIn(m.content, { exclude: page })}
+                      onNavigate={navigate}
+                    />
+                    <div className="mt-1.5 -ml-2 flex items-center">
+                      <CopyButton text={m.content} />
+                      <ListenButton text={m.content} />
+                    </div>
+                    {m === lastBot && !busy && (
+                      <FollowUps
+                        chips={followUps(
+                          m.content,
+                          msgs[mi - 1]?.role === "user"
+                            ? msgs[mi - 1].content
+                            : "",
+                          asked,
+                          page,
+                        )}
+                        disabled={busy}
+                        onAsk={(q) => void send(q)}
+                        onNavigate={navigate}
+                      />
+                    )}
+                  </>
                 )}
               </div>
             ),
@@ -611,6 +845,81 @@ export default function AyanBotPanel({
             void send(input);
           }}
         >
+          <div
+            role="group"
+            aria-label="Answer for"
+            className="text-muted mb-2 flex items-center gap-1 px-1 font-mono text-[10px] tracking-wide"
+          >
+            <span className="mr-1">answer for:</span>
+            {AUDIENCES.map((a) => (
+              <button
+                key={a}
+                type="button"
+                aria-pressed={audience === a}
+                onClick={() => pickAudience(a)}
+                className={`min-h-6 rounded-full border px-2 uppercase transition-colors ${
+                  audience === a
+                    ? "border-accent text-accent"
+                    : "hover:text-fg border-transparent"
+                }`}
+              >
+                {a}
+              </button>
+            ))}
+          </div>
+          {jd && (
+            <div
+              role="status"
+              className="border-line bg-card text-muted mb-2 flex items-start gap-2 rounded-[10px] border px-3 py-2 text-[12.5px] leading-snug"
+            >
+              <p className="flex-1">
+                That looks like a job description. Questions stop at{" "}
+                {LIMITS.userChars} characters; the Fit check reads all of it, in
+                your browser.{" "}
+                <Link
+                  href="/cv#fit"
+                  className="text-accent underline underline-offset-4"
+                  onClick={() => {
+                    try {
+                      sessionStorage.setItem(FIT_HANDOFF_KEY, jd);
+                    } catch {
+                      /* the event below still covers /cv itself */
+                    }
+                    window.dispatchEvent(
+                      new CustomEvent(FIT_HANDOFF_EVENT, { detail: jd }),
+                    );
+                    setJd(null);
+                    navigate();
+                  }}
+                >
+                  Run the Fit check →
+                </Link>
+              </p>
+              <button
+                type="button"
+                onClick={() => setJd(null)}
+                aria-label="Dismiss the Fit check suggestion"
+                className="text-muted hover:text-fg -mt-1 -mr-1 grid size-7 shrink-0 place-items-center"
+              >
+                ×
+              </button>
+            </div>
+          )}
+          {left === 0 && (
+            <p
+              id={`${counterId}-zero`}
+              className="border-line bg-card text-muted mb-2 rounded-[10px] border px-3 py-2 text-[12.5px] leading-snug"
+            >
+              <span className="text-fg font-medium">
+                Out of messages for now.
+              </span>{" "}
+              {retryMin
+                ? `Refills in about ${retryMin} min.`
+                : "The allowance refills in a few minutes."}{" "}
+              Suggested questions and the recruiter brief still answer from
+              saved briefs.
+            </p>
+          )}
           <div className="border-line-strong bg-bg focus-within:border-accent/70 flex items-end gap-2 rounded-[12px] border py-1.5 pr-1.5 pl-3 transition-colors">
             <span
               aria-hidden="true"
@@ -627,9 +936,22 @@ export default function AyanBotPanel({
               rows={1}
               value={input}
               maxLength={LIMITS.userChars}
-              aria-describedby={counterId}
-              placeholder="Ask about Ayan…"
-              onChange={(e) => setInput(e.target.value)}
+              aria-describedby={
+                left === 0 ? `${counterId}-zero ${counterId}` : counterId
+              }
+              placeholder={
+                left === 0
+                  ? "Out of messages, refills soon…"
+                  : "Ask about Ayan…"
+              }
+              onChange={(e) => {
+                setInput(e.target.value);
+                if (!e.target.value) setJd(null);
+              }}
+              onPaste={(e) => {
+                const t = e.clipboardData.getData("text");
+                if (looksLikeJobDescription(t)) setJd(t.slice(0, 8000));
+              }}
               onKeyDown={(e) => {
                 if (
                   e.key === "Enter" &&
@@ -669,11 +991,18 @@ export default function AyanBotPanel({
           </div>
           <p
             id={counterId}
-            className="text-muted mt-1.5 flex justify-between px-1 font-mono text-[10px] tracking-wide"
+            className="text-muted mt-1.5 flex min-h-4 items-center gap-3 px-1 font-mono text-[10px] tracking-wide"
           >
-            <span>Answers only about Ayan · AI can be wrong</span>
-            <span className={remaining < 60 ? "text-accent" : ""}>
-              {remaining < 120 ? `${remaining} left` : ""}
+            <span className="min-w-0 truncate">
+              Answers only about Ayan · AI can be wrong
+            </span>
+            <span className="ml-auto flex shrink-0 items-center gap-3">
+              {remaining < 120 && (
+                <span className={remaining < 60 ? "text-accent" : ""}>
+                  {remaining} chars
+                </span>
+              )}
+              {left !== null && <UsageMeter left={left} />}
             </span>
           </p>
         </form>

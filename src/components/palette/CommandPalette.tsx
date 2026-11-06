@@ -33,6 +33,7 @@ const GROUP_ORDER: CommandGroup[] = [
   "Ask",
   "Projects",
   "Links",
+  "Fun",
   "Settings",
 ];
 const QUICK = ["PROJ", "EXP", "ASK", "AWRD", "CV", "MAIL", "THEME", "HELP"];
@@ -73,9 +74,16 @@ const HELP_LINES = [
   "or type words to search projects and experience, on-device",
   "or ASK <question> to ask ayan-bot",
   "↑ ↓ to move · Enter to run · Tab to complete · Esc to close",
-  "shortcuts: ⌘K / Ctrl+K anywhere · / to open · KEYS <GO> for type-to-open",
-  "easter eggs exist. try: whoami, latency, mavs, sudo hire ayan",
+  "shortcuts: ⌘K / Ctrl+K anywhere · / or ? to open · j / k next and previous section · KEYS <GO> for type-to-open",
+  "ayan-bot: ⌘J / Ctrl+J · select any text on the page to ask about it",
+  "case studies: F1–F8 jump between sections on YouBank · 'Ask about' in the bar",
+  "new here? TOUR <GO> for a 40-second guided tour · TERM <GO> opens the terminal",
+  "hiring? FIT <GO>: paste a job description, see what his work backs up",
+  "easter eggs exist. try: whoami, latency, mavs, sudo hire ayan, RAIN, BELL, ↑↑↓↓←→←→BA",
 ];
+
+/** Log lines kept: the newest, but always room for all of HELP plus its echo. */
+const LOG_MAX = HELP_LINES.length + 2;
 
 export default function CommandPalette({
   open,
@@ -160,7 +168,9 @@ export default function CommandPalette({
 
   function print(lines: Omit<LogLine, "id">[]) {
     setLog((prev) =>
-      [...prev, ...lines.map((l) => ({ ...l, id: ++logId.current }))].slice(-8),
+      [...prev, ...lines.map((l) => ({ ...l, id: ++logId.current }))].slice(
+        -LOG_MAX,
+      ),
     );
   }
 
@@ -284,6 +294,13 @@ export default function CommandPalette({
         return print([
           { kind: "out", text: `opened ${a.href.replace(/^https?:\/\//, "")}` },
         ]);
+      case "download": {
+        const link = document.createElement("a");
+        link.href = a.href;
+        link.download = "";
+        link.click();
+        return print([{ kind: "out", text: `downloading ${a.href}` }]);
+      }
       case "copy":
         try {
           await navigator.clipboard.writeText(a.value);
@@ -312,9 +329,45 @@ export default function CommandPalette({
         }[mode];
         return print([{ kind: "out", text }]);
       }
+      case "motion": {
+        let reduced = false;
+        try {
+          reduced = localStorage.getItem("motion") === "reduce";
+          if (reduced) localStorage.removeItem("motion");
+          else localStorage.setItem("motion", "reduce");
+        } catch {
+          return print([
+            {
+              kind: "err",
+              text: "motion: can't save the setting in this browser.",
+            },
+          ]);
+        }
+        print([
+          {
+            kind: "out",
+            text: reduced
+              ? "motion: animations back on. reloading…"
+              : "motion: reduced. reloading…",
+          },
+        ]);
+        window.setTimeout(() => window.location.reload(), 500);
+        return;
+      }
       case "bot":
         close();
         return openAyanBot();
+      case "fx": {
+        // Close first: the modal <dialog> sits in the top layer, above any
+        // overlay. The effect module loads on demand.
+        close();
+        if (a.name === "tour") {
+          const t = await import("@/components/fx/tour");
+          return t.tour();
+        }
+        const fx = await import("@/components/fx/eggs");
+        return a.name === "rain" ? fx.rain() : fx.bell();
+      }
       case "help":
         return print(
           HELP_LINES.map((text) => ({ kind: "out" as const, text })),
@@ -365,30 +418,51 @@ export default function CommandPalette({
           </button>
         </div>
 
-        {log.length > 0 && (
-          <div
-            aria-live="polite"
-            className="border-line-strong max-h-40 space-y-1 overflow-y-auto border-b px-4 py-3 text-[0.8125rem]"
-          >
-            {log.map((l) => (
-              <p
-                key={l.id}
-                className={
-                  l.kind === "in"
-                    ? "text-muted"
-                    : l.kind === "err"
-                      ? "text-down"
-                      : "text-fg"
-                }
-              >
-                {l.kind === "in" ? (
-                  <span className="text-accent">› </span>
-                ) : null}
-                {l.text}
-              </p>
-            ))}
-          </div>
-        )}
+        {/* Always mounted, so screen readers announce the first line too. */}
+        <div
+          role="log"
+          // cmdk's root claims arrows/Home/End for the list; while the log
+          // is focused, let them scroll the log instead.
+          onKeyDown={(e) => {
+            if (
+              [
+                "ArrowUp",
+                "ArrowDown",
+                "Home",
+                "End",
+                "PageUp",
+                "PageDown",
+              ].includes(e.key)
+            )
+              e.stopPropagation();
+          }}
+          aria-live="polite"
+          aria-label="Palette output"
+          // Focusable (when it has output) so keyboard users can scroll
+          // long output like HELP.
+          tabIndex={log.length ? 0 : undefined}
+          className={
+            log.length
+              ? "border-line-strong max-h-[min(42vh,20rem)] space-y-1 overflow-y-auto border-b px-4 py-3 text-[0.8125rem] focus-visible:ring-2 focus-visible:ring-[color:var(--accent)] focus-visible:outline-none focus-visible:ring-inset"
+              : "sr-only"
+          }
+        >
+          {log.map((l) => (
+            <p
+              key={l.id}
+              className={
+                l.kind === "in"
+                  ? "text-muted"
+                  : l.kind === "err"
+                    ? "text-down"
+                    : "text-fg"
+              }
+            >
+              {l.kind === "in" ? <span className="text-accent">› </span> : null}
+              {l.text}
+            </p>
+          ))}
+        </div>
 
         <div className="relative flex items-center gap-2 px-4 py-3.5">
           <span aria-hidden="true" className="text-accent shrink-0 font-medium">

@@ -35,6 +35,7 @@
 import Link from "next/link";
 import { ViewTransition } from "react";
 import { projectMnemonic } from "@/content/extras";
+import { JsonLd, projectJsonLd } from "@/lib/jsonld";
 import {
   getProject,
   PROJECT_PAGES,
@@ -44,6 +45,12 @@ import {
 import { PointerFx } from "../motion/PointerFx";
 import { RevealObserver } from "../motion/RevealObserver";
 import { ThemeToggle } from "../ui/ThemeToggle";
+import {
+  AskAboutButton,
+  AskChips,
+  Explored,
+  ShareButton,
+} from "./ProjectExtras";
 import "./shell.css";
 
 export function ProjectShell({
@@ -65,6 +72,7 @@ export function ProjectShell({
   const themeAttr = barTheme === "inherit" ? {} : { "data-theme": barTheme };
   return (
     <>
+      <JsonLd data={projectJsonLd(slug)} />
       {/* Non-sticky first element: the App Router scrolls to a segment's first
           element on navigation, and skips it when that element (a sticky bar)
           already looks in view, which left project pages mid-scroll. */}
@@ -91,6 +99,8 @@ export function ProjectShell({
             &lt;GO&gt; · {p.name}
           </p>
           <div className="flex shrink-0 items-center gap-2">
+            <ShareButton name={p.name} path={`/projects/${slug}`} />
+            <AskAboutButton name={p.name} />
             {themeToggle && (
               <ThemeToggle className="t-label h-10 min-w-10 justify-center px-3" />
             )}
@@ -164,6 +174,7 @@ export function ProjectFooter({
   barTheme?: "inherit" | "dark" | "light";
 }) {
   const { prev, next } = prevNext(slug);
+  const current = getProject(slug);
   const themeAttr = barTheme === "inherit" ? {} : { "data-theme": barTheme };
   const n = PROJECT_PAGES.length;
   const at = PROJECT_PAGES.indexOf(next.id as ProjectSlug) + 1;
@@ -171,6 +182,24 @@ export function ProjectFooter({
   return (
     <footer {...themeAttr} className="bg-bg border-line border-t">
       <nav aria-label="More projects" className="container-page py-12 md:py-16">
+        <div className="mb-8">
+          <AskChips
+            name={current.name}
+            stack={current.stack}
+            metrics={current.metrics ?? []}
+          />
+        </div>
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+          <Explored slug={slug} />
+          <Link
+            href={`/terminal?run=${encodeURIComponent(`cat ${slug}`)}`}
+            className="t-label text-muted hover:text-fg inline-flex min-h-9 items-center"
+          >
+            <span className="text-accent">$&nbsp;</span>cat {slug}
+            <span className="sr-only"> in the terminal</span>
+            <span aria-hidden="true">&nbsp;→</span>
+          </Link>
+        </div>
         {/* Next project: a large teaser. Its name shares a view-transition
             name with the next page's h1, so it morphs into the title. */}
         <Link

@@ -1,0 +1,53 @@
+/* ayan-bot panel extras (AyanBotPanel chunk): case-study cards, follow-ups,
+   the brief menu and the usage meter. Base panel styles live in bot.css. */
+
+.ab-card {
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.ab-card:active {
+  transform: scale(0.985);
+}
+.ab-card .ab-card-go {
+  display: inline-block;
+  transition: transform 240ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.ab-card-img {
+  transition: transform 400ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+@media (hover: hover) {
+  .ab-card:hover .ab-card-go,
+  .ab-card:focus-visible .ab-card-go {
+    transform: translateX(3px);
+  }
+  .ab-card:hover .ab-card-img {
+    transform: scale(1.05);
+  }
+}
+
+.ab-menu:not([hidden]) {
+  animation: ab-msg-in 180ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.ab-seg {
+  transition: background-color 240ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ab-card,
+  .ab-card .ab-card-go,
+  .ab-card-img,
+  .ab-seg {
+    transition: none;
+  }
+  .ab-card:active,
+  .ab-card:hover .ab-card-go,
+  .ab-card:hover .ab-card-img {
+    transform: none;
+  }
+  .ab-menu:not([hidden]) {
+    animation: none;
+  }
+}
