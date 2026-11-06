@@ -16,7 +16,10 @@ import {
   FIT_HANDOFF_EVENT,
   FIT_HANDOFF_KEY,
   fitPrompt,
+  decodeFit,
+  encodeFit,
   fitMarks,
+  type FitResult,
   fitRole,
   TAILOR_EVENT,
   fitSummary,
@@ -75,10 +78,24 @@ export function FitCheck({ index }: { index: FitIndex }) {
   const jd = useDeferredValue(text);
 
   const compiled = useMemo(() => compileFit(index), [index]);
-  const result = useMemo(
+  // A result opened from a shared link (#fit=…): term ids only, no text.
+  const [shared, setShared] = useState<FitResult | null>(null);
+  useEffect(() => {
+    const m = window.location.hash.match(/^#fit=(.+)$/);
+    if (!m) return;
+    const r = decodeFit(compiled, m[1]);
+    if (!r) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time read of a shared link
+    setShared(r);
+    document.getElementById("fit")?.scrollIntoView({ block: "start" });
+  }, [compiled]);
+  const typed = useMemo(
     () => (jd.trim().length < 20 ? null : matchFit(compiled, jd)),
     [jd, compiled],
   );
+  // Typing replaces a shared result.
+  const result = typed ?? (jd.trim() ? null : shared);
+  const isShared = !typed && !!result;
   const total = result?.total ?? 0;
   const role = result ? fitRole(result) : null;
 
@@ -129,6 +146,20 @@ export function FitCheck({ index }: { index: FitIndex }) {
   }, [summary]);
   const roleLabel = role ? ROLES.find((r) => r.id === role)?.label : null;
   const pct = result?.pct ?? 0;
+
+  const [linked, setLinked] = useState(false);
+  const copyLink = async () => {
+    if (!result) return;
+    try {
+      await navigator.clipboard.writeText(
+        `${window.location.origin}/cv#fit=${encodeFit(result)}`,
+      );
+      setLinked(true);
+      window.setTimeout(() => setLinked(false), 1600);
+    } catch {
+      setLinked(false);
+    }
+  };
 
   const copy = async () => {
     if (!result) return;
@@ -213,6 +244,12 @@ export function FitCheck({ index }: { index: FitIndex }) {
         )}
         {result && (total > 0 || result.soft.length > 0) && (
           <>
+            {isShared && (
+              <p className="border-line text-muted mb-4 rounded-[10px] border px-3 py-2 text-[13px]">
+                A shared result: the requirements someone matched, not their
+                posting. Paste your own role above to check it.
+              </p>
+            )}
             <div className="flex flex-wrap items-center gap-4">
               {/* A market-style gauge: the arc sweeps to the share backed.
                   Only with enough technical requirements to mean something. */}
@@ -364,8 +401,18 @@ export function FitCheck({ index }: { index: FitIndex }) {
                 <button type="button" onClick={copy} className="pill min-h-10">
                   {copied ? "Copied" : "Copy summary"}
                 </button>
+                <button
+                  type="button"
+                  onClick={copyLink}
+                  className="pill min-h-10"
+                >
+                  {linked ? "Link copied" : "Copy link"}
+                </button>
                 <span className="sr-only" aria-live="polite">
                   {copied ? "Fit summary copied to the clipboard." : ""}
+                  {linked
+                    ? "Link copied. It carries the matched requirements, not the posting."
+                    : ""}
                 </span>
               </div>
             )}

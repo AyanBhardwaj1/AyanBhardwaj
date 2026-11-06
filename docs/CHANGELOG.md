@@ -63,7 +63,9 @@
   as evidence, and which it doesn't show. Only technical requirements are
   scored (startup experience and leadership are listed, not scored), and a
   score needs at least three, so a sales or nursing posting doesn't light up. A gauge sweeps to the score, and
-  "Show what it recognised" marks each matched phrase in the posting. Runs in the browser; nothing is
+  "Show what it recognised" marks each matched phrase in the posting. "Copy link"
+  shares a result (`/cv#fit=…`) that carries the matched requirements, never
+  the posting's text. Runs in the browser; nothing is
   sent. `fit <text>` does the same in the terminal, and `fit ask` hands the
   result to ayan-bot. Paste a job description into ayan-bot and it offers to
   hand the whole thing to the Fit check instead.

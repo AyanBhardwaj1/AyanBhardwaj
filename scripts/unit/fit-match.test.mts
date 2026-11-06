@@ -6,6 +6,8 @@ import { test } from "node:test";
 import { gapPattern, NOT_ON_SITE, TERMS } from "../../src/lib/fit-terms.ts";
 import {
   compileFit,
+  decodeFit,
+  encodeFit,
   fitMarks,
   fitRole,
   fitSummary,
@@ -205,4 +207,25 @@ test("every counted requirement is marked somewhere (overlaps merge)", () => {
   const pg = fitMarks(c, "Postgres");
   assert.equal(pg.length, 1);
   assert.deepEqual([...pg[0].labels].sort(), ["PostgreSQL", "SQL"]);
+});
+
+test("a shared result round-trips without the posting's text", () => {
+  const text =
+    "Java, Python, React and Rust at an early-stage startup; Kubernetes and ASP.NET a plus.";
+  const r = matchFit(c, text);
+  const code = encodeFit(r);
+  assert.ok(!code.includes("early-stage"));
+  const back = decodeFit(c, code)!;
+  assert.deepEqual(
+    back.hits.map((h) => h.label),
+    r.hits.map((h) => h.label),
+  );
+  assert.deepEqual(
+    back.soft.map((h) => h.label),
+    r.soft.map((h) => h.label),
+  );
+  assert.deepEqual([...back.gaps].sort(), [...r.gaps].sort());
+  assert.equal(back.pct, r.pct);
+  assert.equal(decodeFit(c, "nonsense|%E0%A4%A"), null);
+  assert.equal(decodeFit(c, "not-a-term|Not A Tool"), null);
 });

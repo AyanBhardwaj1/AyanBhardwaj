@@ -41,13 +41,20 @@ export function compileFit(index: FitIndex): CompiledFit {
 }
 
 export function matchFit(c: CompiledFit, text: string): FitResult {
-  const found = c.terms.filter((t) => t.re.test(text));
+  return resultFrom(
+    c.terms.filter((t) => t.re.test(text)),
+    c.missing.filter((m) => m.re.test(text)).map((m) => m.label),
+  );
+}
+
+/** A result from the terms found and the not-on-site names found. */
+function resultFrom(found: FitTerm[], missing: string[]): FitResult {
   const tech = found.filter((t) => !t.soft);
   const hits = tech.filter((t) => t.evidence.length > 0);
   const soft = found.filter((t) => t.soft && t.evidence.length > 0);
   const gaps = [
     ...tech.filter((t) => !t.evidence.length).map((t) => t.label),
-    ...c.missing.filter((m) => m.re.test(text)).map((m) => m.label),
+    ...missing,
   ];
   const total = hits.length + gaps.length;
   return {
@@ -202,4 +209,34 @@ export function fitMarks(c: CompiledFit, text: string): FitMark[] {
     } else out.push({ ...m, labels: [...m.labels] });
   }
   return out;
+}
+
+/**
+ * A shareable result: only the recognised term ids and gap names, never
+ * the posting's text ("python,react|Kubernetes").
+ */
+export function encodeFit(r: FitResult): string {
+  const ids = [...r.hits, ...r.soft].map((t) => t.id);
+  const gaps = r.gaps.map(encodeURIComponent);
+  return `${ids.join(",")}|${gaps.join(",")}`;
+}
+
+/** The result a shared link describes, or null if it doesn't parse. */
+export function decodeFit(c: CompiledFit, raw: string): FitResult | null {
+  if (raw.length > 2000) return null;
+  const [a = "", b = ""] = raw.split("|");
+  const ids = new Set(a.split(",").filter(Boolean));
+  let names: string[];
+  try {
+    names = b.split(",").filter(Boolean).map(decodeURIComponent);
+  } catch {
+    return null;
+  }
+  const found = c.terms.filter(
+    (t) => ids.has(t.id) || (!t.evidence.length && names.includes(t.label)),
+  );
+  const known = new Set(c.missing.map((m) => m.label));
+  const missing = names.filter((n) => known.has(n));
+  if (!found.length && !missing.length) return null;
+  return resultFrom(found, missing);
 }
