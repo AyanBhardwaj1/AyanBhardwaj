@@ -2,6 +2,10 @@
 
 ## After launch (Nov 6, 2026)
 
+- **Hero exit, scrubbed by scroll**: as the first screen scrolls away the
+  name lifts, blurs and fades while the portrait rises a little faster
+  (CSS scroll-driven animations; off under reduced motion and in browsers
+  without `animation-timeline`).
 - **Quote links**: select any text and the "Ask ayan-bot" pill gains a
   **Link** button that copies a link opening the page scrolled to that quote,
   highlighted in the site's amber (a `#:~:text=` text fragment).

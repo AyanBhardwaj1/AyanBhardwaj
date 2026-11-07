@@ -129,14 +129,14 @@ export function Hero({
 
         <h1
           aria-label={profile.name}
-          className="t-display relative z-0 [font-size:var(--hero-size)]"
+          className="hx-exit-name t-display relative z-0 [font-size:var(--hero-size)]"
         >
           <Letters word="Ayan" delay={40} />
           <Letters word="Bhardwaj" delay={130} />
         </h1>
 
         <div
-          className="relative z-10 mt-4 flex justify-center sm:mt-[0.08em]"
+          className="hx-exit-face relative z-10 mt-4 flex justify-center sm:mt-[0.08em]"
           style={{ fontSize: "var(--hero-size)" }}
         >
           <Spark className="hx-glyph absolute top-[-0.2em] left-[-1.4em] hidden size-[0.42em] md:block" />
