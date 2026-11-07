@@ -756,6 +756,39 @@ async function endpoints() {
   });
 }
 
+/** Selecting text offers "Link", which copies a #:~:text= link to the quote. */
+async function quoteLinks(browser) {
+  const ctx = await newContext(browser, {
+    permissions: ["clipboard-read", "clipboard-write"],
+  });
+  const page = await ctx.newPage();
+  await check("quote", "selection copies a link to the quote", async () => {
+    await page.goto(BASE + "/projects/youbank", { waitUntil: "networkidle" });
+    await page.evaluate(() => {
+      const el = [...document.querySelectorAll("main p")].find(
+        (x) => (x.textContent ?? "").trim().length > 120,
+      );
+      if (!el) throw new Error("no long paragraph");
+      el.scrollIntoView({ block: "center" });
+      const r = document.createRange();
+      r.selectNodeContents(el);
+      const s = getSelection();
+      s?.removeAllRanges();
+      s?.addRange(r);
+    });
+    await page
+      .getByRole("button", { name: /Link to the selected text/ })
+      .click();
+    await page.locator(".ab-sel", { hasText: "Copied" }).waitFor();
+    const url = await page.evaluate(() => navigator.clipboard.readText());
+    assert(
+      url.startsWith(BASE + "/projects/youbank#:~:text="),
+      `copied ${url}`,
+    );
+  });
+  await ctx.close();
+}
+
 // ---------------------------------------------------------------------------
 
 const t0 = Date.now();
@@ -772,6 +805,7 @@ try {
   await reducedMotion(browser);
   await firstScreen(browser);
   await keyboard(browser);
+  await quoteLinks(browser);
   await endpoints();
 } catch (e) {
   failed++;

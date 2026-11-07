@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type RefObject } from "react";
+import { quoteLink } from "@/lib/quote-link";
 import "./selection.css";
 
 /**
@@ -16,7 +17,7 @@ const MIN = 8;
 // Long selections are fine: the prompt quotes a trimmed excerpt.
 const MAX = 1200;
 const EXPLAIN = "Explain this from Ayan's site: ";
-const EST_W = 136;
+const EST_W = 196;
 const EST_H = 36;
 const GAP = 10;
 const FIELD =
@@ -36,7 +37,22 @@ export function selectionPrompt(raw: string): string {
   return `${EXPLAIN}"${esc(cut)}"`;
 }
 
-type Spot = { text: string; x: number; y: number };
+/** The selection's text, minus any word it cuts through at either end. */
+function wholeWords(range: Range, text: string): string {
+  const wordChar = /[\p{L}\p{N}]/u;
+  const before = (n: Node, i: number) =>
+    n.nodeType === 3 && i > 0 ? (n.textContent ?? "")[i - 1] : "";
+  const after = (n: Node, i: number) =>
+    n.nodeType === 3 ? (n.textContent ?? "")[i] : "";
+  let out = text;
+  if (wordChar.test(before(range.startContainer, range.startOffset) ?? ""))
+    out = out.replace(/^\S+\s*/, "");
+  if (wordChar.test(after(range.endContainer, range.endOffset) ?? ""))
+    out = out.replace(/\s*\S+$/, "");
+  return out || text;
+}
+
+type Spot = { text: string; quote: string; x: number; y: number };
 
 function readSelection(dismissed: string | null): Spot | null {
   const sel = window.getSelection();
@@ -64,7 +80,7 @@ function readSelection(dismissed: string | null): Spot | null {
   // Above the selection; below it only when there's no room above.
   const above = box.top - GAP - EST_H;
   const y = above >= 8 ? above : Math.min(box.bottom + GAP, vh - EST_H - 8);
-  return { text, x, y };
+  return { text, quote: wholeWords(range, text), x, y };
 }
 
 export function SelectionAsk({
@@ -186,19 +202,63 @@ export function SelectionAsk({
   };
 
   return (
-    <button
-      type="button"
-      className="ab-sel no-print border-line-strong bg-bg-elev text-fg hover:border-accent/70 fixed z-[90] inline-flex h-9 items-center gap-2 rounded-full border pr-3.5 pl-3 font-mono text-[12px] tracking-wide whitespace-nowrap shadow-[var(--shadow-float)]"
+    <div
+      className="ab-sel no-print border-line-strong bg-bg-elev text-fg fixed z-[90] inline-flex h-9 items-center rounded-full border font-mono text-[12px] tracking-wide whitespace-nowrap shadow-[var(--shadow-float)]"
       style={{ left: spot.x, top: spot.y }}
       // Keep the selection (and focus) where they are while clicking.
       onMouseDown={(e) => e.preventDefault()}
-      onClick={ask}
-      aria-keyshortcuts="Meta+J Control+J"
-      title="Ask ayan-bot about this (⌘J / Ctrl+J)"
     >
-      <span aria-hidden="true" className="bg-accent size-1.5 rounded-full" />
-      Ask ayan-bot
-      <span className="sr-only"> about the selected text</span>
+      <button
+        type="button"
+        className="ab-sel-btn inline-flex h-full items-center gap-2 rounded-l-full pr-3 pl-3"
+        onClick={ask}
+        aria-keyshortcuts="Meta+J Control+J"
+        title="Ask ayan-bot about this (⌘J / Ctrl+J)"
+      >
+        <span aria-hidden="true" className="bg-accent size-1.5 rounded-full" />
+        Ask ayan-bot
+        <span className="sr-only"> about the selected text</span>
+      </button>
+      <span aria-hidden="true" className="bg-line-strong h-4 w-px" />
+      <QuoteLinkButton quote={spot.quote} />
+    </div>
+  );
+}
+
+/** Copies a link that opens this page scrolled to the quote, highlighted. */
+function QuoteLinkButton({ quote }: { quote: string }) {
+  // Keyed by quote, so a new selection starts with a fresh label.
+  const [copiedFor, setCopiedFor] = useState<string | null>(null);
+  const copied = copiedFor === quote;
+  const timer = useRef(0);
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+
+  const copy = async () => {
+    const url = quoteLink(window.location.href, quote);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedFor(quote);
+      window.clearTimeout(timer.current);
+      timer.current = window.setTimeout(() => setCopiedFor(null), 1800);
+    } catch {
+      // No clipboard (insecure context, denied): open the link instead,
+      // so the address bar holds it.
+      window.location.assign(url);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      className="ab-sel-btn inline-flex h-full items-center gap-1.5 rounded-r-full pr-3.5 pl-2.5"
+      onClick={copy}
+      title="Copy a link that opens this page highlighted at this quote"
+    >
+      <span aria-hidden="true" className={copied ? "text-up" : "text-muted"}>
+        {copied ? "✓" : "↗"}
+      </span>
+      <span aria-live="polite">{copied ? "Copied" : "Link"}</span>
+      <span className="sr-only"> to the selected text</span>
     </button>
   );
 }
