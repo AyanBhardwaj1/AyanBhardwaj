@@ -2,6 +2,9 @@
 
 ## After launch (Nov 6, 2026)
 
+- **Quote links**: select any text and the "Ask ayan-bot" pill gains a
+  **Link** button that copies a link opening the page scrolled to that quote,
+  highlighted in the site's amber (a `#:~:text=` text fragment).
 - **Related work** at the end of each case study that has close relatives
   (OncoSense has none): the most similar builds,
   ranked by shared tools, category, where they were built and role lens,
@@ -118,7 +121,7 @@
 
 ### Testing
 
-- `npm run test:smoke`: 78 browser checks against a production build (every
+- `npm run test:smoke`: 79 browser checks against a production build (every
   route renders without errors, metadata and share images, palette,
   terminal, Fit check, ayan-bot in mock mode, reduced motion, keyboard,
   endpoints). It caught `/functions` missing its share

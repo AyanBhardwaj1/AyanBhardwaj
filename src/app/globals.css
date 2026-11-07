@@ -207,6 +207,11 @@
     background: var(--selection);
     color: var(--fg);
   }
+  /* A shared quote link (#:~:text=) highlights in the site's own colour. */
+  ::target-text {
+    background: color-mix(in oklab, var(--accent) 32%, transparent);
+    color: var(--fg);
+  }
 
   /* Outlines follow each element's own radius (pills stay pills). */
   :focus-visible {
