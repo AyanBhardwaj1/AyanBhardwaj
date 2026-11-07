@@ -2,6 +2,10 @@
 
 ## After launch (Nov 6, 2026)
 
+- **Audit fixes, launcher and edges**: the ayan-bot launcher takes the look
+  of fixed-theme case studies (no cream pill on dark YouBank in light mode);
+  on phones the terminal's quick-command chips end before the launcher; the
+  Walk-Free case-study bar lines up with its wider editorial grid.
 - **Audit fixes, charts and targets**: the YouBank autonomy chart no longer
   clips its "100%" label; the Activity row reads "13D (best)" and "Per active
   day" on one line each; the home watchlist chart fills its card (no empty

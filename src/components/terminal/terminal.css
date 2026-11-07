@@ -249,6 +249,13 @@
   color: var(--tm-accent);
   border-color: rgb(255 163 26 / 0.5);
 }
+@media (max-width: 767px) {
+  /* The ayan-bot launcher sits bottom-right on phones: end the chip row
+     before it, so no chip hides underneath. */
+  .tm-quick {
+    margin-right: 64px;
+  }
+}
 @media (max-width: 640px) {
   .tm-page {
     padding: 0;
