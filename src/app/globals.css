@@ -1813,6 +1813,26 @@ html[data-motion="reduce"] ::after {
   transition-duration: 0.01ms !important;
   scroll-behavior: auto !important;
 }
+/* A 0.01ms duration doesn't stop scroll-driven animations (they map their
+   duration onto the scroll range), so switch those off by name. Each rests
+   in its finished state without its animation, exactly as it does under
+   the OS setting. */
+html[data-motion="reduce"]
+  :is(
+    .scrub > span,
+    .wm-l,
+    .hx-letter,
+    .hx-line,
+    .hx-exit-name,
+    .hx-exit-face,
+    .md-mani-w,
+    .md-mani-rule > span,
+    .ps-nextName,
+    .scroll-progress
+  ),
+html[data-motion="reduce"] .md-mani-accent::after {
+  animation: none !important;
+}
 
 /* TOUR <GO>: the guided-tour caption card. */
 .fx-tour {
