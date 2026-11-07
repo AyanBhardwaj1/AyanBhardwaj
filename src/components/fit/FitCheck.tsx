@@ -32,6 +32,10 @@ import {
  * entirely in the browser: the text never leaves the page.
  */
 
+/** Longest job description read. Real postings run 3-10k characters; past
+    this the text is trimmed, and the panel says so. */
+const JD_MAX = 20_000;
+
 const KIND_WORDS = {
   hit: "backed",
   gap: "not on the site",
@@ -77,7 +81,7 @@ export function FitCheck({
       if (jd) {
         sessionStorage.removeItem(FIT_HANDOFF_KEY);
         // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time handoff from sessionStorage
-        setText(jd.slice(0, 8000));
+        setText(jd.slice(0, JD_MAX));
       }
     } catch {
       /* no storage */
@@ -90,7 +94,7 @@ export function FitCheck({
       } catch {
         /* ignore */
       }
-      setText(jd.slice(0, 8000));
+      setText(jd.slice(0, JD_MAX));
     };
     window.addEventListener(FIT_HANDOFF_EVENT, onFit);
     return () => window.removeEventListener(FIT_HANDOFF_EVENT, onFit);
@@ -111,13 +115,20 @@ export function FitCheck({
       );
       return () => window.clearTimeout(t);
     }
-    const m = window.location.hash.match(/^#fit=(.+)$/);
-    if (!m) return;
-    const r = decodeFit(compiled, m[1]);
-    if (!r) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time read of a shared link
-    setShared(r);
-    document.getElementById("fit")?.scrollIntoView({ block: "start" });
+    const read = (scroll: boolean) => {
+      const m = window.location.hash.match(/^#fit=(.+)$/);
+      const r = m ? decodeFit(compiled, m[1]) : null;
+      if (!r) return;
+      setShared(r);
+      if (scroll)
+        document.getElementById("fit")?.scrollIntoView({ block: "start" });
+    };
+    read(true);
+    // Another shared result in the same tab (edited address, Back/Forward
+    // between two links) replaces this one.
+    const onHash = () => read(false);
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
   }, [compiled]);
   const typed = useMemo(
     () => (jd.trim().length < 20 ? null : matchFit(compiled, jd)),
@@ -158,6 +169,8 @@ export function FitCheck({
     return out;
   }, [marks, jd]);
 
+  // At the limit the posting was cut, so "paste more" would be wrong advice.
+  const trimmed = text.length >= JD_MAX;
   // Announce the score once typing settles, not on every keystroke.
   const headline = !result
     ? ""
@@ -167,7 +180,7 @@ export function FitCheck({
         : "No recognisable skills yet."
       : result.scored
         ? `${result.hits.length} of ${total} technical requirements backed by work on this site`
-        : `${total} technical requirement${total === 1 ? "" : "s"} recognised, too few to score. Paste more of the role.`;
+        : `${total} technical requirement${total === 1 ? "" : "s"} recognised, too few to score.${trimmed ? "" : " Paste more of the role."}`;
   const summary = headline ? `${headline}.`.replace(/\.\.$/, ".") : "";
   const [said, setSaid] = useState("");
   useEffect(() => {
@@ -262,7 +275,7 @@ export function FitCheck({
         id={`${id}-jd`}
         name="job-description"
         rows={5}
-        maxLength={8000}
+        maxLength={JD_MAX}
         value={text}
         onChange={(e) => {
           setText(e.target.value);
@@ -281,6 +294,12 @@ export function FitCheck({
         spellCheck={false}
         className="border-line-strong bg-bg text-fg placeholder:text-dim focus-visible:border-accent mt-2 w-full resize-y rounded-[10px] border px-3 py-2 font-mono text-[16px] focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]/40 focus-visible:outline-none md:text-[13px]"
       />
+      {trimmed && (
+        <p className="text-muted mt-1 text-[13px]">
+          Trimmed to the first {JD_MAX.toLocaleString("en-US")} characters;
+          requirements after that aren&apos;t counted.
+        </p>
+      )}
       <div className="mt-2 flex flex-wrap gap-2">
         <button
           type="button"

@@ -962,7 +962,7 @@ export default function AyanBotPanel({
               }}
               onPaste={(e) => {
                 const t = e.clipboardData.getData("text");
-                if (looksLikeJobDescription(t)) setJd(t.slice(0, 8000));
+                if (looksLikeJobDescription(t)) setJd(t.slice(0, 20_000));
               }}
               onKeyDown={(e) => {
                 if (

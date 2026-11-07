@@ -66,8 +66,17 @@ function score(cmd: Cmd, q: string): number {
   if (cmd.keywords.some((k) => k.startsWith(query))) return 120;
   if (cmd.keywords.some((k) => k.includes(query))) return 80;
   if (cmd.hint.toLowerCase().includes(query)) return 40;
+  // "you bank", "walk free", "moss-jarvis": match with spaces and dashes
+  // squashed, so a name typed as words still finds YouBank.
+  const sq = squash(query);
+  if (sq.length >= 3 && sq !== query) {
+    if (squash(title).includes(sq)) return 150;
+    if (cmd.keywords.some((k) => squash(k).includes(sq))) return 70;
+  }
   return 0;
 }
+
+const squash = (s: string) => s.toLowerCase().replace(/[\s\-_.]+/g, "");
 
 const HELP_LINES = [
   "type a function code and press Enter (<GO>). e.g. PROJ, GP, CV, YOUB",
