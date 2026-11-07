@@ -59,6 +59,25 @@
   }
 }
 
+/* Case studies with a fixed look (YouBank and others are always dark): the
+   launcher takes that look instead of the site theme, so it never floats as
+   a cream pill on a dark page. */
+html:has([data-page-ground="dark"]) .ab-launcher {
+  color-scheme: dark;
+  --bg-elev: #121210;
+  --fg: #f2eee7;
+  --line-strong: rgb(242 238 231 / 0.16);
+  --accent: #ffa31a;
+  --shadow-float: 0 8px 32px -12px rgb(0 0 0 / 0.6);
+}
+html:has([data-page-ground="light"]) .ab-launcher {
+  color-scheme: light;
+  --bg-elev: #f2eee7;
+  --fg: #111111;
+  --line-strong: rgb(17 17 17 / 0.2);
+  --accent: #a35200;
+}
+
 /* Panel */
 .ab-panel {
   --ab-ease: cubic-bezier(0.23, 1, 0.32, 1);
