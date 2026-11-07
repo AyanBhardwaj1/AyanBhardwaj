@@ -1571,3 +1571,16 @@
     transition: none;
   }
 }
+
+/* Print: the title is gradient-clipped text, which vanishes when browsers
+   drop backgrounds. Keep its colours (the white top stays on paper too). */
+@media print {
+  .myc-h1 {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background: linear-gradient(180deg, #2a1650 10%, #7a3dff 90%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: none;
+  }
+}

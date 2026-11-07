@@ -2,6 +2,11 @@
 
 ## After launch (Nov 6, 2026)
 
+- **Case studies**: the amber reading-progress hairline now runs under the
+  case-study bar too. Printing a case study drops the sticky bar, the YouBank
+  command bar and ticker tape, and the MossJarvis boot overlay (which used to
+  print instead of the page); gradient titles (YouBank, Mycelium) keep their
+  colour on paper instead of vanishing.
 - **Hero exit, scrubbed by scroll**: as the first screen scrolls away the
   name lifts, blurs and fades while the portrait rises a little faster
   (CSS scroll-driven animations; off under reduced motion and in browsers
