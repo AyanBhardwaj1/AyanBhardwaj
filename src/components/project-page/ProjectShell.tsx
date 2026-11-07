@@ -34,6 +34,7 @@
  */
 import Link from "next/link";
 import { ViewTransition } from "react";
+import { PageMark } from "./PageMark";
 import { projectMnemonic } from "@/content/extras";
 import { JsonLd, projectJsonLd } from "@/lib/jsonld";
 import {
@@ -114,12 +115,12 @@ export function ProjectShell({
       {/* Non-sticky first element: the App Router scrolls to a segment's first
           element on navigation, and skips it when that element (a sticky bar)
           already looks in view, which left project pages mid-scroll. */}
-      <div
-        aria-hidden="true"
-        className="h-0"
-        // A page with a fixed look: the floating ayan-bot launcher matches it
-        // (bot.css), instead of following the site theme onto it.
-        data-page-ground={barTheme === "inherit" ? undefined : barTheme}
+      <div aria-hidden="true" className="h-0" />
+      {/* A page with a fixed look: the floating ayan-bot launcher matches it
+          (bot.css), instead of following the site theme onto it. */}
+      <PageMark
+        slug={slug}
+        ground={barTheme === "inherit" ? undefined : barTheme}
       />
       <header
         {...themeAttr}

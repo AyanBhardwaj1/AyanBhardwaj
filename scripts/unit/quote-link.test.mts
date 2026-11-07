@@ -29,3 +29,10 @@ test("the page's own hash is replaced, the query kept", () => {
 test("nothing to quote gives the bare page", () => {
   assert.equal(quoteLink("https://x.dev/#top", "   "), "https://x.dev/");
 });
+
+test("a quote across blocks uses its first and last lines", () => {
+  assert.equal(
+    textFragment("Moss · SWE intern\n\nBuilt ten open-source apps"),
+    "#:~:text=Moss%20%C2%B7%20SWE%20intern,Built%20ten%20open%2Dsource%20apps",
+  );
+});

@@ -2,6 +2,13 @@
 
 ## After launch (Nov 6, 2026)
 
+- **Review fixes**: the launcher no longer keeps a dark case study's look
+  after you leave it (cached routes stay in the DOM, so the page now marks
+  `<html>` from an effect instead of a `:has()` marker); quote links that
+  cross blocks (a CV title and its first bullet) use start,end and match;
+  only words the selection actually cuts are trimmed; a shared `#fit=` link
+  is picked up after opening plain `#fit`; the hero exit honours the site's
+  own reduce-motion setting.
 - **Interaction fixes**: the Fit check reads job descriptions up to 20,000
   characters (it silently cut at 8,000, then advised "paste more") and says
   when it trims; a new `#fit=` link in the same tab (edited address,
@@ -156,7 +163,7 @@
 
 ### Testing
 
-- `npm run test:smoke`: 82 browser checks against a production build (every
+- `npm run test:smoke`: 83 browser checks against a production build (every
   route renders without errors, metadata and share images, palette,
   terminal, Fit check, ayan-bot in mock mode, reduced motion, keyboard,
   endpoints). It caught `/functions` missing its share

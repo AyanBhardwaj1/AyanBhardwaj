@@ -857,6 +857,30 @@ async function interactions(browser) {
       );
     },
   );
+  await check(
+    "interactions",
+    "launcher drops a dark page's look after leaving it",
+    async () => {
+      const c = await newContext(browser, { colorScheme: "light" });
+      const p = await c.newPage();
+      const bg = () =>
+        p.evaluate(
+          () => getComputedStyle(document.querySelector(".ab-launcher")).color,
+        );
+      await p.goto(BASE + "/projects/youbank", { waitUntil: "load" });
+      assert(
+        await until(async () => (await bg()) === "rgb(242, 238, 231)"),
+        "launcher is not dark on YouBank",
+      );
+      await p.locator('header a[href="/"]').first().click();
+      await p.waitForURL(BASE + "/");
+      assert(
+        await until(async () => (await bg()) === "rgb(17, 17, 17)"),
+        `launcher kept the dark look on home (${await bg()})`,
+      );
+      await c.close();
+    },
+  );
   await ctx.close();
 }
 

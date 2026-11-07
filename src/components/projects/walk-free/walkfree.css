@@ -785,7 +785,7 @@ html.js .wf-play:not([data-playing]) [class*="wx-"] {
 
 /* The case-study bar lines up with this page's wider editorial grid
    (its left edge sat 92px right of the content at 1440px). */
-header:has(~ main.wf) > .container-page {
+html[data-page="walk-free"] header > .container-page {
   max-width: 1440px;
   padding-inline: clamp(16px, 4vw, 56px);
 }
