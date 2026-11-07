@@ -2,6 +2,10 @@
 
 ## After launch (Nov 6, 2026)
 
+- **Reduce motion, fully**: the site's own reduce-motion setting now stops
+  every scroll-driven effect (manifesto ink, watermark, hero letters and
+  exit, case-study footer name, progress line), not just timed animations;
+  each rests in its finished state, as under the OS setting.
 - **Review fixes**: the launcher no longer keeps a dark case study's look
   after you leave it (cached routes stay in the DOM, so the page now marks
   `<html>` from an effect instead of a `:has()` marker); quote links that
