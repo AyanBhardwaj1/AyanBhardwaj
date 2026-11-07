@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
+import { DARK_GROUND_SLUGS } from "@/lib/page-ground";
 import { links, profile, seo } from "@/content/content";
 import { SITE_URL, hasResume } from "@/lib/site";
 import { Providers } from "@/components/Providers";
@@ -73,7 +74,7 @@ export const viewport: Viewport = {
 // <html data-motion="reduce"> and makes matchMedia evaluate any
 // prefers-reduced-motion feature as "reduce" (the rest of the query is still
 // evaluated for real), so every JS effect takes its reduced path.
-const themeScript = `(function(){var d=document.documentElement;d.classList.add("js");if(location.pathname==="/"&&!location.hash)d.setAttribute("data-nav-at-top","true");try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")d.setAttribute("data-theme",t);if(localStorage.getItem("motion")==="reduce"){d.setAttribute("data-motion","reduce");var mm=window.matchMedia.bind(window);window.matchMedia=function(q){return mm(String(q).replace(/\\(\\s*prefers-reduced-motion(\\s*:\\s*reduce)?\\s*\\)/g,"(min-width: 0px)").replace(/\\(\\s*prefers-reduced-motion\\s*:\\s*no-preference\\s*\\)/g,"(min-width: 999999px)"))}}}catch(e){}})()`;
+const themeScript = `(function(){var d=document.documentElement;d.classList.add("js");var pg=location.pathname.match(/^\\/projects\\/([^/]+)/);if(pg){d.setAttribute("data-page",pg[1]);if(${JSON.stringify(DARK_GROUND_SLUGS)}.indexOf(pg[1])>-1)d.setAttribute("data-page-ground","dark")}if(location.pathname==="/"&&!location.hash)d.setAttribute("data-nav-at-top","true");try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")d.setAttribute("data-theme",t);if(localStorage.getItem("motion")==="reduce"){d.setAttribute("data-motion","reduce");var mm=window.matchMedia.bind(window);window.matchMedia=function(q){return mm(String(q).replace(/\\(\\s*prefers-reduced-motion(\\s*:\\s*reduce)?\\s*\\)/g,"(min-width: 0px)").replace(/\\(\\s*prefers-reduced-motion\\s*:\\s*no-preference\\s*\\)/g,"(min-width: 999999px)"))}}}catch(e){}})()`;
 
 /**
  * With the site's reduce-motion switch on, rewrite our own stylesheets so
