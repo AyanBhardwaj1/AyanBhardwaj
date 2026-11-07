@@ -1154,6 +1154,40 @@ html:not(.js) .section-rule::after {
     transform: translateY(14px);
   }
 }
+/* Hero exit, scrubbed by scroll: the name lifts and softens, the portrait
+   rises a little faster (parallax). Wrappers only, so the entrance
+   animations on the letters and portrait are untouched. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .hx-hero {
+      view-timeline-name: --hx;
+    }
+    .hx-exit-name,
+    .hx-exit-face {
+      animation: linear both;
+      animation-timeline: --hx;
+      animation-range: exit 0% exit 90%;
+    }
+    .hx-exit-name {
+      animation-name: hx-exit-name;
+    }
+    .hx-exit-face {
+      animation-name: hx-exit-face;
+    }
+  }
+}
+@keyframes hx-exit-name {
+  to {
+    opacity: 0.12;
+    filter: blur(5px);
+    transform: translateY(-14%) scale(0.95);
+  }
+}
+@keyframes hx-exit-face {
+  to {
+    transform: translateY(-38%) rotate(-2.5deg);
+  }
+}
 .hx-portrait {
   animation: hx-portrait 820ms var(--ease-expo) 300ms both;
 }
