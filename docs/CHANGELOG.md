@@ -2,6 +2,12 @@
 
 ## After launch (Nov 6, 2026)
 
+- **Interaction fixes**: the Fit check reads job descriptions up to 20,000
+  characters (it silently cut at 8,000, then advised "paste more") and says
+  when it trims; a new `#fit=` link in the same tab (edited address,
+  Back/Forward) replaces the shared result; the terminal brings back your
+  draft after ↑ then ↓, as bash does; the palette finds "you bank" and
+  "walk free" typed as words.
 - **Clickable ticker**: every symbol on the hero tape leads somewhere (YOUBANK
   and the metrics open the case study, MIT LL opens OncoSense, GH STARS jumps
   to Activity, AEO to Leadership). Mouse-only shortcuts in the aria-hidden
@@ -150,7 +156,7 @@
 
 ### Testing
 
-- `npm run test:smoke`: 79 browser checks against a production build (every
+- `npm run test:smoke`: 82 browser checks against a production build (every
   route renders without errors, metadata and share images, palette,
   terminal, Fit check, ayan-bot in mock mode, reduced motion, keyboard,
   endpoints). It caught `/functions` missing its share

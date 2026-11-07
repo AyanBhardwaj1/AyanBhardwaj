@@ -195,6 +195,9 @@ export function Terminal({ data }: { data: TerminalData }) {
     }
   }, [hist]);
   const [hIdx, setHIdx] = useState<number | null>(null);
+  // What was being typed before ↑ stepped into history; ↓ past the newest
+  // entry brings it back, as in bash.
+  const draftRef = useRef("");
   const [hint, setHint] = useState("");
   const idRef = useRef(1000);
   const fit = useMemo(() => compileFit(data.fit), [data.fit]);
@@ -1076,6 +1079,7 @@ export function Terminal({ data }: { data: TerminalData }) {
     } else if (e.key === "ArrowUp") {
       if (!hist.length) return;
       e.preventDefault();
+      if (hIdx === null) draftRef.current = value;
       const i = hIdx === null ? hist.length - 1 : Math.max(0, hIdx - 1);
       setHIdx(i);
       setValue(hist[i]);
@@ -1085,7 +1089,7 @@ export function Terminal({ data }: { data: TerminalData }) {
       const i = hIdx + 1;
       if (i >= hist.length) {
         setHIdx(null);
-        setValue("");
+        setValue(draftRef.current);
       } else {
         setHIdx(i);
         setValue(hist[i]);

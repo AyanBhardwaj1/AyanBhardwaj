@@ -789,6 +789,77 @@ async function quoteLinks(browser) {
   await ctx.close();
 }
 
+/** Regressions from the interaction audit: history draft, #fit= changes,
+    squashed palette search. */
+async function interactions(browser) {
+  const ctx = await newContext(browser);
+  const page = await ctx.newPage();
+
+  await check(
+    "interactions",
+    "terminal ↑ then ↓ restores the draft",
+    async () => {
+      await page.goto(BASE + "/terminal", { waitUntil: "load" });
+      const input = page.getByRole("textbox", { name: /command/i });
+      await input.fill("whoami");
+      await input.press("Enter");
+      await input.fill("cat runw");
+      await input.press("ArrowUp");
+      assert(
+        (await input.inputValue()) === "whoami",
+        "↑ did not recall whoami",
+      );
+      await input.press("ArrowDown");
+      const v = await input.inputValue();
+      assert(v === "cat runw", `↓ gave "${v}", want the draft`);
+    },
+  );
+
+  await check(
+    "interactions",
+    "a new #fit= link replaces the shared result",
+    async () => {
+      await page.goto(BASE + "/cv#fit=python|kafka", { waitUntil: "load" });
+      const fit = page.locator("#fit");
+      assert(
+        await until(async () => /Python/.test(await fit.innerText())),
+        "first shared result did not show",
+      );
+      await page.evaluate(() => {
+        location.hash = "#fit=rust|kafka";
+      });
+      assert(
+        await until(async () => {
+          const t = await fit.innerText();
+          return /Rust/.test(t) && !/Python/.test(t);
+        }),
+        "result did not follow the new hash",
+      );
+    },
+  );
+
+  await check(
+    "interactions",
+    'palette finds YouBank from "you bank"',
+    async () => {
+      await page.goto(BASE + "/", { waitUntil: "load" });
+      const dialog = page.getByRole("dialog");
+      const ok = await pressUntil(page, "Control+k", () => dialog.isVisible());
+      assert(ok, "palette did not open");
+      await page.keyboard.type("you bank");
+      assert(
+        await until(async () =>
+          /YouBank/.test(
+            (await dialog.locator("[cmdk-item]").allInnerTexts()).join("\n"),
+          ),
+        ),
+        "no YouBank result",
+      );
+    },
+  );
+  await ctx.close();
+}
+
 // ---------------------------------------------------------------------------
 
 const t0 = Date.now();
@@ -806,6 +877,7 @@ try {
   await firstScreen(browser);
   await keyboard(browser);
   await quoteLinks(browser);
+  await interactions(browser);
   await endpoints();
 } catch (e) {
   failed++;
