@@ -58,11 +58,11 @@ function Spark({ pts, up }: { pts: number[]; up: boolean }) {
   const color = up ? "var(--up)" : "var(--down)";
   const last = xy[xy.length - 1];
   return (
-    <div className="relative">
+    <div className="relative min-h-[72px] flex-1 lg:min-h-[104px]">
       <svg
         viewBox={`0 0 ${W} ${H}`}
         preserveAspectRatio="none"
-        className="block h-[72px] w-full overflow-visible lg:h-[104px]"
+        className="absolute inset-0 block size-full overflow-visible"
         aria-hidden="true"
       >
         <defs>
@@ -156,7 +156,16 @@ export function MiniTerminal() {
         return out;
       });
     }, 900);
-    return () => window.clearInterval(id);
+    return () => {
+      window.clearInterval(id);
+      // Paused (scrolled away, hidden tab, other tab): drop the last tick's
+      // tint, or a red row could sit next to a green change forever.
+      const calm = rowsRef.current.map((r) =>
+        r.flash ? { ...r, flash: 0 as const } : r,
+      );
+      rowsRef.current = calm;
+      setRows(calm);
+    };
   }, [live, tab]);
 
   useEffect(() => {
@@ -225,7 +234,7 @@ export function MiniTerminal() {
                           e.stopPropagation();
                           setFocus(r.sym);
                         }}
-                        className={`text-accent -mx-1 rounded-[3px] px-1 text-left ${focus === r.sym ? "underline decoration-1 underline-offset-4" : ""}`}
+                        className={`text-accent -mx-1 inline-flex min-h-6 min-w-11 items-center rounded-[3px] px-1 text-left ${focus === r.sym ? "underline decoration-1 underline-offset-4" : ""}`}
                       >
                         {r.sym}
                       </button>
@@ -244,7 +253,9 @@ export function MiniTerminal() {
             {(() => {
               const row = rows.find((r) => r.sym === focus) ?? rows[0];
               return (
-                <div className="border-line mt-auto border-t pt-3">
+                // Fills the panel's spare height, so a tall card shows a
+                // taller chart instead of a gap above it.
+                <div className="border-line mt-3 flex flex-1 flex-col border-t pt-3">
                   <p className="text-muted mb-2 flex justify-between text-[11px]">
                     <span>
                       <span className="text-fg">{row.sym}</span> · intraday

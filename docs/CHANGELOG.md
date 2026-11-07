@@ -2,6 +2,11 @@
 
 ## After launch (Nov 6, 2026)
 
+- **Audit fixes, charts and targets**: the YouBank autonomy chart no longer
+  clips its "100%" label; the Activity row reads "13D (best)" and "Per active
+  day" on one line each; the home watchlist chart fills its card (no empty
+  gap) and drops a row's red/green tint when the ticker pauses; phone tap
+  targets under 24px (CV back link, watchlist symbols, scroll link) grew.
 - **Audit fixes, text layout**: terminal `help`, `skills` and `interests`
   stack key and text on phones instead of stranding words at the edge, and
   the ASCII banner uses system monospace (the web font has no box-drawing

@@ -213,10 +213,19 @@ export function AutonomySim() {
                     y2={H}
                     className={s.gridLine}
                   />
+                  {/* Edge labels anchor inward, so "100%" is never clipped. */}
                   <text
-                    x={Math.min(Math.max(px(t), 12), W - 14)}
+                    x={
+                      px(t) < 16
+                        ? px(t) + 1
+                        : px(t) > W - 16
+                          ? px(t) - 2
+                          : px(t)
+                    }
                     y={H + 18}
-                    textAnchor="middle"
+                    textAnchor={
+                      px(t) < 16 ? "start" : px(t) > W - 16 ? "end" : "middle"
+                    }
                     className={s.axisText}
                   >
                     {pct(t)}

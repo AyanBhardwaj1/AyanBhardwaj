@@ -29,8 +29,15 @@ export function ContributionSurface({
         `${r.busiest.count} (${formatDay(r.busiest.date, false).toUpperCase()})`,
       ],
       ["Active days", String(r.activeDays)],
-      ["Streak", `${r.currentStreak}D (best ${r.bestStreak}D)`],
-      ["Avg / active day", r.avgActive.toFixed(1)],
+      // Short enough for a sixth of the row; "best" only adds a number
+      // when it differs from the current streak.
+      [
+        "Streak",
+        r.bestStreak > r.currentStreak
+          ? `${r.currentStreak}D (best ${r.bestStreak})`
+          : `${r.currentStreak}D (best)`,
+      ],
+      ["Per active day", r.avgActive.toFixed(1)],
       ["σ / wk", r.weeklyStdev.toFixed(1)],
     ],
   }));

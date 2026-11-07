@@ -72,7 +72,10 @@ export default function CvPage() {
   return (
     <main id="main" className="cv">
       <div className="cv-tools no-print">
-        <Link href="/" className="link t-label">
+        <Link
+          href="/"
+          className="link t-label inline-flex min-h-10 items-center"
+        >
           ← ayan<span className="text-accent">://</span>bhardwaj
         </Link>
         <div className="flex flex-wrap gap-2">

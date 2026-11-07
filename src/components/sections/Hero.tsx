@@ -249,7 +249,10 @@ export function Hero({
           </div>
           <div className="t-label text-muted flex flex-col items-center gap-1 sm:items-end">
             <span>/Austin, TX · 30.28°N 97.73°W</span>
-            <a href="#about" className="link text-fg">
+            <a
+              href="#about"
+              className="link text-fg inline-flex min-h-6 items-center"
+            >
               scroll_to_enter ↓
             </a>
           </div>
