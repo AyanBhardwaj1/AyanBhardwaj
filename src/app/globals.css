@@ -1935,3 +1935,17 @@ html[data-motion="reduce"] ::after {
     margin-top: 16px;
   }
 }
+
+/* Ticker symbols that lead somewhere (hero tape): hover shows it. */
+.ticker-go {
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 4px;
+  transition:
+    color 160ms ease,
+    text-decoration-color 160ms ease;
+}
+.ticker-go:hover {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}

@@ -1,12 +1,42 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 export type TickerItem = {
   symbol: string;
   value: string;
   delta?: "up" | "down" | "flat";
+  /** Where the symbol leads: a home section (#id) or a page. */
+  href?: string;
 };
+
+/** A ticker destination: a plain anchor for #hash, a Link for pages. */
+function Go({
+  href,
+  children,
+  className,
+  hidden,
+}: {
+  href: string;
+  children: ReactNode;
+  className?: string;
+  /** In the aria-hidden moving tape: a mouse shortcut only. Every target is
+      a section or page the nav already reaches, so keyboards lose nothing
+      and the hero gains no invisible tab stops. */
+  hidden?: boolean;
+}) {
+  const extra = hidden ? { tabIndex: -1 } : {};
+  return href.startsWith("#") ? (
+    <a href={href} className={className} {...extra}>
+      {children}
+    </a>
+  ) : (
+    <Link href={href} className={className} {...extra}>
+      {children}
+    </Link>
+  );
+}
 
 /**
  * Endless ticker tape. CSS marquee (duplicated track), pauses on hover, when
@@ -41,7 +71,13 @@ export function Ticker({ items }: { items: TickerItem[] }) {
     >
       {items.map((it, i) => (
         <li key={i} className="flex items-center gap-2 px-5 whitespace-nowrap">
-          <span className="text-fg">{it.symbol}</span>
+          {it.href ? (
+            <Go href={it.href} hidden className="ticker-go text-fg">
+              {it.symbol}
+            </Go>
+          ) : (
+            <span className="text-fg">{it.symbol}</span>
+          )}
           {it.delta && it.delta !== "flat" && (
             <span className={it.delta === "up" ? "text-up" : "text-down"}>
               {it.delta === "up" ? "▲" : "▼"}
