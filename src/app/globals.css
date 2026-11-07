@@ -1307,6 +1307,16 @@ html:not(.js) .section-rule::after {
   opacity: 1;
   transform: none;
 }
+/* Keyboard focus never lands on something still hidden by its reveal: a
+   focused element (or one holding focus) shows at once, wherever it is. */
+.js [data-reveal]:focus-within,
+.js [data-reveal-stagger] > :focus-within {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  clip-path: inset(0);
+  transition-delay: 0s;
+}
 [data-reveal-stagger] > :nth-child(2) {
   --si: 1;
 }
