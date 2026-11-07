@@ -62,7 +62,7 @@
 /* Case studies with a fixed look (YouBank and others are always dark): the
    launcher takes that look instead of the site theme, so it never floats as
    a cream pill on a dark page. */
-html:has([data-page-ground="dark"]) .ab-launcher {
+html[data-page-ground="dark"] .ab-launcher {
   color-scheme: dark;
   --bg-elev: #121210;
   --fg: #f2eee7;
@@ -70,7 +70,7 @@ html:has([data-page-ground="dark"]) .ab-launcher {
   --accent: #ffa31a;
   --shadow-float: 0 8px 32px -12px rgb(0 0 0 / 0.6);
 }
-html:has([data-page-ground="light"]) .ab-launcher {
+html[data-page-ground="light"] .ab-launcher {
   color-scheme: light;
   --bg-elev: #f2eee7;
   --fg: #111111;

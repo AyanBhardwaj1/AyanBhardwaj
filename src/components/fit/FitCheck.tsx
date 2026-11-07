@@ -107,14 +107,13 @@ export function FitCheck({
   useEffect(() => {
     // Plain #fit: land on the Fit check even if content above it settles
     // after load (on phones it sits below the CV).
-    if (window.location.hash === "#fit") {
-      const t = window.setTimeout(
+    let t = 0;
+    if (window.location.hash === "#fit")
+      t = window.setTimeout(
         () =>
           document.getElementById("fit")?.scrollIntoView({ block: "start" }),
         250,
       );
-      return () => window.clearTimeout(t);
-    }
     const read = (scroll: boolean) => {
       const m = window.location.hash.match(/^#fit=(.+)$/);
       const r = m ? decodeFit(compiled, m[1]) : null;
@@ -128,7 +127,10 @@ export function FitCheck({
     // between two links) replaces this one.
     const onHash = () => read(false);
     window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
+    return () => {
+      window.clearTimeout(t);
+      window.removeEventListener("hashchange", onHash);
+    };
   }, [compiled]);
   const typed = useMemo(
     () => (jd.trim().length < 20 ? null : matchFit(compiled, jd)),

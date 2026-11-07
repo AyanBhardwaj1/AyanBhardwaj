@@ -1162,16 +1162,18 @@ html:not(.js) .section-rule::after {
     .hx-hero {
       view-timeline-name: --hx;
     }
-    .hx-exit-name,
-    .hx-exit-face {
+    /* Also off with the site's own reduce-motion setting: its 0.01ms
+       duration doesn't stop a scroll-driven animation. */
+    html:not([data-motion="reduce"]) .hx-exit-name,
+    html:not([data-motion="reduce"]) .hx-exit-face {
       animation: linear both;
       animation-timeline: --hx;
       animation-range: exit 0% exit 90%;
     }
-    .hx-exit-name {
+    html:not([data-motion="reduce"]) .hx-exit-name {
       animation-name: hx-exit-name;
     }
-    .hx-exit-face {
+    html:not([data-motion="reduce"]) .hx-exit-face {
       animation-name: hx-exit-face;
     }
   }

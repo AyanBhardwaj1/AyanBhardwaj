@@ -37,19 +37,29 @@ export function selectionPrompt(raw: string): string {
   return `${EXPLAIN}"${esc(cut)}"`;
 }
 
-/** The selection's text, minus any word it cuts through at either end. */
-function wholeWords(range: Range, text: string): string {
+/**
+ * The raw selection text (line breaks kept, for block boundaries), minus any
+ * word it cuts through at either end: only when the selection's own edge
+ * character and the one just outside it are both letters or digits.
+ */
+function wholeWords(range: Range, raw: string): string {
   const wordChar = /[\p{L}\p{N}]/u;
   const before = (n: Node, i: number) =>
     n.nodeType === 3 && i > 0 ? (n.textContent ?? "")[i - 1] : "";
   const after = (n: Node, i: number) =>
     n.nodeType === 3 ? (n.textContent ?? "")[i] : "";
-  let out = text;
-  if (wordChar.test(before(range.startContainer, range.startOffset) ?? ""))
+  let out = raw;
+  if (
+    wordChar.test(raw[0] ?? "") &&
+    wordChar.test(before(range.startContainer, range.startOffset) ?? "")
+  )
     out = out.replace(/^\S+\s*/, "");
-  if (wordChar.test(after(range.endContainer, range.endOffset) ?? ""))
+  if (
+    wordChar.test(raw[raw.length - 1] ?? "") &&
+    wordChar.test(after(range.endContainer, range.endOffset) ?? "")
+  )
     out = out.replace(/\s*\S+$/, "");
-  return out || text;
+  return out.trim() ? out : raw;
 }
 
 type Spot = { text: string; quote: string; x: number; y: number };
@@ -57,7 +67,8 @@ type Spot = { text: string; quote: string; x: number; y: number };
 function readSelection(dismissed: string | null): Spot | null {
   const sel = window.getSelection();
   if (!sel || sel.isCollapsed || sel.rangeCount === 0) return null;
-  const text = sel.toString().replace(/\s+/g, " ").trim();
+  const raw = sel.toString();
+  const text = raw.replace(/\s+/g, " ").trim();
   if (text.length < MIN || text.length > MAX || text === dismissed) return null;
   // Text selected inside a field (some browsers report it here too).
   const active = document.activeElement;
@@ -80,7 +91,7 @@ function readSelection(dismissed: string | null): Spot | null {
   // Above the selection; below it only when there's no room above.
   const above = box.top - GAP - EST_H;
   const y = above >= 8 ? above : Math.min(box.bottom + GAP, vh - EST_H - 8);
-  return { text, quote: wholeWords(range, text), x, y };
+  return { text, quote: wholeWords(range, raw), x, y };
 }
 
 export function SelectionAsk({
