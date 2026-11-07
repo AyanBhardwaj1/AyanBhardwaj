@@ -95,7 +95,7 @@ export default function Page() {
           functions={functions.map((f) => f.code)}
         />
 
-        <div className={s.tape} aria-hidden="true">
+        <div className={`${s.tape} no-print`} aria-hidden="true">
           <div className={s.tapeTrack}>
             {tape.map((f, i) => (
               <span key={i}>

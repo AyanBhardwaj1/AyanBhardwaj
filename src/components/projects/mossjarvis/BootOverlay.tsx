@@ -52,7 +52,7 @@ export function BootOverlay() {
   return (
     <>
       {fromServer && <script dangerouslySetInnerHTML={{ __html: decide }} />}
-      <div className="jv-boot" aria-hidden="true">
+      <div className="jv-boot no-print" aria-hidden="true">
         <div className="jv-bootReactor">
           <i />
           <i />

@@ -1272,3 +1272,12 @@
 .yb-panel[data-pending] .yb-auditOn {
   visibility: hidden;
 }
+
+/* Print: the title is gradient-clipped text, which vanishes when browsers
+   drop backgrounds. Keep its colours. */
+@media print {
+  .yb-h1 {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
