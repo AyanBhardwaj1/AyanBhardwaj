@@ -115,10 +115,33 @@
   overflow-wrap: anywhere;
   min-height: 1.55em;
 }
+/* Key columns (help, skills, interests): a fixed width on wide screens; on
+   phones the key gets its own line and the text below it is indented. */
+.tm-col {
+  display: inline-block;
+  min-width: var(--w);
+  vertical-align: top;
+}
+@media (max-width: 640px) {
+  .tm-col {
+    display: block;
+    min-width: 0;
+  }
+  .tm-col ~ * {
+    display: inline-block;
+    padding-left: 2ch;
+  }
+}
 .tm-banner {
   white-space: pre;
-  line-height: 1.1;
-  font-size: clamp(7px, 1.6vw, 14px);
+  /* The web font has no box-drawing glyphs, so each one fell back to a
+     font with other widths and the logo sheared on phones. System monos
+     carry the whole set at one width. */
+  font-family:
+    ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono",
+    "Liberation Mono", monospace;
+  line-height: 1;
+  font-size: clamp(8px, 2.4vw, 14px);
   text-shadow: 0 0 18px rgb(255 163 26 / 0.45);
 }
 .tm-cmd {

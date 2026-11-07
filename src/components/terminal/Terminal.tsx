@@ -78,7 +78,12 @@ export type TerminalData = {
 
 type Seg =
   | string
-  | { t: string; tone?: "accent" | "muted" | "up" | "down" | "strong" }
+  | {
+      t: string;
+      tone?: "accent" | "muted" | "up" | "down" | "strong";
+      /** A key column this many characters wide; on phones it stacks. */
+      col?: number;
+    }
   | { t: string; href: string; ext?: boolean };
 type Line = {
   id: number;
@@ -115,6 +120,17 @@ const s = (
   tone?: "accent" | "muted" | "up" | "down" | "strong",
 ): Seg => ({ t, tone });
 const a = (t: string, href: string, ext = false): Seg => ({ t, href, ext });
+/** A key column (help, skills): padded on wide screens, stacked on phones. */
+const col = (
+  t: string,
+  w: number,
+  tone: "accent" | "muted" = "accent",
+): Seg => ({
+  // Real trailing spaces, so copied text (and innerText) keeps the gap.
+  t: `${t}  `,
+  tone,
+  col: Math.max(w, t.length + 2),
+});
 
 function bootLines(data: TerminalData): Line[] {
   const rows: [Seg[], Line["kind"]][] = [
@@ -313,12 +329,7 @@ export function Terminal({ data }: { data: TerminalData }) {
           }
           COMMANDS.forEach((c) =>
             print([
-              s(
-                ((sig) => sig.padEnd(Math.max(42, sig.length + 2)))(
-                  `${c.name}${c.args ? ` ${c.args}` : ""}`,
-                ),
-                "accent",
-              ),
+              col(`${c.name}${c.args ? ` ${c.args}` : ""}`, 44),
               s(c.help, "muted"),
             ]),
           );
@@ -439,7 +450,7 @@ export function Terminal({ data }: { data: TerminalData }) {
           return;
         case "skills":
           data.skills.forEach((g) =>
-            print([s(g.label.padEnd(22), "accent"), g.items.join(" · ")]),
+            print([col(g.label, 22), g.items.join(" · ")]),
           );
           return;
         case "awards":
@@ -917,9 +928,7 @@ export function Terminal({ data }: { data: TerminalData }) {
           return;
         }
         case "interests":
-          data.interests.forEach((i) =>
-            print([s(i.label.padEnd(18), "accent"), i.line]),
-          );
+          data.interests.forEach((i) => print([col(i.label, 18), i.line]));
           return;
         default: {
           // A bare project name works as a shortcut, but only on a close
@@ -1185,7 +1194,19 @@ export function Terminal({ data }: { data: TerminalData }) {
                   </a>
                 )
               ) : (
-                <span key={i} className={g.tone ? `tm-${g.tone}` : undefined}>
+                <span
+                  key={i}
+                  className={
+                    [g.tone && `tm-${g.tone}`, "col" in g && g.col && "tm-col"]
+                      .filter(Boolean)
+                      .join(" ") || undefined
+                  }
+                  style={
+                    "col" in g && g.col
+                      ? ({ "--w": `${g.col}ch` } as React.CSSProperties)
+                      : undefined
+                  }
+                >
                   {g.t}
                 </span>
               ),

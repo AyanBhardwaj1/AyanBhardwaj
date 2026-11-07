@@ -61,9 +61,9 @@ export function Footer({ hasResume }: { hasResume: boolean }) {
           </p>
         </div>
       </div>
-      <div className="container-page flex items-end justify-between gap-4 pb-4">
+      <div className="container-page flex flex-col items-start gap-2 pb-4 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
         <p className="t-label text-muted">{ui.footer.alternates[0]}</p>
-        <p className="t-label text-muted">
+        <p className="t-label text-muted whitespace-nowrap">
           <span className="hidden sm:inline">
             Press ⌘K · type HELP &lt;GO&gt; ·{" "}
           </span>

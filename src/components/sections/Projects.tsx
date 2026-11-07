@@ -2,7 +2,7 @@ import Image from "next/image";
 import { roleAttr } from "@/lib/roles";
 import { RoleFilter } from "../ui/RoleFilter";
 import Link from "next/link";
-import { ViewTransition } from "react";
+import { Fragment, ViewTransition } from "react";
 import { projects, ui, type Project } from "@/content/content";
 import {
   projectMedia,
@@ -343,8 +343,25 @@ function MossSdkGroup({ apps }: { apps: Project[] }) {
 }
 
 /** A list row's name. Its ::after stretches over the row, so the whole row clicks. */
+/** Long CamelCase names ("LowResourceResearch") may wrap at each hump. */
+function Breakable({ name }: { name: string }) {
+  if (name.length < 14) return name;
+  const parts = name.split(/(?<=[a-z])(?=[A-Z])/);
+  return parts.map((part, i) => (
+    <Fragment key={i}>
+      {i > 0 && <wbr />}
+      {part}
+    </Fragment>
+  ));
+}
+
 function RowLink({ href, name }: { href?: string; name: string }) {
-  if (!href) return <span className="lw-name t-h3">{name}</span>;
+  if (!href)
+    return (
+      <span className="lw-name t-h3">
+        <Breakable name={name} />
+      </span>
+    );
   return (
     <a
       href={href}
@@ -352,7 +369,7 @@ function RowLink({ href, name }: { href?: string; name: string }) {
       rel="noopener noreferrer"
       className="lw-link lw-name t-h3 after:absolute after:inset-0 after:content-['']"
     >
-      {name}
+      <Breakable name={name} />
       <span aria-hidden="true" className="lw-go">
         ↗
       </span>
@@ -597,7 +614,7 @@ export function Projects() {
                 className="lw-row lw-self border-line grid gap-2 border-b py-5 md:grid-cols-12 md:items-baseline md:gap-6 md:px-3"
               >
                 <span aria-hidden="true" className="lw-wash" />
-                <span className="md:col-span-3">
+                <span className="min-w-0 md:col-span-3">
                   <RowLink href={p.links.code} name={p.name} />
                 </span>
                 <span className="text-muted md:col-span-5">

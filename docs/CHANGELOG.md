@@ -2,6 +2,13 @@
 
 ## After launch (Nov 6, 2026)
 
+- **Audit fixes, text layout**: terminal `help`, `skills` and `interests`
+  stack key and text on phones instead of stranding words at the edge, and
+  the ASCII banner uses system monospace (the web font has no box-drawing
+  glyphs, so it sheared); long CamelCase names (LowResourceResearch) wrap at
+  their humps instead of running into the description; CV event lines wrap
+  on phones; `/functions` breaks commands at `|`, never mid-word; the footer
+  links stay on one line on phones.
 - **Case studies**: the amber reading-progress hairline now runs under the
   case-study bar too. Printing a case study drops the sticky bar, the YouBank
   command bar and ticker tape, and the MossJarvis boot overlay (which used to

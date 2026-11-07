@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { COMMANDS, EXAMPLES, linkSafe } from "@/lib/terminal-commands";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -130,8 +131,20 @@ export default function FunctionsPage() {
                 >
                   <td className="py-3 pr-4 pl-2">
                     <a href={href} className="link text-accent">
-                      <code className="[overflow-wrap:anywhere]">
-                        {c.args ? `${c.name} ${c.args}` : c.name}
+                      <code className="[overflow-wrap:break-word]">
+                        {/* Break between alternatives, never mid-word. */}
+                        {(c.args ? `${c.name} ${c.args}` : c.name)
+                          .split("|")
+                          .map((part, i) => (
+                            <Fragment key={i}>
+                              {i > 0 && (
+                                <>
+                                  |<wbr />
+                                </>
+                              )}
+                              {part}
+                            </Fragment>
+                          ))}
                       </code>
                     </a>
                   </td>
