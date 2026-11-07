@@ -25,23 +25,79 @@ export default function Home() {
     .map((p) => projectRepo[p.id]);
   const last12 = contributionRanges()[0];
   const ticker: TickerItem[] = [
-    { symbol: "MOSS", value: "SWE intern (YC F25)", delta: "up" },
-    { symbol: "KOYAL AI", value: "AI eng intern (YC F25)", delta: "up" },
-    { symbol: "YOUBANK", value: "Live in beta", delta: "up" },
+    {
+      symbol: "MOSS",
+      value: "SWE intern (YC F25)",
+      delta: "up",
+      href: "#experience",
+    },
+    {
+      symbol: "KOYAL AI",
+      value: "AI eng intern (YC F25)",
+      delta: "up",
+      href: "#experience",
+    },
+    {
+      symbol: "YOUBANK",
+      value: "Live in beta",
+      delta: "up",
+      href: "/projects/youbank",
+    },
     {
       symbol: "MOSS APPS",
       value: `10 shipped · ${totalStars(mossIds)} stars`,
       delta: "up",
+      href: "#projects",
     },
-    { symbol: "MIT LL", value: "OncoSense research", delta: "flat" },
-    { symbol: "HACKATHONS", value: "Walk-Free · Runway", delta: "up" },
-    { symbol: "RECALL@5", value: "0.85 → 0.97", delta: "up" },
-    { symbol: "SEC TOOLS", value: "328", delta: "up" },
-    { symbol: "GH 12M", value: `${last12.total} contributions`, delta: "up" },
-    { symbol: "GH STARS", value: String(githubStats.ownStars), delta: "up" },
-    { symbol: "AEO", value: "Founded · 200+ members", delta: "up" },
-    { symbol: "CSB HONORS", value: "UT Austin", delta: "flat" },
-    { symbol: "TESTS", value: "1,000+ on YouBank", delta: "up" },
+    {
+      symbol: "MIT LL",
+      value: "OncoSense research",
+      delta: "flat",
+      href: "/projects/oncosense",
+    },
+    {
+      symbol: "HACKATHONS",
+      value: "Walk-Free · Runway",
+      delta: "up",
+      href: "#projects",
+    },
+    {
+      symbol: "RECALL@5",
+      value: "0.85 → 0.97",
+      delta: "up",
+      href: "/projects/youbank",
+    },
+    {
+      symbol: "SEC TOOLS",
+      value: "328",
+      delta: "up",
+      href: "/projects/youbank",
+    },
+    {
+      symbol: "GH 12M",
+      value: `${last12.total} contributions`,
+      delta: "up",
+      href: "#activity",
+    },
+    {
+      symbol: "GH STARS",
+      value: String(githubStats.ownStars),
+      delta: "up",
+      href: "#activity",
+    },
+    {
+      symbol: "AEO",
+      value: "Founded · 200+ members",
+      delta: "up",
+      href: "#trophies",
+    },
+    { symbol: "CSB HONORS", value: "UT Austin", delta: "flat", href: "#csb" },
+    {
+      symbol: "TESTS",
+      value: "1,000+ on YouBank",
+      delta: "up",
+      href: "/projects/youbank",
+    },
   ];
 
   const navItems: NavItem[] = [

@@ -2,6 +2,10 @@
 
 ## After launch (Nov 6, 2026)
 
+- **Clickable ticker**: every symbol on the hero tape leads somewhere (YOUBANK
+  and the metrics open the case study, MIT LL opens OncoSense, GH STARS jumps
+  to Activity, AEO to Leadership). Mouse-only shortcuts in the aria-hidden
+  tape; keyboard order is unchanged.
 - **Audit fixes, launcher and edges**: the ayan-bot launcher takes the look
   of fixed-theme case studies (no cream pill on dark YouBank in light mode);
   on phones the terminal's quick-command chips end before the launcher; the
