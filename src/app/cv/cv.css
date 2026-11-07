@@ -112,6 +112,14 @@
   font-size: 12px;
   white-space: nowrap;
 }
+/* Phones: long event lines ("Meta Global AI Developer Hackathon · Indie
+   track") wrap inside the sheet instead of running past its padding. */
+@media screen and (max-width: 640px) {
+  .cv-when {
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+}
 .cv-bullets {
   margin-top: 4px;
   padding-left: 1.1em;
