@@ -141,13 +141,13 @@ export function Hero({
         >
           <Spark className="hx-glyph absolute top-[-0.2em] left-[-1.4em] hidden size-[0.42em] md:block" />
           <Candles className="hx-glyph hx-glyph-b absolute right-[-1.5em] bottom-[0.6em] hidden size-[0.5em] md:block" />
-          <figure className="hx-portrait group border-line-strong bg-card relative w-[clamp(108px,min(30vw,17vh),144px)] overflow-hidden rounded-xl border text-base md:w-[clamp(104px,min(15vw,15vh),230px)]">
+          <figure className="hx-portrait group border-line-strong bg-card relative w-[clamp(113px,min(40vw,calc(34.6vh-132px)),180px)] overflow-hidden rounded-xl border text-base md:w-[clamp(104px,min(18vw,calc(40vh-180px)),230px)]">
             <Image
               src={headshot.src}
               alt={headshot.alt}
               width={headshot.width}
               height={headshot.height}
-              sizes="(max-width: 768px) 144px, 260px"
+              sizes="(max-width: 768px) 180px, 260px"
               preload
               className="hx-portrait-img aspect-[4/5] w-full object-cover object-[50%_30%] contrast-[1.08] grayscale transition-[filter] duration-700 group-hover:grayscale-0"
             />
