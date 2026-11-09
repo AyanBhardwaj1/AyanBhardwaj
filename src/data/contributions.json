@@ -1,57 +1,22 @@
 {
-  "generated_at": "2026-11-04T10:08:49.697Z",
+  "generated_at": "2026-11-09T23:28:14.943Z",
   "source": "github.com/users/{user}/contributions",
   "user": "AyanBhardwaj1",
   "range": {
-    "from": "2024-11-01",
-    "to": "2026-11-04"
+    "from": "2024-11-08",
+    "to": "2026-11-09"
   },
-  "total": 836,
-  "total_last_year": 804,
-  "active_days": 71,
+  "total": 1141,
+  "total_last_year": 1104,
+  "active_days": 73,
   "longest_streak_days": 13,
-  "current_streak_days": 13,
+  "current_streak_days": 0,
   "busiest_day": {
-    "date": "2026-11-01",
-    "count": 141,
+    "date": "2026-11-06",
+    "count": 277,
     "level": 4
   },
   "days": [
-    {
-      "date": "2024-11-01",
-      "count": 0,
-      "level": 0
-    },
-    {
-      "date": "2024-11-02",
-      "count": 0,
-      "level": 0
-    },
-    {
-      "date": "2024-11-03",
-      "count": 0,
-      "level": 0
-    },
-    {
-      "date": "2024-11-04",
-      "count": 0,
-      "level": 0
-    },
-    {
-      "date": "2024-11-05",
-      "count": 0,
-      "level": 0
-    },
-    {
-      "date": "2024-11-06",
-      "count": 0,
-      "level": 0
-    },
-    {
-      "date": "2024-11-07",
-      "count": 0,
-      "level": 0
-    },
     {
       "date": "2024-11-08",
       "count": 0,
@@ -1850,7 +1815,7 @@
     {
       "date": "2025-11-02",
       "count": 5,
-      "level": 1
+      "level": 3
     },
     {
       "date": "2025-11-03",
@@ -3505,12 +3470,12 @@
     {
       "date": "2026-09-29",
       "count": 17,
-      "level": 2
+      "level": 1
     },
     {
       "date": "2026-09-30",
       "count": 35,
-      "level": 3
+      "level": 1
     },
     {
       "date": "2026-10-01",
@@ -3575,7 +3540,7 @@
     {
       "date": "2026-10-13",
       "count": 16,
-      "level": 2
+      "level": 1
     },
     {
       "date": "2026-10-14",
@@ -3585,7 +3550,7 @@
     {
       "date": "2026-10-15",
       "count": 20,
-      "level": 2
+      "level": 1
     },
     {
       "date": "2026-10-16",
@@ -3635,7 +3600,7 @@
     {
       "date": "2026-10-25",
       "count": 14,
-      "level": 2
+      "level": 1
     },
     {
       "date": "2026-10-26",
@@ -3650,42 +3615,67 @@
     {
       "date": "2026-10-28",
       "count": 35,
-      "level": 3
+      "level": 1
     },
     {
       "date": "2026-10-29",
       "count": 28,
-      "level": 3
+      "level": 1
     },
     {
       "date": "2026-10-30",
       "count": 33,
-      "level": 3
+      "level": 1
     },
     {
       "date": "2026-10-31",
       "count": 50,
-      "level": 4
+      "level": 1
     },
     {
       "date": "2026-11-01",
       "count": 141,
-      "level": 4
+      "level": 3
     },
     {
       "date": "2026-11-02",
       "count": 134,
-      "level": 4
+      "level": 2
     },
     {
       "date": "2026-11-03",
       "count": 41,
-      "level": 3
+      "level": 1
     },
     {
       "date": "2026-11-04",
-      "count": 55,
+      "count": 81,
+      "level": 2
+    },
+    {
+      "date": "2026-11-05",
+      "count": 0,
+      "level": 0
+    },
+    {
+      "date": "2026-11-06",
+      "count": 277,
       "level": 4
+    },
+    {
+      "date": "2026-11-07",
+      "count": 2,
+      "level": 1
+    },
+    {
+      "date": "2026-11-08",
+      "count": 0,
+      "level": 0
+    },
+    {
+      "date": "2026-11-09",
+      "count": 0,
+      "level": 0
     }
   ]
 }
